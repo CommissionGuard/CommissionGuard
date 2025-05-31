@@ -1,8 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UserPlus, FileUp, BarChart3, Settings } from "lucide-react";
+import { UserPlus, FileUp, BarChart3, Scale } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function QuickActions() {
+  const [, setLocation] = useLocation();
+
   const actions = [
     {
       icon: UserPlus,
@@ -17,23 +20,22 @@ export default function QuickActions() {
       icon: FileUp,
       label: "Upload Contract",
       onClick: () => {
-        document.querySelector('input[type="file"]')?.click();
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        fileInput?.click();
       }
     },
     {
       icon: BarChart3,
       label: "View Reports",
       onClick: () => {
-        // TODO: Navigate to reports page
-        console.log("Navigate to reports");
+        setLocation("/reports");
       }
     },
     {
-      icon: Settings,
-      label: "Manage Settings",
+      icon: Scale,
+      label: "Legal Support",
       onClick: () => {
-        // TODO: Navigate to settings page
-        console.log("Navigate to settings");
+        setLocation("/legal-support");
       }
     }
   ];

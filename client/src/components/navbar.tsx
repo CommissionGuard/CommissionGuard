@@ -29,6 +29,7 @@ export default function Navbar() {
     { path: "/clients", label: "Clients" },
     { path: "/contracts", label: "Contracts" },
     { path: "/alerts", label: "Alerts" },
+    { path: "/reports", label: "Reports" },
   ];
 
   return (
