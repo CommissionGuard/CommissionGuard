@@ -165,7 +165,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getContractsByAgent(agentId: string): Promise<ContractWithDetails[]> {
-    return await db
+    const contractsWithDetails = await db
       .select({
         id: contracts.id,
         clientId: contracts.clientId,
@@ -180,15 +180,32 @@ export class DatabaseStorage implements IStorage {
         updatedAt: contracts.updatedAt,
         client: clients,
         agent: users,
-        alerts: sql<Alert[]>`COALESCE(array_agg(${alerts}.*) FILTER (WHERE ${alerts.id} IS NOT NULL), '{}'::jsonb[])`,
       })
       .from(contracts)
       .leftJoin(clients, eq(contracts.clientId, clients.id))
       .leftJoin(users, eq(contracts.agentId, users.id))
-      .leftJoin(alerts, eq(contracts.id, alerts.contractId))
       .where(eq(contracts.agentId, agentId))
-      .groupBy(contracts.id, clients.id, users.id)
-      .orderBy(desc(contracts.createdAt)) as ContractWithDetails[];
+      .orderBy(desc(contracts.createdAt));
+
+    // Get alerts for each contract separately
+    const result: ContractWithDetails[] = [];
+    for (const contract of contractsWithDetails) {
+      if (!contract.client || !contract.agent) continue;
+      
+      const contractAlerts = await db
+        .select()
+        .from(alerts)
+        .where(eq(alerts.contractId, contract.id));
+      
+      result.push({
+        ...contract,
+        client: contract.client,
+        agent: contract.agent,
+        alerts: contractAlerts,
+      });
+    }
+
+    return result;
   }
 
   async getContractsByClient(clientId: number): Promise<Contract[]> {
@@ -227,7 +244,7 @@ export class DatabaseStorage implements IStorage {
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate() + daysAhead);
     
-    return await db
+    const contractsWithDetails = await db
       .select({
         id: contracts.id,
         clientId: contracts.clientId,
@@ -242,12 +259,10 @@ export class DatabaseStorage implements IStorage {
         updatedAt: contracts.updatedAt,
         client: clients,
         agent: users,
-        alerts: sql<Alert[]>`COALESCE(array_agg(${alerts}.*) FILTER (WHERE ${alerts.id} IS NOT NULL), '{}'::jsonb[])`,
       })
       .from(contracts)
       .leftJoin(clients, eq(contracts.clientId, clients.id))
       .leftJoin(users, eq(contracts.agentId, users.id))
-      .leftJoin(alerts, eq(contracts.id, alerts.contractId))
       .where(
         and(
           eq(contracts.agentId, agentId),
@@ -255,8 +270,23 @@ export class DatabaseStorage implements IStorage {
           lte(contracts.endDate, targetDate.toISOString().split('T')[0])
         )
       )
-      .groupBy(contracts.id, clients.id, users.id)
-      .orderBy(asc(contracts.endDate)) as ContractWithDetails[];
+      .orderBy(asc(contracts.endDate));
+
+    // Get alerts for each contract separately
+    const result: ContractWithDetails[] = [];
+    for (const contract of contractsWithDetails) {
+      const contractAlerts = await db
+        .select()
+        .from(alerts)
+        .where(eq(alerts.contractId, contract.id));
+      
+      result.push({
+        ...contract,
+        alerts: contractAlerts,
+      });
+    }
+
+    return result;
   }
 
   // Alert operations
