@@ -13,6 +13,7 @@ import Alerts from "@/pages/alerts";
 import Reports from "@/pages/reports";
 import LegalSupport from "@/pages/legal-support";
 import PropertyMap from "@/pages/map";
+import Prospecting from "@/pages/prospecting";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -30,6 +31,7 @@ function Router() {
           <Route path="/reports" component={Reports} />
           <Route path="/legal-support" component={LegalSupport} />
           <Route path="/map" component={PropertyMap} />
+          <Route path="/prospecting" component={Prospecting} />
         </>
       )}
       <Route component={NotFound} />
