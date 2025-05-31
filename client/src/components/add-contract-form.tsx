@@ -100,220 +100,118 @@ export default function AddContractForm() {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="clientId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Client *</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(parseInt(value))}
-                      defaultValue={field.value?.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a client" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {clients && clients.length > 0 ? (
-                          clients.map((client: any) => (
-                            <SelectItem key={client.id} value={client.id.toString()}>
-                              {client.fullName}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="" disabled>
-                            No clients available - add a client first
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="contractType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Contract Type *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select contract type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="buyer_representation">Buyer Representation</SelectItem>
-                        <SelectItem value="seller_representation">Seller Representation</SelectItem>
-                        <SelectItem value="dual_agency">Dual Agency</SelectItem>
-                        <SelectItem value="referral">Referral Agreement</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="propertyAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Property Address *</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="123 Main St, City, State 12345" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="commissionPercentage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Commission Percentage *</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.1" 
-                        min="0" 
-                        max="100" 
-                        placeholder="2.5" 
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="commissionAmount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Expected Commission Amount</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        step="100" 
-                        min="0" 
-                        placeholder="15000" 
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="startDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Start Date *</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="expirationDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Expiration Date *</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="terms"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contract Terms & Notes</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Additional terms, conditions, or notes about this contract..."
-                      rows={3}
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* File Upload */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">
-                Contract Document (Optional)
+              <Label htmlFor="clientId" className="block text-sm font-medium text-gray-700 mb-2">
+                Client *
               </Label>
-              <div className="flex items-center space-x-4">
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id="contract-file"
-                />
-                <Label
-                  htmlFor="contract-file"
-                  className="flex items-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                >
-                  <FileUp className="h-4 w-4 mr-2" />
-                  Choose File
-                </Label>
-                {selectedFile && (
-                  <span className="text-sm text-gray-600">
-                    {selectedFile.name}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Supported formats: PDF, DOC, DOCX, JPG, PNG (max 10MB)
-              </p>
+              <Select value={clientId} onValueChange={setClientId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients && clients.length > 0 ? (
+                    clients.map((client: any) => (
+                      <SelectItem key={client.id} value={client.id.toString()}>
+                        {client.fullName}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>
+                      No clients available - add a client first
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={createContractMutation.isPending}
-                className="bg-primary text-white hover:bg-blue-700 px-8"
-              >
-                {createContractMutation.isPending ? "Creating..." : "Create Contract"}
-              </Button>
+            <div>
+              <Label htmlFor="representationType" className="block text-sm font-medium text-gray-700 mb-2">
+                Representation Type *
+              </Label>
+              <Select value={representationType} onValueChange={setRepresentationType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select representation type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="buyer">Buyer Representation</SelectItem>
+                  <SelectItem value="seller">Seller Representation</SelectItem>
+                  <SelectItem value="dual">Dual Agency</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </form>
-        </Form>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-2">
+                Start Date *
+              </Label>
+              <Input 
+                type="date" 
+                id="startDate"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-2">
+                End Date *
+              </Label>
+              <Input 
+                type="date" 
+                id="endDate"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          {/* File Upload */}
+          <div>
+            <Label className="block text-sm font-medium text-gray-700 mb-2">
+              Contract Document (Optional)
+            </Label>
+            <div className="flex items-center space-x-4">
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                onChange={handleFileChange}
+                className="hidden"
+                id="contract-file"
+              />
+              <Label
+                htmlFor="contract-file"
+                className="flex items-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+              >
+                <FileUp className="h-4 w-4 mr-2" />
+                Choose File
+              </Label>
+              {selectedFile && (
+                <span className="text-sm text-gray-600">
+                  {selectedFile.name}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Supported formats: PDF, DOC, DOCX, JPG, PNG (max 10MB)
+            </p>
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              disabled={createContractMutation.isPending}
+              className="bg-primary text-white hover:bg-blue-700 px-8"
+            >
+              {createContractMutation.isPending ? "Creating..." : "Create Contract"}
+            </Button>
+          </div>
+        </form>
       </CardContent>
     </Card>
   );

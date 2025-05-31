@@ -49,7 +49,14 @@ export default function Contracts() {
           <p className="text-gray-600 mt-1">Monitor your representation agreements and protect your commissions</p>
         </div>
 
-        <ContractsTable />
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          <div className="xl:col-span-2">
+            <ContractsTable />
+          </div>
+          <div>
+            <AddContractForm />
+          </div>
+        </div>
       </div>
     </div>
   );
