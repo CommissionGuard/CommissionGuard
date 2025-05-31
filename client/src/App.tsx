@@ -12,6 +12,7 @@ import Contracts from "@/pages/contracts";
 import Alerts from "@/pages/alerts";
 import Reports from "@/pages/reports";
 import LegalSupport from "@/pages/legal-support";
+import PropertyMap from "@/pages/map";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -28,6 +29,7 @@ function Router() {
           <Route path="/alerts" component={Alerts} />
           <Route path="/reports" component={Reports} />
           <Route path="/legal-support" component={LegalSupport} />
+          <Route path="/map" component={PropertyMap} />
         </>
       )}
       <Route component={NotFound} />
