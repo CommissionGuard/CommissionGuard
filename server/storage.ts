@@ -187,7 +187,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contracts.agentId, agentId))
       .orderBy(desc(contracts.createdAt));
 
-    // Get alerts for each contract separately
+    // Get alerts for each contract separately and ensure proper typing
     const result: ContractWithDetails[] = [];
     for (const contract of contractsWithDetails) {
       if (!contract.client || !contract.agent) continue;
@@ -198,7 +198,17 @@ export class DatabaseStorage implements IStorage {
         .where(eq(alerts.contractId, contract.id));
       
       result.push({
-        ...contract,
+        id: contract.id,
+        clientId: contract.clientId,
+        agentId: contract.agentId,
+        representationType: contract.representationType,
+        startDate: contract.startDate,
+        endDate: contract.endDate,
+        contractFileUrl: contract.contractFileUrl,
+        contractFileName: contract.contractFileName,
+        status: contract.status,
+        createdAt: contract.createdAt,
+        updatedAt: contract.updatedAt,
         client: contract.client,
         agent: contract.agent,
         alerts: contractAlerts,

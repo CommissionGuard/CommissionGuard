@@ -13,6 +13,7 @@ import {
 
 export default function Navbar() {
   const { user } = useAuth();
+  const [location, setLocation] = useLocation();
   
   const { data: unreadCount } = useQuery({
     queryKey: ["/api/alerts/unread/count"],
@@ -23,30 +24,41 @@ export default function Navbar() {
     `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() || 
     user.email?.[0]?.toUpperCase() || 'U' : 'U';
 
+  const navItems = [
+    { path: "/", label: "Dashboard" },
+    { path: "/clients", label: "Clients" },
+    { path: "/contracts", label: "Contracts" },
+    { path: "/alerts", label: "Alerts" },
+  ];
+
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
+            <div 
+              className="flex items-center space-x-2 cursor-pointer"
+              onClick={() => setLocation("/")}
+            >
               <Shield className="h-8 w-8 text-primary" />
               <span className="text-xl font-bold text-gray-900">Commission Guard</span>
             </div>
           </div>
           
           <div className="hidden md:flex items-center space-x-6">
-            <a href="#dashboard" className="text-primary font-medium border-b-2 border-primary pb-1">
-              Dashboard
-            </a>
-            <a href="#clients" className="text-gray-600 hover:text-gray-900">
-              Clients
-            </a>
-            <a href="#contracts" className="text-gray-600 hover:text-gray-900">
-              Contracts
-            </a>
-            <a href="#alerts" className="text-gray-600 hover:text-gray-900">
-              Alerts
-            </a>
+            {navItems.map((item) => (
+              <button
+                key={item.path}
+                onClick={() => setLocation(item.path)}
+                className={`font-medium pb-1 transition-colors ${
+                  location === item.path
+                    ? "text-primary border-b-2 border-primary"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
           
           <div className="flex items-center space-x-4">
