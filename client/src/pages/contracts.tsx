@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/navbar";
 import ContractsTable from "@/components/contracts-table";
+import AddContractForm from "@/components/add-contract-form";
 
 export default function Contracts() {
   const { toast } = useToast();
