@@ -1,17 +1,57 @@
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { apiRequest } from "@/lib/queryClient";
 import Navbar from "@/components/navbar";
 import StatsCards from "@/components/stats-cards";
 import AlertsSection from "@/components/alerts-section";
 import ContractsTable from "@/components/contracts-table";
 import QuickActions from "@/components/quick-actions";
 import AddClientForm from "@/components/add-client-form";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Database } from "lucide-react";
 
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const queryClient = useQueryClient();
+
+  const createDemoDataMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/demo-data");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/contracts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/alerts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      toast({
+        title: "Success",
+        description: "Sample client, contract, and alert data created successfully",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to create demo data",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -70,6 +110,29 @@ export default function Dashboard() {
           {/* Sidebar */}
           <div className="space-y-6">
             <QuickActions />
+            
+            {/* Demo Data Card */}
+            <Card className="bg-white rounded-xl shadow-sm border border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
+                  <Database className="text-primary mr-2" />
+                  Try the Platform
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 mb-4">
+                  Add sample data to explore Commission Guard's features and see how it protects your commissions.
+                </p>
+                <Button
+                  onClick={() => createDemoDataMutation.mutate()}
+                  disabled={createDemoDataMutation.isPending}
+                  className="w-full bg-primary text-white hover:bg-blue-700"
+                >
+                  {createDemoDataMutation.isPending ? "Creating..." : "Add Sample Data"}
+                </Button>
+              </CardContent>
+            </Card>
+            
             <AddClientForm />
             
             {/* Subscription Status */}

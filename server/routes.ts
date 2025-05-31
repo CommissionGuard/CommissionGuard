@@ -234,6 +234,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Demo data route for testing
+  app.post("/api/demo-data", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      
+      // Create sample client
+      const sampleClient = await storage.createClient({
+        agentId,
+        fullName: "John & Sarah Smith",
+        email: "smiths@email.com",
+        phone: "(555) 123-4567",
+      });
+
+      // Create sample contract
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + 6); // 6 months from now
+
+      const sampleContract = await storage.createContract({
+        clientId: sampleClient.id,
+        agentId,
+        representationType: "buyer",
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0],
+        contractFileUrl: null,
+        contractFileName: null,
+      });
+
+      // Create sample alert
+      await storage.createAlert({
+        agentId,
+        contractId: sampleContract.id,
+        clientId: sampleClient.id,
+        type: "expiration",
+        title: "Contract Expiring Soon",
+        description: `Your representation agreement with ${sampleClient.fullName} expires in 30 days. Consider reaching out to discuss renewal.`,
+        severity: "medium",
+      });
+
+      res.json({ message: "Demo data created successfully" });
+    } catch (error) {
+      console.error("Error creating demo data:", error);
+      res.status(500).json({ message: "Failed to create demo data" });
+    }
+  });
+
   // Audit log routes
   app.get("/api/audit-logs", isAuthenticated, async (req: any, res) => {
     try {
