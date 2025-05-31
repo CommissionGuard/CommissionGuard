@@ -66,20 +66,28 @@ export default function StatsCards() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {cards.map((card) => (
-        <Card key={card.title} className="bg-white rounded-xl shadow-sm border border-gray-200">
+      {cards.map((card, index) => (
+        <Card 
+          key={card.title} 
+          className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group"
+          style={{ animationDelay: `${index * 100}ms` }}
+        >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">{card.title}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{card.value}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1 transition-all duration-300 group-hover:scale-105">{card.value}</p>
               </div>
-              <div className={`${card.bgColor} rounded-full p-3`}>
-                <card.icon className={`${card.color} h-6 w-6`} />
+              <div className={`${card.bgColor} rounded-full p-3 relative overflow-hidden group-hover:scale-110 transition-transform duration-300`}>
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <card.icon className={`${card.color} h-6 w-6 relative z-10`} />
               </div>
             </div>
             <div className="flex items-center mt-4 text-sm">
-              <span className={`${card.changeColor} font-medium`}>{card.change}</span>
+              <div className="flex items-center space-x-1">
+                <div className={`w-2 h-2 rounded-full ${card.changeColor === 'text-success' ? 'bg-green-400' : card.changeColor === 'text-warning' ? 'bg-yellow-400' : 'bg-red-400'} animate-pulse`}></div>
+                <span className={`${card.changeColor} font-medium`}>{card.change}</span>
+              </div>
               {card.changeText && (
                 <span className="text-gray-600 ml-1">{card.changeText}</span>
               )}
