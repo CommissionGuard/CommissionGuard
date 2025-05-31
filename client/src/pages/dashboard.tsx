@@ -10,6 +10,7 @@ import AlertsSection from "@/components/alerts-section";
 import ContractsTable from "@/components/contracts-table";
 import QuickActions from "@/components/quick-actions";
 import AddClientForm from "@/components/add-client-form";
+import AnimatedBackground from "@/components/animated-background";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Database, Shield } from "lucide-react";
@@ -95,10 +96,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 relative">
+      <AnimatedBackground />
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Dashboard Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">

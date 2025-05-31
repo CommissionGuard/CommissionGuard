@@ -1,21 +1,30 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, FileText, Clock, AlertTriangle, DollarSign, Users } from "lucide-react";
+import { Shield, FileText, Clock, AlertTriangle, DollarSign, Users, TrendingUp, Eye, Lock } from "lucide-react";
+import AnimatedBackground from "@/components/animated-background";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative">
+      <AnimatedBackground />
       {/* Navigation */}
-      <nav className="bg-white border-b border-gray-200">
+      <nav className="bg-white/90 backdrop-blur-sm border-b border-gray-200 relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <Shield className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-gray-900">Commission Guard</span>
+            <div className="flex items-center space-x-3 group">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary to-blue-600 rounded-lg opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+                <div className="relative bg-gradient-to-br from-primary to-blue-600 p-2 rounded-lg shadow-lg group-hover:scale-105 transition-transform duration-300">
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Commission Guard
+              </span>
             </div>
             <Button 
               onClick={() => window.location.href = "/api/login"}
-              className="bg-primary hover:bg-blue-700"
+              className="bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-primary transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               Sign In
             </Button>
