@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, FileText, Clock, AlertTriangle, DollarSign, Users, TrendingUp, Eye, Lock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Shield, FileText, Clock, AlertTriangle, DollarSign, Users, TrendingUp, Eye, Lock, Home, CheckCircle } from "lucide-react";
 import AnimatedBackground from "@/components/animated-background";
 
 export default function Landing() {
@@ -32,32 +33,183 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Protect Your Real Estate
-            <span className="text-primary block">Commissions</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Monitor representation agreements, track contract expirations, and detect potential breaches
-            before they cost you thousands in lost commissions.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg"
-              onClick={() => window.location.href = "/api/login"}
-              className="bg-primary hover:bg-blue-700 text-lg px-8 py-3"
-            >
-              Get Started Today
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="text-lg px-8 py-3"
-            >
-              Watch Demo
-            </Button>
+      {/* Hero Section with Real Estate Graphics */}
+      <div className="relative overflow-hidden py-20">
+        {/* Real Estate Background Elements */}
+        <div className="absolute inset-0 z-0">
+          {/* Property silhouettes in background */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-blue-100/20 to-transparent">
+            <svg className="absolute bottom-0 left-1/4 w-16 h-20 text-blue-200/40 animate-float" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <svg className="absolute bottom-0 right-1/3 w-12 h-16 text-purple-200/40 animate-float-delayed" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <svg className="absolute bottom-0 left-1/2 w-20 h-24 text-green-200/40 animate-float" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+          </div>
+          
+          {/* Property icons scattered */}
+          <div className="absolute top-20 left-10 opacity-10">
+            <Home className="h-24 w-24 text-blue-600 animate-bounce-slow" />
+          </div>
+          <div className="absolute top-32 right-16 opacity-10">
+            <Home className="h-32 w-32 text-green-600 animate-float" />
+          </div>
+          <div className="absolute bottom-40 right-1/4 opacity-10">
+            <Home className="h-20 w-20 text-purple-600 animate-ping-slow" />
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Column - Content */}
+            <div className="text-left">
+              {/* Hero Icon */}
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-blue-600 rounded-xl mb-6 shadow-2xl animate-float">
+                <Shield className="w-10 h-10 text-white" />
+              </div>
+              
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Protect Your
+                </span>
+                <span className="block bg-gradient-to-r from-primary via-blue-600 to-purple-600 bg-clip-text text-transparent animate-gradient">
+                  Real Estate Commissions
+                </span>
+              </h1>
+              
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                Monitor representation agreements 24/7, detect potential breaches instantly, and connect with legal experts to safeguard your hard-earned income.
+              </p>
+              
+              {/* Trust Indicators */}
+              <div className="flex flex-wrap gap-6 mb-8">
+                <div className="flex items-center space-x-2">
+                  <div className="bg-green-100 rounded-full p-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 font-medium">$2.3M+ Protected</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="bg-blue-100 rounded-full p-2">
+                    <Users className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <span className="text-gray-700 font-medium">500+ Agents</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="bg-purple-100 rounded-full p-2">
+                    <TrendingUp className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <span className="text-gray-700 font-medium">94% Success Rate</span>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button 
+                  size="lg" 
+                  onClick={() => window.location.href = "/api/login"}
+                  className="bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-purple-600 text-lg px-8 py-4 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                >
+                  Start Protecting Commissions
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="text-lg px-8 py-4 border-2 border-gray-300 hover:border-primary hover:bg-primary/5 transition-all duration-300 shadow-lg"
+                >
+                  <Eye className="h-5 w-5 mr-2" />
+                  Watch Demo
+                </Button>
+              </div>
+            </div>
+
+            {/* Right Column - Real Estate Dashboard Visual */}
+            <div className="relative">
+              <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 shadow-2xl">
+                {/* Property Dashboard Mockup */}
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-2">
+                      <Home className="h-6 w-6 text-primary" />
+                      <span className="font-semibold text-gray-900">Property Portfolio</span>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800">Protected</Badge>
+                  </div>
+                  
+                  {/* Sample Property Cards */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Home className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">123 Oak Street</p>
+                          <p className="text-sm text-gray-600">Buyer Agreement</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-green-600">$12,500</p>
+                        <p className="text-xs text-gray-500">Commission</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                          <Home className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">456 Pine Avenue</p>
+                          <p className="text-sm text-gray-600">Seller Listing</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-green-600">$18,750</p>
+                        <p className="text-xs text-gray-500">Commission</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">789 Elm Drive</p>
+                          <p className="text-sm text-yellow-700">Requires Attention</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-yellow-600">Alert</p>
+                        <p className="text-xs text-gray-500">Contract Issue</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Protection Status */}
+                  <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Shield className="h-5 w-5 text-green-600" />
+                        <span className="font-medium text-green-900">Commission Protection Active</span>
+                      </div>
+                      <span className="text-green-600 font-semibold">$31,250</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Floating Elements */}
+                <div className="absolute -top-4 -right-4 bg-white rounded-full p-3 shadow-lg animate-bounce-slow">
+                  <DollarSign className="h-6 w-6 text-green-600" />
+                </div>
+                <div className="absolute -bottom-4 -left-4 bg-white rounded-full p-3 shadow-lg animate-float">
+                  <Lock className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
