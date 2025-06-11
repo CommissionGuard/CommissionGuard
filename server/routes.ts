@@ -181,6 +181,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const agentId = req.user.claims.sub;
       const clientId = parseInt(req.params.clientId);
+      
+      // Validate clientId
+      if (isNaN(clientId)) {
+        return res.status(400).json({ message: "Invalid client ID" });
+      }
+      
       const contracts = await storage.getContractsByClient(clientId);
       
       // Filter contracts to only show those belonging to the authenticated agent
