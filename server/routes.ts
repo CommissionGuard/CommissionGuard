@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { apiIntegrationService } from "./apiIntegrations";
-import { insertClientSchema, insertContractSchema, insertAlertSchema } from "@shared/schema";
+import { insertClientSchema, insertContractSchema, insertContractSignerSchema, insertAlertSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
@@ -174,6 +174,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching expiring contracts:", error);
       res.status(500).json({ message: "Failed to fetch expiring contracts" });
+    }
+  });
+
+  // Contract Signer routes
+  app.post("/api/contracts/:contractId/signers", isAuthenticated, async (req: any, res) => {
+    try {
+      const contractId = parseInt(req.params.contractId);
+      const signerData = insertContractSignerSchema.parse({
+        ...req.body,
+        contractId,
+      });
+      
+      const signer = await storage.createContractSigner(signerData);
+      res.json(signer);
+    } catch (error) {
+      console.error("Error creating contract signer:", error);
+      res.status(500).json({ message: "Failed to create contract signer" });
+    }
+  });
+
+  app.get("/api/contracts/:contractId/signers", isAuthenticated, async (req: any, res) => {
+    try {
+      const contractId = parseInt(req.params.contractId);
+      const signers = await storage.getContractSigners(contractId);
+      res.json(signers);
+    } catch (error) {
+      console.error("Error fetching contract signers:", error);
+      res.status(500).json({ message: "Failed to fetch contract signers" });
+    }
+  });
+
+  app.patch("/api/contract-signers/:id/sign", isAuthenticated, async (req: any, res) => {
+    try {
+      const signerId = parseInt(req.params.id);
+      await storage.markSignerAsSigned(signerId);
+      res.json({ message: "Signer marked as signed" });
+    } catch (error) {
+      console.error("Error marking signer as signed:", error);
+      res.status(500).json({ message: "Failed to mark signer as signed" });
+    }
+  });
+
+  app.delete("/api/contract-signers/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const signerId = parseInt(req.params.id);
+      await storage.deleteContractSigner(signerId);
+      res.json({ message: "Contract signer deleted" });
+    } catch (error) {
+      console.error("Error deleting contract signer:", error);
+      res.status(500).json({ message: "Failed to delete contract signer" });
     }
   });
 

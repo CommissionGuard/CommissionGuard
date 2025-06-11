@@ -8,7 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { FileText, Download, AlertTriangle, Upload } from "lucide-react";
+import { FileText, Download, AlertTriangle, Upload, UserCheck } from "lucide-react";
+import ContractSignersForm from "./contract-signers-form";
 
 interface ContractModalProps {
   contract: any;
