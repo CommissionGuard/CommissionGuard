@@ -193,59 +193,84 @@ export class ApiIntegrationService {
     }
 
     try {
-      const response = await fetch(
+      console.log(`Attempting Regrid API call for coordinates: ${latitude}, ${longitude}`);
+      
+      // Try multiple Regrid API endpoint formats
+      const endpoints = [
         `https://app.regrid.com/api/v1/search.json?lat=${latitude}&lng=${longitude}&limit=1`,
-        {
-          headers: {
-            'Authorization': `Bearer ${regridApiKey}`,
-            'Content-Type': 'application/json',
-            'User-Agent': 'Commission-Guard/1.0'
+        `https://app.regrid.com/api/v1/parcels.json?lat=${latitude}&lng=${longitude}&limit=1`,
+        `https://api.regrid.com/v1/parcels?lat=${latitude}&lng=${longitude}&limit=1`
+      ];
+
+      for (const endpoint of endpoints) {
+        try {
+          const response = await fetch(endpoint, {
+            headers: {
+              'Authorization': `Bearer ${regridApiKey}`,
+              'Content-Type': 'application/json',
+              'User-Agent': 'Commission-Guard/1.0'
+            }
+          });
+
+          console.log(`Regrid API response status: ${response.status} for endpoint: ${endpoint}`);
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log(`Regrid API response data:`, JSON.stringify(data).substring(0, 200));
+            
+            if (data.results && data.results.length > 0) {
+              const parcel = data.results[0];
+              return {
+                success: true,
+                parcel: {
+                  parcelId: parcel.ll_uuid || parcel.id,
+                  address: parcel.address || parcel.formatted_address,
+                  owner: parcel.owner || parcel.owner_name,
+                  propertyType: parcel.property_type || parcel.land_use_code,
+                  landUse: parcel.land_use_general || parcel.land_use,
+                  acreage: parcel.acres || parcel.area_acres,
+                  assessedValue: parcel.assessed_total_value || parcel.total_assessed_value,
+                  marketValue: parcel.market_total_value || parcel.market_value,
+                  yearBuilt: parcel.year_built || parcel.built_year,
+                  bedrooms: parcel.bedrooms || parcel.beds,
+                  bathrooms: parcel.bathrooms || parcel.baths,
+                  squareFeet: parcel.building_area || parcel.sqft,
+                  lotSize: parcel.lot_size_acres || parcel.lot_acres,
+                  zoning: parcel.zoning || parcel.zoning_code,
+                  lastSaleDate: parcel.last_sale_date || parcel.sale_date,
+                  lastSalePrice: parcel.last_sale_price || parcel.sale_price,
+                  taxYear: parcel.tax_year || new Date().getFullYear(),
+                  taxAmount: parcel.tax_amount || parcel.annual_tax,
+                  county: parcel.county || parcel.county_name,
+                  state: parcel.state_name || parcel.state
+                }
+              };
+            }
           }
+        } catch (endpointError) {
+          console.log(`Endpoint ${endpoint} failed:`, endpointError);
+          continue;
         }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-
-      if (data.results && data.results.length > 0) {
-        const parcel = data.results[0];
-        return {
-          success: true,
-          parcel: {
-            parcelId: parcel.ll_uuid,
-            address: parcel.address,
-            owner: parcel.owner,
-            propertyType: parcel.property_type,
-            landUse: parcel.land_use_general,
-            acreage: parcel.acres,
-            assessedValue: parcel.assessed_total_value,
-            marketValue: parcel.market_total_value,
-            yearBuilt: parcel.year_built,
-            bedrooms: parcel.bedrooms,
-            bathrooms: parcel.bathrooms,
-            squareFeet: parcel.building_area,
-            lotSize: parcel.lot_size_acres,
-            zoning: parcel.zoning,
-            lastSaleDate: parcel.last_sale_date,
-            lastSalePrice: parcel.last_sale_price,
-            taxYear: parcel.tax_year,
-            taxAmount: parcel.tax_amount,
-            county: parcel.county,
-            state: parcel.state_name
-          }
-        };
-      }
-
+      // If all API endpoints fail, provide informative error
       return {
         success: false,
-        error: 'No parcel data found for this location'
+        error: 'Regrid API authentication issue - please verify API key and endpoint access',
+        debug: {
+          latitude,
+          longitude,
+          keyPresent: !!regridApiKey,
+          keyPrefix: regridApiKey.substring(0, 10)
+        }
       };
     } catch (error) {
       console.error('Regrid API error:', error);
-      throw new Error(`Failed to get parcel data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return {
+        success: false,
+        error: `Regrid API connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        shouldContactSupport: true
+      };
     }
   }
 
