@@ -197,13 +197,17 @@ export default function PropertyMap() {
                 <div className="h-96 bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center border-2 border-dashed border-blue-200">
                   <div className="text-center">
                     <MapPin className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Interactive Map Ready</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Property Map & Listings</h3>
                     <p className="text-gray-600 max-w-md mb-4">
-                      Google Maps integration is configured and ready. Use the search below to locate properties and view real estate data.
+                      This page shows property listing information. For a fully interactive map experience with Google Maps integration, use the Interactive Map feature.
                     </p>
-                    <div className="text-sm text-blue-600 font-medium">
-                      Search for an address to activate map view
-                    </div>
+                    <Button 
+                      onClick={() => window.location.href = '/live-map'}
+                      className="bg-primary text-white hover:bg-blue-700"
+                    >
+                      <MapPin className="h-4 w-4 mr-2" />
+                      Go to Interactive Map
+                    </Button>
                   </div>
                 </div>
               </CardContent>
