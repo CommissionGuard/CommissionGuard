@@ -194,11 +194,12 @@ export class ApiIntegrationService {
 
     try {
       const response = await fetch(
-        `https://app.regrid.com/api/v1/parcels?lat=${latitude}&lng=${longitude}&limit=1`,
+        `https://app.regrid.com/api/v1/search.json?lat=${latitude}&lng=${longitude}&limit=1`,
         {
           headers: {
             'Authorization': `Bearer ${regridApiKey}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'User-Agent': 'Commission-Guard/1.0'
           }
         }
       );
@@ -257,10 +258,9 @@ export class ApiIntegrationService {
 
     try {
       const response = await fetch(
-        `https://app.regrid.com/api/v1/parcels?query=${encodeURIComponent(address)}&limit=1`,
+        `https://app.regrid.com/api/v1/parcels.json?query=${encodeURIComponent(address)}&limit=1&token=${regridApiKey}`,
         {
           headers: {
-            'Authorization': `Bearer ${regridApiKey}`,
             'Content-Type': 'application/json'
           }
         }
@@ -324,10 +324,9 @@ export class ApiIntegrationService {
 
     try {
       const response = await fetch(
-        `https://app.regrid.com/api/v1/parcels/${parcelId}/ownership_history`,
+        `https://app.regrid.com/api/v1/parcels/${parcelId}/ownership_history.json?token=${regridApiKey}`,
         {
           headers: {
-            'Authorization': `Bearer ${regridApiKey}`,
             'Content-Type': 'application/json'
           }
         }
