@@ -177,6 +177,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/contracts/client/:clientId", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const clientId = parseInt(req.params.clientId);
+      const contracts = await storage.getContractsByClient(clientId);
+      
+      // Filter contracts to only show those belonging to the authenticated agent
+      const agentContracts = contracts.filter(contract => contract.agentId === agentId);
+      res.json(agentContracts);
+    } catch (error) {
+      console.error("Error fetching client contracts:", error);
+      res.status(500).json({ message: "Failed to fetch client contracts" });
+    }
+  });
+
   // Contract Signer routes
   app.post("/api/contracts/:contractId/signers", isAuthenticated, async (req: any, res) => {
     try {
