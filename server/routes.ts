@@ -345,6 +345,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Regrid Parcel Data API by coordinates
+  app.get("/api/parcels/coordinates", isAuthenticated, async (req, res) => {
+    try {
+      const { lat, lng } = req.query;
+      
+      if (!lat || !lng) {
+        return res.status(400).json({ error: "Latitude and longitude are required" });
+      }
+
+      const parcelData = await apiIntegrationService.getParcelData(
+        parseFloat(lat as string),
+        parseFloat(lng as string)
+      );
+      
+      res.json(parcelData);
+    } catch (error) {
+      console.error("Parcel data error:", error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // Regrid Parcel Data API by address
+  app.post("/api/parcels/address", isAuthenticated, async (req, res) => {
+    try {
+      const { address } = req.body;
+      
+      if (!address) {
+        return res.status(400).json({ error: "Address is required" });
+      }
+
+      const parcelData = await apiIntegrationService.getParcelByAddress(address);
+      res.json(parcelData);
+    } catch (error) {
+      console.error("Parcel address lookup error:", error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // Regrid Ownership History API
+  app.get("/api/parcels/:parcelId/ownership", isAuthenticated, async (req, res) => {
+    try {
+      const { parcelId } = req.params;
+      
+      const ownershipHistory = await apiIntegrationService.getOwnershipHistory(parcelId);
+      res.json(ownershipHistory);
+    } catch (error) {
+      console.error("Ownership history error:", error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
   // Public Records Monitoring API
   app.post("/api/monitoring/start", isAuthenticated, async (req, res) => {
     try {

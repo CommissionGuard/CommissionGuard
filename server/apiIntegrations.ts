@@ -185,6 +185,170 @@ export class ApiIntegrationService {
     };
   }
 
+  // Regrid API Integration for property parcels and ownership data
+  async getParcelData(latitude: number, longitude: number) {
+    const regridApiKey = process.env.REGRID_API_KEY;
+    if (!regridApiKey) {
+      throw new Error("Regrid API key not configured");
+    }
+
+    try {
+      const response = await fetch(
+        `https://app.regrid.com/api/v1/parcels?lat=${latitude}&lng=${longitude}&limit=1`,
+        {
+          headers: {
+            'Authorization': `Bearer ${regridApiKey}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.results && data.results.length > 0) {
+        const parcel = data.results[0];
+        return {
+          success: true,
+          parcel: {
+            parcelId: parcel.ll_uuid,
+            address: parcel.address,
+            owner: parcel.owner,
+            propertyType: parcel.property_type,
+            landUse: parcel.land_use_general,
+            acreage: parcel.acres,
+            assessedValue: parcel.assessed_total_value,
+            marketValue: parcel.market_total_value,
+            yearBuilt: parcel.year_built,
+            bedrooms: parcel.bedrooms,
+            bathrooms: parcel.bathrooms,
+            squareFeet: parcel.building_area,
+            lotSize: parcel.lot_size_acres,
+            zoning: parcel.zoning,
+            lastSaleDate: parcel.last_sale_date,
+            lastSalePrice: parcel.last_sale_price,
+            taxYear: parcel.tax_year,
+            taxAmount: parcel.tax_amount,
+            county: parcel.county,
+            state: parcel.state_name
+          }
+        };
+      }
+
+      return {
+        success: false,
+        error: 'No parcel data found for this location'
+      };
+    } catch (error) {
+      console.error('Regrid API error:', error);
+      throw new Error(`Failed to get parcel data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Get parcel data by address
+  async getParcelByAddress(address: string) {
+    const regridApiKey = process.env.REGRID_API_KEY;
+    if (!regridApiKey) {
+      throw new Error("Regrid API key not configured");
+    }
+
+    try {
+      const response = await fetch(
+        `https://app.regrid.com/api/v1/parcels?query=${encodeURIComponent(address)}&limit=1`,
+        {
+          headers: {
+            'Authorization': `Bearer ${regridApiKey}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.results && data.results.length > 0) {
+        const parcel = data.results[0];
+        return {
+          success: true,
+          parcel: {
+            parcelId: parcel.ll_uuid,
+            address: parcel.address,
+            owner: parcel.owner,
+            propertyType: parcel.property_type,
+            landUse: parcel.land_use_general,
+            acreage: parcel.acres,
+            assessedValue: parcel.assessed_total_value,
+            marketValue: parcel.market_total_value,
+            yearBuilt: parcel.year_built,
+            bedrooms: parcel.bedrooms,
+            bathrooms: parcel.bathrooms,
+            squareFeet: parcel.building_area,
+            lotSize: parcel.lot_size_acres,
+            zoning: parcel.zoning,
+            lastSaleDate: parcel.last_sale_date,
+            lastSalePrice: parcel.last_sale_price,
+            taxYear: parcel.tax_year,
+            taxAmount: parcel.tax_amount,
+            county: parcel.county,
+            state: parcel.state_name,
+            coordinates: {
+              latitude: parcel.ll_geopoint?.lat,
+              longitude: parcel.ll_geopoint?.lon
+            }
+          }
+        };
+      }
+
+      return {
+        success: false,
+        error: 'No parcel data found for this address'
+      };
+    } catch (error) {
+      console.error('Regrid API error:', error);
+      throw new Error(`Failed to get parcel data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Get ownership history for a parcel
+  async getOwnershipHistory(parcelId: string) {
+    const regridApiKey = process.env.REGRID_API_KEY;
+    if (!regridApiKey) {
+      throw new Error("Regrid API key not configured");
+    }
+
+    try {
+      const response = await fetch(
+        `https://app.regrid.com/api/v1/parcels/${parcelId}/ownership_history`,
+        {
+          headers: {
+            'Authorization': `Bearer ${regridApiKey}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      return {
+        success: true,
+        history: data.results || []
+      };
+    } catch (error) {
+      console.error('Regrid ownership history error:', error);
+      throw new Error(`Failed to get ownership history: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   // Real Estate Market Data
   async getMarketData(location: string) {
     const marketDataApiKey = process.env.MARKET_DATA_API_KEY;

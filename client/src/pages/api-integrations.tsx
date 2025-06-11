@@ -41,6 +41,8 @@ export default function ApiIntegrations() {
 
   const [geocodeResult, setGeocodeResult] = useState<any>(null);
   const [nearbyResults, setNearbyResults] = useState<any>(null);
+  const [parcelData, setParcelData] = useState<any>(null);
+  const [ownershipHistory, setOwnershipHistory] = useState<any>(null);
 
   // Property Search
   const propertySearchMutation = useMutation({
