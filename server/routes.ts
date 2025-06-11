@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { apiIntegrationService } from "./apiIntegrations";
+import { aiService } from "./aiService";
+import { enhancedPropertyService } from "./enhancedPropertyService";
 import { insertClientSchema, insertContractSchema, insertContractSignerSchema, insertAlertSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -658,6 +660,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching property pins:", error);
       res.status(500).json({ message: "Failed to fetch property pins" });
+    }
+  });
+
+  // AI-powered contract analysis
+  app.post("/api/ai/analyze-contract", isAuthenticated, async (req: any, res) => {
+    try {
+      const { contractText, contractId } = req.body;
+      
+      if (!contractText) {
+        return res.status(400).json({ message: "Contract text is required" });
+      }
+
+      const analysis = await aiService.analyzeContract(contractText);
+      
+      // Create an alert if high risk is detected
+      if (analysis.riskLevel === "high" && contractId) {
+        const agentId = req.user.claims.sub;
+        const contract = await storage.getContract(contractId);
+        
+        if (contract) {
+          await storage.createAlert({
+            agentId,
+            contractId,
+            clientId: contract.clientId,
+            type: "ai_analysis",
+            title: "High Risk Contract Detected",
+            description: `AI analysis detected high-risk factors: ${analysis.riskFactors.join(", ")}`,
+            severity: "high",
+          });
+        }
+      }
+
+      res.json(analysis);
+    } catch (error) {
+      console.error("Contract analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze contract" });
+    }
+  });
+
+  // AI commission protection recommendations
+  app.post("/api/ai/commission-recommendations", isAuthenticated, async (req: any, res) => {
+    try {
+      const contractData = req.body;
+      const recommendations = await aiService.generateCommissionRecommendations(contractData);
+      
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Recommendation generation error:", error);
+      res.status(500).json({ message: "Failed to generate recommendations" });
+    }
+  });
+
+  // AI alert prioritization
+  app.post("/api/ai/prioritize-alerts", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const alerts = await storage.getAlertsByAgent(agentId);
+      
+      const prioritizedAlerts = await aiService.prioritizeAlerts(alerts);
+      
+      res.json(prioritizedAlerts);
+    } catch (error) {
+      console.error("Alert prioritization error:", error);
+      res.status(500).json({ message: "Failed to prioritize alerts" });
+    }
+  });
+
+  // AI market trend analysis
+  app.post("/api/ai/market-analysis", isAuthenticated, async (req: any, res) => {
+    try {
+      const propertyData = req.body;
+      const analysis = await aiService.analyzeMarketTrends(propertyData);
+      
+      res.json(analysis);
+    } catch (error) {
+      console.error("Market analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze market trends" });
+    }
+  });
+
+  // AI legal document analysis
+  app.post("/api/ai/legal-analysis", isAuthenticated, async (req: any, res) => {
+    try {
+      const { documentText, documentType } = req.body;
+      
+      if (!documentText || !documentType) {
+        return res.status(400).json({ message: "Document text and type are required" });
+      }
+
+      const analysis = await aiService.analyzeLegalDocument(documentText, documentType);
+      
+      res.json(analysis);
+    } catch (error) {
+      console.error("Legal document analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze legal document" });
+    }
+  });
+
+  // Enhanced property valuation and analytics
+  app.post("/api/properties/valuation-trends", isAuthenticated, async (req: any, res) => {
+    try {
+      const { address } = req.body;
+      
+      if (!address) {
+        return res.status(400).json({ message: "Property address is required" });
+      }
+
+      const trends = await enhancedPropertyService.getPropertyValuationTrends(address);
+      res.json(trends);
+    } catch (error) {
+      console.error("Property valuation trends error:", error);
+      res.status(500).json({ message: "Failed to get property valuation trends" });
+    }
+  });
+
+  app.post("/api/properties/compare", isAuthenticated, async (req: any, res) => {
+    try {
+      const { addresses } = req.body;
+      
+      if (!addresses || addresses.length < 2) {
+        return res.status(400).json({ message: "At least 2 property addresses are required" });
+      }
+
+      const comparison = await enhancedPropertyService.compareProperties(addresses);
+      res.json(comparison);
+    } catch (error) {
+      console.error("Property comparison error:", error);
+      res.status(500).json({ message: "Failed to compare properties" });
+    }
+  });
+
+  app.post("/api/rental-market/analyze", isAuthenticated, async (req: any, res) => {
+    try {
+      const { location } = req.body;
+      
+      if (!location) {
+        return res.status(400).json({ message: "Location is required" });
+      }
+
+      const analysis = await enhancedPropertyService.analyzeRentalMarket(location);
+      res.json(analysis);
+    } catch (error) {
+      console.error("Rental market analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze rental market" });
+    }
+  });
+
+  app.post("/api/portfolio/analyze", isAuthenticated, async (req: any, res) => {
+    try {
+      const { properties } = req.body;
+      
+      if (!properties || properties.length === 0) {
+        return res.status(400).json({ message: "Properties data is required" });
+      }
+
+      const analysis = await enhancedPropertyService.analyzePortfolioPerformance(properties);
+      res.json(analysis);
+    } catch (error) {
+      console.error("Portfolio analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze portfolio" });
     }
   });
 
