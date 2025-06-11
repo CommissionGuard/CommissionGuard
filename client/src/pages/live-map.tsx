@@ -324,36 +324,33 @@ export default function LiveMap() {
               
               <CardContent className="p-0">
                 {/* Interactive Map with Street View */}
-                <div className="h-96 relative overflow-hidden border bg-gray-100">
-                  {/* Map Tiles Grid */}
-                  <div className="absolute inset-0">
-                    {Array.from({ length: 4 }).map((_, i) => 
-                      Array.from({ length: 4 }).map((_, j) => {
-                        const tileX = Math.floor((mapCenter.lng + 180) / 360 * Math.pow(2, zoom)) + (i - 2);
-                        const tileY = Math.floor((1 - Math.log(Math.tan(mapCenter.lat * Math.PI / 180) + 1 / Math.cos(mapCenter.lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom)) + (j - 2);
-                        
-                        return (
-                          <img
-                            key={`${i}-${j}`}
-                            src={`https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`}
-                            alt=""
-                            className="absolute w-64 h-64 object-cover"
-                            style={{
-                              left: `${(i - 2) * 256 + 128}px`,
-                              top: `${(j - 2) * 256 + 128}px`,
-                              transform: 'translate(-50%, -50%)'
-                            }}
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        );
-                      })
-                    )}
+                <div className="h-96 relative overflow-hidden border bg-gray-200">
+                  {/* Map Background with Street Pattern */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-green-50">
+                    {/* Street Grid Pattern */}
+                    <div 
+                      className="absolute inset-0 opacity-30"
+                      style={{
+                        backgroundImage: `
+                          linear-gradient(90deg, #e5e7eb 1px, transparent 1px),
+                          linear-gradient(#e5e7eb 1px, transparent 1px)
+                        `,
+                        backgroundSize: '20px 20px'
+                      }}
+                    ></div>
+                    
+                    {/* Major Roads Pattern */}
+                    <div 
+                      className="absolute inset-0 opacity-20"
+                      style={{
+                        backgroundImage: `
+                          linear-gradient(45deg, #9ca3af 2px, transparent 2px),
+                          linear-gradient(-45deg, #9ca3af 2px, transparent 2px)
+                        `,
+                        backgroundSize: '60px 60px'
+                      }}
+                    ></div>
                   </div>
-
-                  {/* Street overlay pattern for better visibility */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/5"></div>
                   
                   {/* Map attribution */}
                   <div className="absolute bottom-1 right-1 text-xs text-gray-700 bg-white/90 px-2 py-1 rounded shadow">
@@ -372,27 +369,24 @@ export default function LiveMap() {
 
                   {/* Property Markers */}
                   {allProperties.map((property, index) => {
-                    // Convert lat/lng to pixel coordinates using Web Mercator projection
-                    const metersPerPixel = 156543.03392 * Math.cos(mapCenter.lat * Math.PI / 180) / Math.pow(2, zoom);
-                    const mapWidth = 384; // approximate map width
-                    const mapHeight = 384; // approximate map height
+                    // Simple coordinate-based positioning for better reliability
+                    const latRange = 0.3; // Degrees of latitude to show
+                    const lngRange = 0.4; // Degrees of longitude to show
                     
-                    // Calculate offset from map center in meters
-                    const latOffsetMeters = (mapCenter.lat - property.latitude) * 111320;
-                    const lngOffsetMeters = (property.longitude - mapCenter.lng) * 111320 * Math.cos(mapCenter.lat * Math.PI / 180);
+                    const latMin = mapCenter.lat - latRange / 2;
+                    const latMax = mapCenter.lat + latRange / 2;
+                    const lngMin = mapCenter.lng - lngRange / 2;
+                    const lngMax = mapCenter.lng + lngRange / 2;
                     
-                    // Convert to pixels
-                    const xPixels = mapWidth / 2 + (lngOffsetMeters / metersPerPixel);
-                    const yPixels = mapHeight / 2 + (latOffsetMeters / metersPerPixel);
-                    
-                    // Convert to percentages
-                    const xPercent = (xPixels / mapWidth) * 100;
-                    const yPercent = (yPixels / mapHeight) * 100;
-                    
-                    // Only show markers that are within the visible map area
-                    if (xPercent < 0 || xPercent > 100 || yPercent < 0 || yPercent > 100) {
+                    // Check if property is within view
+                    if (property.latitude < latMin || property.latitude > latMax ||
+                        property.longitude < lngMin || property.longitude > lngMax) {
                       return null;
                     }
+                    
+                    // Convert to percentage position
+                    const xPercent = ((property.longitude - lngMin) / lngRange) * 100;
+                    const yPercent = ((latMax - property.latitude) / latRange) * 100;
                     
                     const canDelete = property.propertyType === 'Custom Pin' || savedPins.some((p: any) => p.id === property.id);
                     
@@ -401,8 +395,8 @@ export default function LiveMap() {
                         key={property.id}
                         className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
                         style={{
-                          left: `${xPercent}%`,
-                          top: `${yPercent}%`
+                          left: `${Math.max(5, Math.min(95, xPercent))}%`,
+                          top: `${Math.max(10, Math.min(90, yPercent))}%`
                         }}
                       >
                         <button
@@ -447,20 +441,15 @@ export default function LiveMap() {
                       const x = e.clientX - rect.left;
                       const y = e.clientY - rect.top;
                       
-                      // Convert pixel coordinates to lat/lng using Web Mercator projection
-                      const mapWidth = rect.width;
-                      const mapHeight = rect.height;
+                      // Convert pixel coordinates to lat/lng using the same range as markers
+                      const latRange = 0.3;
+                      const lngRange = 0.4;
                       
-                      // Calculate meters per pixel at current zoom level and latitude
-                      const metersPerPixel = 156543.03392 * Math.cos(mapCenter.lat * Math.PI / 180) / Math.pow(2, zoom);
+                      const xPercent = (x / rect.width) * 100;
+                      const yPercent = (y / rect.height) * 100;
                       
-                      // Convert pixel offset from center to meters
-                      const meterOffsetX = (x - mapWidth / 2) * metersPerPixel;
-                      const meterOffsetY = (y - mapHeight / 2) * metersPerPixel;
-                      
-                      // Convert meters to lat/lng (1 degree ≈ 111320 meters)
-                      const lat = mapCenter.lat - (meterOffsetY / 111320);
-                      const lng = mapCenter.lng + (meterOffsetX / (111320 * Math.cos(mapCenter.lat * Math.PI / 180)));
+                      const lng = mapCenter.lng - lngRange / 2 + (xPercent / 100) * lngRange;
+                      const lat = mapCenter.lat + latRange / 2 - (yPercent / 100) * latRange;
                       
                       createCustomPin(lat, lng);
                     }}
