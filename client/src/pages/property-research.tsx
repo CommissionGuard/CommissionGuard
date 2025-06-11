@@ -34,14 +34,33 @@ export default function PropertyResearch() {
   const researchMutation = useMutation({
     mutationFn: async (address: string) => {
       // First geocode the address
-      const geocodeData = await apiRequest("/api/properties/geocode", "POST", { address });
+      const response = await fetch("/api/properties/geocode", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ address }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const geocodeData = await response.json();
       
       if (geocodeData.success) {
         // Get parcel data using coordinates
-        const parcelData = await apiRequest(`/api/parcels/coordinates?lat=${geocodeData.latitude}&lng=${geocodeData.longitude}`);
+        const parcelResponse = await fetch(`/api/parcels/coordinates?lat=${geocodeData.latitude}&lng=${geocodeData.longitude}`, {
+          credentials: "include",
+        });
+        const parcelData = await parcelResponse.json();
         
         // Get nearby real estate locations
-        const nearbyData = await apiRequest(`/api/properties/nearby?lat=${geocodeData.latitude}&lng=${geocodeData.longitude}&radius=2000`);
+        const nearbyResponse = await fetch(`/api/properties/nearby?lat=${geocodeData.latitude}&lng=${geocodeData.longitude}&radius=2000`, {
+          credentials: "include",
+        });
+        const nearbyData = await nearbyResponse.json();
         
         return {
           geocode: geocodeData,
@@ -60,7 +79,10 @@ export default function PropertyResearch() {
       // Get ownership history if parcel data is available
       if (data.parcel.success && data.parcel.parcel.parcelId) {
         try {
-          const ownershipData = await apiRequest(`/api/parcels/${data.parcel.parcel.parcelId}/ownership`);
+          const ownershipResponse = await fetch(`/api/parcels/${data.parcel.parcel.parcelId}/ownership`, {
+            credentials: "include",
+          });
+          const ownershipData = await ownershipResponse.json();
           setOwnershipHistory(ownershipData);
         } catch (error) {
           console.error("Could not fetch ownership history:", error);

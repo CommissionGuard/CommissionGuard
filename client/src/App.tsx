@@ -16,6 +16,7 @@ import PropertyMap from "@/pages/map";
 import Prospecting from "@/pages/prospecting";
 import ApiIntegrations from "@/pages/api-integrations";
 import PropertyResearch from "@/pages/property-research";
+import ApiTest from "@/pages/api-test";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -36,6 +37,7 @@ function Router() {
           <Route path="/prospecting" component={Prospecting} />
           <Route path="/api-integrations" component={ApiIntegrations} />
           <Route path="/property-research" component={PropertyResearch} />
+          <Route path="/api-test" component={ApiTest} />
         </>
       )}
       <Route component={NotFound} />
