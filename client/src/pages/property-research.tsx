@@ -142,7 +142,7 @@ export default function PropertyResearch() {
               <span>Property Address Research</span>
             </CardTitle>
             <CardDescription>
-              Enter any property address to get complete ownership, tax, and market data
+              Enter any property address to get complete ownership, tax, and market data. For best coverage, try addresses in Texas, California, Colorado, or Georgia.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -174,6 +174,29 @@ export default function PropertyResearch() {
                 </>
               )}
             </Button>
+            
+            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
+              <span className="text-sm text-gray-600 mr-2">Quick test:</span>
+              {[
+                "1600 Amphitheatre Parkway, Mountain View, CA",
+                "1 Apple Park Way, Cupertino, CA", 
+                "410 Terry Ave N, Seattle, WA",
+                "1 Hacker Way, Menlo Park, CA"
+              ].map((addr) => (
+                <Button
+                  key={addr}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchAddress(addr);
+                    researchMutation.mutate(addr);
+                  }}
+                  className="text-xs"
+                >
+                  {addr.split(',')[0]}
+                </Button>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
@@ -320,11 +343,20 @@ export default function PropertyResearch() {
                       </CardContent>
                     </Card>
                   </div>
+                ) : parcelData && !parcelData.success ? (
+                  <Alert className="border-amber-200 bg-amber-50">
+                    <AlertCircle className="h-4 w-4 text-amber-600" />
+                    <AlertDescription className="text-amber-800">
+                      <strong>Limited property data for this location.</strong><br/>
+                      {parcelData.error || "This address may not have comprehensive property records in our database."}<br/>
+                      <span className="text-sm mt-2 block">Try addresses in major cities like Austin TX, Denver CO, Atlanta GA, or Los Angeles CA for better data coverage.</span>
+                    </AlertDescription>
+                  </Alert>
                 ) : (
                   <Alert>
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      No detailed property data available for this address. This may be due to limited parcel data coverage in this area.
+                      Search for a property address above to view detailed information.
                     </AlertDescription>
                   </Alert>
                 )}
