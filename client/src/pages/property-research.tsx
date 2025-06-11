@@ -1,132 +1,735 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import Navbar from "@/components/navbar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { 
   Search, 
   MapPin, 
-  Home, 
+  TrendingUp, 
   DollarSign, 
-  Calendar, 
-  User, 
-  FileText,
+  Home,
+  Calendar,
+  Users,
+  Building,
+  Brain,
+  Star,
+  AlertTriangle,
   CheckCircle,
-  AlertCircle,
-  TrendingUp,
-  Building
+
+  Target,
+  Sparkles,
+  PieChart,
+  Activity
 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 
 export default function PropertyResearch() {
   const { toast } = useToast();
+  const { isAuthenticated, isLoading } = useAuth();
   const [searchAddress, setSearchAddress] = useState("");
-  const [geocodeResult, setGeocodeResult] = useState<any>(null);
-  const [parcelData, setParcelData] = useState<any>(null);
-  const [ownershipHistory, setOwnershipHistory] = useState<any>(null);
-  const [nearbyResults, setNearbyResults] = useState<any>(null);
-
-  const researchMutation = useMutation({
+  const [valuationData, setValuationData] = useState<any>(null);
+  const [marketAnalysis, setMarketAnalysis] = useState<any>(null);
+  const [compareAddresses, setCompareAddresses] = useState<string[]>([""]);
+  const [comparisonData, setComparisonData] = useState<any>(null);
+  
+  const getValuationTrendsMutation = useMutation({
     mutationFn: async (address: string) => {
-      // First geocode the address
-      const response = await fetch("/api/properties/geocode", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ address }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const geocodeData = await response.json();
-      
-      if (geocodeData.success) {
-        // Get parcel data using coordinates
-        const parcelResponse = await fetch(`/api/parcels/coordinates?lat=${geocodeData.latitude}&lng=${geocodeData.longitude}`, {
-          credentials: "include",
-        });
-        const parcelData = await parcelResponse.json();
-        
-        // Get nearby real estate locations
-        const nearbyResponse = await fetch(`/api/properties/nearby?lat=${geocodeData.latitude}&lng=${geocodeData.longitude}&radius=2000`, {
-          credentials: "include",
-        });
-        const nearbyData = await nearbyResponse.json();
-        
-        return {
-          geocode: geocodeData,
-          parcel: parcelData,
-          nearby: nearbyData
-        };
-      }
-      
-      throw new Error("Failed to geocode address");
+      return await apiRequest("POST", "/api/properties/valuation-trends", { address });
     },
-    onSuccess: async (data: any) => {
-      setGeocodeResult(data.geocode);
-      setParcelData(data.parcel);
-      setNearbyResults(data.nearby);
-      
-      // Get ownership history if parcel data is available
-      if (data.parcel.success && data.parcel.parcel.parcelId) {
-        try {
-          const ownershipResponse = await fetch(`/api/parcels/${data.parcel.parcel.parcelId}/ownership`, {
-            credentials: "include",
-          });
-          const ownershipData = await ownershipResponse.json();
-          setOwnershipHistory(ownershipData);
-        } catch (error) {
-          console.error("Could not fetch ownership history:", error);
-        }
-      }
-      
+    onSuccess: (result) => {
+      setValuationData(result);
       toast({
-        title: "Property Research Complete",
-        description: `Comprehensive data found for ${data.geocode.address}`,
+        title: "Valuation Analysis Complete",
+        description: "AI-powered property valuation trends have been generated.",
       });
     },
-    onError: (error: any) => {
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
       toast({
-        title: "Research Failed",
-        description: error.message,
+        title: "Analysis Failed",
+        description: "Failed to analyze property valuation. Please try again.",
         variant: "destructive",
       });
-    }
+    },
   });
 
-  const handleResearch = () => {
-    if (searchAddress.trim()) {
-      researchMutation.mutate(searchAddress);
+  const getRentalAnalysisMutation = useMutation({
+    mutationFn: async (location: string) => {
+      return await apiRequest("POST", "/api/rental-market/analyze", { location });
+    },
+    onSuccess: (result) => {
+      setMarketAnalysis(result);
+      toast({
+        title: "Market Analysis Complete",
+        description: "Rental market insights have been generated.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Analysis Failed",
+        description: "Failed to analyze rental market. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const comparePropertiesMutation = useMutation({
+    mutationFn: async (addresses: string[]) => {
+      return await apiRequest("POST", "/api/properties/compare", { addresses });
+    },
+    onSuccess: (result) => {
+      setComparisonData(result);
+      toast({
+        title: "Comparison Complete",
+        description: "Property comparison analysis is ready.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Comparison Failed",
+        description: "Failed to compare properties. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  const handleAnalyzeProperty = () => {
+    if (!searchAddress.trim()) {
+      toast({
+        title: "Address Required",
+        description: "Please enter a property address to analyze.",
+        variant: "destructive",
+      });
+      return;
+    }
+    getValuationTrendsMutation.mutate(searchAddress);
+  };
+
+  const handleRentalAnalysis = () => {
+    if (!searchAddress.trim()) {
+      toast({
+        title: "Location Required",
+        description: "Please enter a location for rental market analysis.",
+        variant: "destructive",
+      });
+      return;
+    }
+    getRentalAnalysisMutation.mutate(searchAddress);
+  };
+
+  const handleCompareProperties = () => {
+    const validAddresses = compareAddresses.filter(addr => addr.trim());
+    if (validAddresses.length < 2) {
+      toast({
+        title: "Multiple Addresses Required",
+        description: "Please enter at least 2 property addresses to compare.",
+        variant: "destructive",
+      });
+      return;
+    }
+    comparePropertiesMutation.mutate(validAddresses);
+  };
+
+  const addCompareAddress = () => {
+    setCompareAddresses([...compareAddresses, ""]);
+  };
+
+  const updateCompareAddress = (index: number, value: string) => {
+    const updated = [...compareAddresses];
+    updated[index] = value;
+    setCompareAddresses(updated);
+  };
+
+  const removeCompareAddress = (index: number) => {
+    if (compareAddresses.length > 1) {
+      const updated = compareAddresses.filter((_, i) => i !== index);
+      setCompareAddresses(updated);
     }
   };
 
-  const formatCurrency = (value: any) => {
-    if (!value) return "Not available";
-    const numValue = parseInt(value);
-    return isNaN(numValue) ? "Not available" : `$${numValue.toLocaleString()}`;
+  const getInvestmentScoreColor = (score: number) => {
+    if (score >= 8) return "text-green-600";
+    if (score >= 6) return "text-yellow-600";
+    return "text-red-600";
   };
 
-  const formatDate = (dateStr: any) => {
-    if (!dateStr) return "Not available";
-    try {
-      return new Date(dateStr).toLocaleDateString();
-    } catch {
-      return dateStr;
-    }
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-teal-600 rounded-lg">
+              <Brain className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Enhanced Property Research</h1>
+          </div>
+          <p className="text-gray-600">
+            AI-powered property intelligence with valuation tracking, market predictions, and comparative analysis
+          </p>
+        </div>
+
+        <Tabs defaultValue="valuation" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="valuation">Valuation Trends</TabsTrigger>
+            <TabsTrigger value="rental">Rental Market</TabsTrigger>
+            <TabsTrigger value="compare">Property Comparison</TabsTrigger>
+          </TabsList>
+
+          {/* Valuation Trends Tab */}
+          <TabsContent value="valuation">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <div className="xl:col-span-2 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                      <span>Property Valuation Analysis</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex space-x-3">
+                      <Input
+                        placeholder="Enter property address..."
+                        value={searchAddress}
+                        onChange={(e) => setSearchAddress(e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button
+                        onClick={handleAnalyzeProperty}
+                        disabled={getValuationTrendsMutation.isPending}
+                        className="bg-gradient-to-r from-blue-500 to-teal-600 hover:from-blue-600 hover:to-teal-700"
+                      >
+                        {getValuationTrendsMutation.isPending ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Analyze
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    {valuationData && (
+                      <div className="space-y-6">
+                        {/* Current Value & Score */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-sm text-blue-600 font-medium">Current Value</p>
+                                <p className="text-2xl font-bold text-blue-900">
+                                  {formatCurrency(valuationData.currentValue)}
+                                </p>
+                              </div>
+                              <Home className="h-8 w-8 text-blue-600" />
+                            </div>
+                          </div>
+                          <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-sm text-green-600 font-medium">Investment Score</p>
+                                <div className="flex items-center space-x-2">
+                                  <span className={`text-2xl font-bold ${getInvestmentScoreColor(valuationData.investmentScore)}`}>
+                                    {valuationData.investmentScore}/10
+                                  </span>
+                                  <Star className="h-5 w-5 text-yellow-500" />
+                                </div>
+                              </div>
+                              <Target className="h-8 w-8 text-green-600" />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Value History Chart */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Value History & Predictions</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <ResponsiveContainer width="100%" height={300}>
+                              <LineChart data={valuationData.valueHistory}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="date" />
+                                <YAxis />
+                                <Tooltip formatter={(value) => [formatCurrency(Number(value)), "Value"]} />
+                                <Line 
+                                  type="monotone" 
+                                  dataKey="value" 
+                                  stroke="#3B82F6" 
+                                  strokeWidth={2}
+                                  dot={{ fill: "#3B82F6", strokeWidth: 2, r: 4 }}
+                                />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </CardContent>
+                        </Card>
+
+                        {/* AI Predictions */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center space-x-2">
+                              <Brain className="h-5 w-5 text-purple-600" />
+                              <span>AI Market Predictions</span>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid grid-cols-3 gap-4">
+                              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                <p className="text-sm text-gray-600">Next Month</p>
+                                <p className="text-lg font-semibold text-gray-900">
+                                  {formatCurrency(valuationData.predictions.nextMonth)}
+                                </p>
+                              </div>
+                              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                <p className="text-sm text-gray-600">Next Quarter</p>
+                                <p className="text-lg font-semibold text-gray-900">
+                                  {formatCurrency(valuationData.predictions.nextQuarter)}
+                                </p>
+                              </div>
+                              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                <p className="text-sm text-gray-600">Next Year</p>
+                                <p className="text-lg font-semibold text-gray-900">
+                                  {formatCurrency(valuationData.predictions.nextYear)}
+                                </p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        {/* Market Factors */}
+                        {valuationData.marketFactors && valuationData.marketFactors.length > 0 && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Key Market Factors</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <ul className="space-y-2">
+                                {valuationData.marketFactors.map((factor: string, index: number) => (
+                                  <li key={index} className="flex items-start space-x-2">
+                                    <Activity className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                                    <span className="text-sm text-gray-700">{factor}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Sparkles className="h-5 w-5 text-blue-600" />
+                      <span>AI Features</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-start space-x-3">
+                      <TrendingUp className="h-5 w-5 text-green-600 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">Value Tracking</p>
+                        <p className="text-xs text-gray-600">Historical trends & predictions</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <Brain className="h-5 w-5 text-purple-600 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">AI Predictions</p>
+                        <p className="text-xs text-gray-600">Machine learning forecasts</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <Target className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">Investment Score</p>
+                        <p className="text-xs text-gray-600">Comprehensive rating system</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Rental Market Tab */}
+          <TabsContent value="rental">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Building className="h-5 w-5 text-primary" />
+                  <span>Rental Market Analysis</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex space-x-3">
+                  <Input
+                    placeholder="Enter location (e.g., San Francisco, CA)..."
+                    value={searchAddress}
+                    onChange={(e) => setSearchAddress(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={handleRentalAnalysis}
+                    disabled={getRentalAnalysisMutation.isPending}
+                    className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
+                  >
+                    {getRentalAnalysisMutation.isPending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <PieChart className="h-4 w-4 mr-2" />
+                        Analyze Market
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {marketAnalysis && (
+                  <div className="space-y-6">
+                    {/* Key Metrics */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-purple-600 font-medium">Avg Rent</p>
+                            <p className="text-xl font-bold text-purple-900">
+                              {formatCurrency(marketAnalysis.averageRent)}
+                            </p>
+                          </div>
+                          <DollarSign className="h-6 w-6 text-purple-600" />
+                        </div>
+                      </div>
+                      <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-green-600 font-medium">Occupancy</p>
+                            <p className="text-xl font-bold text-green-900">
+                              {Math.round(marketAnalysis.occupancyRate * 100)}%
+                            </p>
+                          </div>
+                          <CheckCircle className="h-6 w-6 text-green-600" />
+                        </div>
+                      </div>
+                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-blue-600 font-medium">Days on Market</p>
+                            <p className="text-xl font-bold text-blue-900">
+                              {marketAnalysis.timeOnMarket}
+                            </p>
+                          </div>
+                          <Calendar className="h-6 w-6 text-blue-600" />
+                        </div>
+                      </div>
+                      <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-yellow-600 font-medium">Rental Yield</p>
+                            <p className="text-xl font-bold text-yellow-900">
+                              {marketAnalysis.rentalYield.toFixed(1)}%
+                            </p>
+                          </div>
+                          <TrendingUp className="h-6 w-6 text-yellow-600" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Rent Trends Chart */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Rental Trends</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={300}>
+                          <LineChart data={marketAnalysis.rentTrends}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="period" />
+                            <YAxis />
+                            <Tooltip formatter={(value) => [formatCurrency(Number(value)), "Rent"]} />
+                            <Line 
+                              type="monotone" 
+                              dataKey="rent" 
+                              stroke="#8B5CF6" 
+                              strokeWidth={2}
+                              dot={{ fill: "#8B5CF6", strokeWidth: 2, r: 4 }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+
+                    {/* Market Segments */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Market Segments</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {marketAnalysis.marketSegments.map((segment: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <Building className="h-5 w-5 text-gray-600" />
+                                <div>
+                                  <p className="font-medium">{segment.type}</p>
+                                  <p className="text-sm text-gray-600">{formatCurrency(segment.averageRent)}/month</p>
+                                </div>
+                              </div>
+                              <div className="flex space-x-2">
+                                <Badge variant={segment.demand === "high" ? "default" : segment.demand === "medium" ? "secondary" : "outline"}>
+                                  {segment.demand} demand
+                                </Badge>
+                                <Badge variant={segment.supply === "low" ? "default" : segment.supply === "medium" ? "secondary" : "outline"}>
+                                  {segment.supply} supply
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* AI Recommendations */}
+                    {marketAnalysis.recommendations && marketAnalysis.recommendations.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center space-x-2">
+                            <Brain className="h-5 w-5 text-purple-600" />
+                            <span>AI Investment Recommendations</span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-2">
+                            {marketAnalysis.recommendations.map((rec: string, index: number) => (
+                              <li key={index} className="flex items-start space-x-2">
+                                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-700">{rec}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Property Comparison Tab */}
+          <TabsContent value="compare">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Activity className="h-5 w-5 text-primary" />
+                  <span>Property Comparison</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  {compareAddresses.map((address, index) => (
+                    <div key={index} className="flex space-x-2">
+                      <Input
+                        placeholder={`Property ${index + 1} address...`}
+                        value={address}
+                        onChange={(e) => updateCompareAddress(index, e.target.value)}
+                        className="flex-1"
+                      />
+                      {compareAddresses.length > 1 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeCompareAddress(index)}
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  <div className="flex space-x-2">
+                    <Button variant="outline" onClick={addCompareAddress}>
+                      Add Property
+                    </Button>
+                    <Button
+                      onClick={handleCompareProperties}
+                      disabled={comparePropertiesMutation.isPending}
+                      className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
+                    >
+                      {comparePropertiesMutation.isPending ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Comparing...
+                        </>
+                      ) : (
+                        <>
+                          <Activity className="h-4 w-4 mr-2" />
+                          Compare Properties
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {comparisonData && (
+                  <div className="space-y-6">
+                    {/* Market Summary */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Market Summary</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="text-center">
+                            <p className="text-sm text-gray-600">Average Value</p>
+                            <p className="text-lg font-semibold">{formatCurrency(comparisonData.marketSummary.averageValue)}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm text-gray-600">Best Investment</p>
+                            <p className="text-lg font-semibold text-green-600">
+                              {comparisonData.marketSummary.bestInvestment.split(',')[0]}
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm text-gray-600">Highest Appreciation</p>
+                            <p className="text-lg font-semibold text-blue-600">
+                              {comparisonData.marketSummary.highestAppreciation.split(',')[0]}
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm text-gray-600">Market Trend</p>
+                            <p className="text-lg font-semibold text-purple-600">
+                              {comparisonData.marketSummary.marketTrend}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Property Comparison Table */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Property Comparison</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left p-2">Address</th>
+                                <th className="text-right p-2">Value</th>
+                                <th className="text-right p-2">Price/SqFt</th>
+                                <th className="text-right p-2">Appreciation</th>
+                                <th className="text-center p-2">Score</th>
+                                <th className="text-center p-2">Position</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {comparisonData.properties.map((property: any, index: number) => (
+                                <tr key={index} className="border-b">
+                                  <td className="p-2">
+                                    <div className="font-medium">{property.address.split(',')[0]}</div>
+                                    <div className="text-sm text-gray-600">{property.address.split(',').slice(1).join(',')}</div>
+                                  </td>
+                                  <td className="text-right p-2 font-semibold">
+                                    {formatCurrency(property.currentValue)}
+                                  </td>
+                                  <td className="text-right p-2">
+                                    ${property.pricePerSqFt.toFixed(0)}
+                                  </td>
+                                  <td className="text-right p-2">
+                                    <span className={property.appreciation >= 0 ? "text-green-600" : "text-red-600"}>
+                                      {property.appreciation >= 0 ? "+" : ""}{property.appreciation.toFixed(1)}%
+                                    </span>
+                                  </td>
+                                  <td className="text-center p-2">
+                                    <span className={`font-semibold ${getInvestmentScoreColor(property.investmentScore)}`}>
+                                      {property.investmentScore}/10
+                                    </span>
+                                  </td>
+                                  <td className="text-center p-2">
+                                    <Badge 
+                                      variant={
+                                        property.marketPosition === "undervalued" ? "default" :
+                                        property.marketPosition === "fairly-valued" ? "secondary" : "outline"
+                                      }
+                                    >
+                                      {property.marketPosition.replace("-", " ")}
+                                    </Badge>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Property Research Center</h1>
           <p className="text-gray-600 mt-2">
