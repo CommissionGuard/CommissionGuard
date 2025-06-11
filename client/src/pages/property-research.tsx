@@ -105,51 +105,60 @@ export default function PropertyResearch() {
     mutationFn: async (address: string) => {
       // First geocode the address
       const geocodeResponse = await apiRequest("POST", "/api/property/geocode", { address });
-      if (!geocodeResponse.success) {
-        throw new Error(geocodeResponse.error || "Failed to geocode address");
+      const geocodeData = await geocodeResponse.json();
+      
+      if (!geocodeData.success) {
+        throw new Error(geocodeData.error || "Failed to geocode address");
       }
 
-      setGeocodeResult(geocodeResponse);
+      setGeocodeResult(geocodeData);
 
       // Get parcel data
-      const parcelResponse = await apiRequest("POST", "/api/property/parcel", {
-        latitude: geocodeResponse.latitude,
-        longitude: geocodeResponse.longitude
-      });
-      
-      if (parcelResponse.success && parcelResponse.data) {
-        setParcelData(parcelResponse.data);
+      try {
+        const parcelResponse = await apiRequest("POST", "/api/property/parcel", {
+          latitude: geocodeData.latitude,
+          longitude: geocodeData.longitude
+        });
+        const parcelResponseData = await parcelResponse.json();
+        
+        if (parcelResponseData.success && parcelResponseData.data) {
+          setParcelData(parcelResponseData.data);
 
-        // Get ownership history if we have a parcel ID
-        if (parcelResponse.data.parcelId) {
-          try {
-            const historyResponse = await apiRequest("POST", "/api/property/ownership-history", {
-              parcelId: parcelResponse.data.parcelId
-            });
-            if (historyResponse.success && historyResponse.data) {
-              setOwnershipHistory(historyResponse.data);
+          // Get ownership history if we have a parcel ID
+          if (parcelResponseData.data.parcelId) {
+            try {
+              const historyResponse = await apiRequest("POST", "/api/property/ownership-history", {
+                parcelId: parcelResponseData.data.parcelId
+              });
+              const historyData = await historyResponse.json();
+              if (historyData.success && historyData.data) {
+                setOwnershipHistory(historyData.data);
+              }
+            } catch (error) {
+              console.warn("Could not fetch ownership history:", error);
             }
-          } catch (error) {
-            console.warn("Could not fetch ownership history:", error);
           }
         }
+      } catch (error) {
+        console.warn("Could not fetch parcel data:", error);
       }
 
       // Get nearby properties
       try {
         const nearbyResponse = await apiRequest("POST", "/api/property/nearby", {
-          latitude: geocodeResponse.latitude,
-          longitude: geocodeResponse.longitude,
+          latitude: geocodeData.latitude,
+          longitude: geocodeData.longitude,
           radius: 1000
         });
-        if (nearbyResponse.success && nearbyResponse.data) {
-          setNearbyResults(nearbyResponse.data);
+        const nearbyData = await nearbyResponse.json();
+        if (nearbyData.success && nearbyData.data) {
+          setNearbyResults(nearbyData.data);
         }
       } catch (error) {
         console.warn("Could not fetch nearby properties:", error);
       }
 
-      return geocodeResponse;
+      return geocodeData;
     },
     onSuccess: () => {
       toast({

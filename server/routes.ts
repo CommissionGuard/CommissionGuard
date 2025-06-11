@@ -353,6 +353,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Property Research specific endpoints
+  app.post("/api/property/geocode", isAuthenticated, async (req, res) => {
+    try {
+      const { address } = req.body;
+      if (!address) {
+        return res.status(400).json({ error: "Address is required" });
+      }
+
+      const location = await apiIntegrationService.getPropertyLocation(address);
+      res.json(location);
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  app.post("/api/property/parcel", isAuthenticated, async (req, res) => {
+    try {
+      const { latitude, longitude } = req.body;
+      if (!latitude || !longitude) {
+        return res.status(400).json({ error: "Latitude and longitude are required" });
+      }
+
+      const parcelData = await apiIntegrationService.getParcelData(latitude, longitude);
+      res.json(parcelData);
+    } catch (error) {
+      console.error("Parcel data error:", error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  app.post("/api/property/ownership-history", isAuthenticated, async (req, res) => {
+    try {
+      const { parcelId } = req.body;
+      if (!parcelId) {
+        return res.status(400).json({ error: "Parcel ID is required" });
+      }
+
+      const history = await apiIntegrationService.getOwnershipHistory(parcelId);
+      res.json(history);
+    } catch (error) {
+      console.error("Ownership history error:", error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  app.post("/api/property/nearby", isAuthenticated, async (req, res) => {
+    try {
+      const { latitude, longitude, radius = 1000 } = req.body;
+      if (!latitude || !longitude) {
+        return res.status(400).json({ error: "Latitude and longitude are required" });
+      }
+
+      const nearby = await apiIntegrationService.getNearbyProperties(latitude, longitude, radius);
+      res.json(nearby);
+    } catch (error) {
+      console.error("Nearby properties error:", error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
   // Nearby Properties API
   app.get("/api/properties/nearby", isAuthenticated, async (req, res) => {
     try {
