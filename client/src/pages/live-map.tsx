@@ -21,7 +21,9 @@ import {
   Plus,
   Eye,
   Navigation,
-  Save
+  Save,
+  Trash2,
+  X
 } from "lucide-react";
 
 interface PropertyPin {
@@ -128,6 +130,39 @@ export default function LiveMap() {
     },
   });
 
+  const deletePropertyMutation = useMutation({
+    mutationFn: async (propertyId: string) => {
+      const response = await apiRequest("DELETE", `/api/property-pins/${propertyId}`);
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Property Removed",
+        description: "Property has been removed from your pins.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/property-pins"] });
+      setSelectedProperty(null);
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to remove property. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const searchLocationMutation = useMutation({
     mutationFn: async (address: string) => {
       const response = await apiRequest("POST", "/api/geocode", { address });
@@ -174,6 +209,28 @@ export default function LiveMap() {
     });
   };
 
+  const handleDeleteProperty = (propertyId: string) => {
+    // For saved properties, delete from backend
+    const savedProperty = savedPins.find((p: any) => p.id === propertyId);
+    if (savedProperty) {
+      deletePropertyMutation.mutate(propertyId);
+      return;
+    }
+    
+    // For custom pins, remove from local state
+    const customProperty = customPins.find(p => p.id === propertyId);
+    if (customProperty) {
+      setCustomPins(customPins.filter(p => p.id !== propertyId));
+      if (selectedProperty?.id === propertyId) {
+        setSelectedProperty(null);
+      }
+      toast({
+        title: "Pin Removed",
+        description: "Custom pin has been removed from the map.",
+      });
+    }
+  };
+
   const createCustomPin = (lat: number, lng: number) => {
     const newPin: PropertyPin = {
       id: `custom-${Date.now()}`,
@@ -185,6 +242,17 @@ export default function LiveMap() {
     };
     setCustomPins([...customPins, newPin]);
     setSelectedProperty(newPin);
+  };
+
+  const clearAllCustomPins = () => {
+    setCustomPins([]);
+    if (selectedProperty?.propertyType === "Custom Pin") {
+      setSelectedProperty(null);
+    }
+    toast({
+      title: "All Custom Pins Cleared",
+      description: "All custom pins have been removed from the map.",
+    });
   };
 
   const allProperties = [...sampleProperties, ...nearbyProperties, ...customPins];
@@ -261,26 +329,43 @@ export default function LiveMap() {
                   {allProperties.map((property, index) => {
                     const x = ((property.longitude + 74.0060) * 1000) % 100;
                     const y = ((property.latitude - 40.7128) * 1000) % 100;
+                    const canDelete = property.propertyType === 'Custom Pin' || savedPins.some((p: any) => p.id === property.id);
                     
                     return (
-                      <button
+                      <div
                         key={property.id}
-                        className={`absolute w-8 h-8 rounded-full border-2 border-white shadow-lg transform -translate-x-1/2 -translate-y-1/2 transition-all hover:scale-110 z-20 ${
-                          selectedProperty?.id === property.id 
-                            ? 'bg-red-500' 
-                            : property.propertyType === 'Custom Pin' 
-                            ? 'bg-purple-500' 
-                            : 'bg-blue-500'
-                        }`}
+                        className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
                         style={{
                           left: `${Math.max(10, Math.min(90, x + 20))}%`,
                           top: `${Math.max(10, Math.min(80, y + 30))}%`
                         }}
-                        onClick={() => setSelectedProperty(property)}
-                        title={property.address}
                       >
-                        <MapPin className="h-4 w-4 text-white mx-auto" />
-                      </button>
+                        <button
+                          className={`w-8 h-8 rounded-full border-2 border-white shadow-lg transition-all hover:scale-110 ${
+                            selectedProperty?.id === property.id 
+                              ? 'bg-red-500' 
+                              : property.propertyType === 'Custom Pin' 
+                              ? 'bg-purple-500' 
+                              : 'bg-blue-500'
+                          }`}
+                          onClick={() => setSelectedProperty(property)}
+                          title={property.address}
+                        >
+                          <MapPin className="h-4 w-4 text-white mx-auto" />
+                        </button>
+                        {canDelete && (
+                          <button
+                            className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs hover:bg-red-600 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteProperty(property.id);
+                            }}
+                            title="Remove pin"
+                          >
+                            <X className="h-2 w-2 mx-auto" />
+                          </button>
+                        )}
+                      </div>
                     );
                   })}
 
@@ -309,7 +394,7 @@ export default function LiveMap() {
             </Card>
 
             {/* Map Controls */}
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex gap-2 flex-wrap">
               <Button
                 variant="outline"
                 onClick={() => setZoom(Math.min(20, zoom + 1))}
@@ -331,6 +416,16 @@ export default function LiveMap() {
               >
                 Reset View
               </Button>
+              {customPins.length > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={clearAllCustomPins}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Clear Custom Pins ({customPins.length})
+                </Button>
+              )}
             </div>
           </div>
 
@@ -393,14 +488,29 @@ export default function LiveMap() {
                   )}
 
                   <div className="flex gap-2 pt-4">
-                    <Button
-                      onClick={() => handleSaveProperty(selectedProperty)}
-                      disabled={savePropertyMutation.isPending || selectedProperty.saved}
-                      className="flex-1"
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      {selectedProperty.saved ? 'Saved' : 'Save Property'}
-                    </Button>
+                    {(selectedProperty.propertyType !== 'Custom Pin' && !selectedProperty.saved) && (
+                      <Button
+                        onClick={() => handleSaveProperty(selectedProperty)}
+                        disabled={savePropertyMutation.isPending}
+                        className="flex-1"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Property
+                      </Button>
+                    )}
+                    
+                    {(selectedProperty.propertyType === 'Custom Pin' || savedPins.some((p: any) => p.id === selectedProperty.id)) && (
+                      <Button
+                        onClick={() => handleDeleteProperty(selectedProperty.id)}
+                        disabled={deletePropertyMutation.isPending}
+                        variant="destructive"
+                        className="flex-1"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Remove Pin
+                      </Button>
+                    )}
+                    
                     <Button variant="outline" size="icon">
                       <Eye className="h-4 w-4" />
                     </Button>
