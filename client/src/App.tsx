@@ -20,6 +20,8 @@ import PropertyAnalyzer from "@/pages/property-analyzer";
 import DealPipeline from "@/pages/deal-pipeline";
 import BusinessOverview from "@/pages/business-overview";
 import ApiTest from "@/pages/api-test";
+import AdminDashboard from "@/pages/admin-dashboard";
+import FunctionalityTest from "@/pages/functionality-test";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -44,6 +46,8 @@ function Router() {
           <Route path="/deal-pipeline" component={DealPipeline} />
           <Route path="/business-overview" component={BusinessOverview} />
           <Route path="/api-test" component={ApiTest} />
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/functionality-test" component={FunctionalityTest} />
         </>
       )}
       <Route component={NotFound} />
