@@ -20,7 +20,7 @@ export default function PropertyMap() {
   const [savedPins, setSavedPins] = useState<any[]>([]);
 
   const { data: properties, isLoading: loadingProperties } = useQuery({
-    queryKey: ["/api/properties", searchLocation],
+    queryKey: [`/api/properties?location=${encodeURIComponent(searchLocation)}`],
     enabled: !!searchLocation,
   });
 

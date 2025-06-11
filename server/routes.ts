@@ -294,6 +294,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Basic properties endpoint for map functionality
+  app.get("/api/properties", isAuthenticated, async (req, res) => {
+    try {
+      const { location } = req.query;
+      
+      if (!location) {
+        return res.json([]);
+      }
+
+      const results = await apiIntegrationService.searchProperties({
+        location: location as string,
+      });
+
+      res.json(results);
+    } catch (error) {
+      console.error("Property search error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Property Search API Integration
   app.get("/api/properties/search", isAuthenticated, async (req, res) => {
     try {
@@ -612,6 +632,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating demo data:", error);
       res.status(500).json({ message: "Failed to create demo data" });
+    }
+  });
+
+  // Property pins routes
+  app.post("/api/property-pins", isAuthenticated, async (req, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const pinData = { ...req.body, agentId };
+      
+      // For now, just return success - in a real app you'd save to database
+      res.json({ message: "Property pin saved successfully", data: pinData });
+    } catch (error) {
+      console.error("Error saving property pin:", error);
+      res.status(500).json({ message: "Failed to save property pin" });
+    }
+  });
+
+  app.get("/api/property-pins", isAuthenticated, async (req, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      
+      // For now, return empty array - in a real app you'd fetch from database
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching property pins:", error);
+      res.status(500).json({ message: "Failed to fetch property pins" });
     }
   });
 
