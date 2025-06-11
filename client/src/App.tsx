@@ -16,6 +16,7 @@ import PropertyMap from "@/pages/map";
 import Prospecting from "@/pages/prospecting";
 import ApiIntegrations from "@/pages/api-integrations";
 import PropertyResearch from "@/pages/property-research";
+import PropertyAnalyzer from "@/pages/property-analyzer";
 import ApiTest from "@/pages/api-test";
 
 function Router() {
@@ -37,6 +38,7 @@ function Router() {
           <Route path="/prospecting" component={Prospecting} />
           <Route path="/api-integrations" component={ApiIntegrations} />
           <Route path="/property-research" component={PropertyResearch} />
+          <Route path="/property-analyzer" component={PropertyAnalyzer} />
           <Route path="/api-test" component={ApiTest} />
         </>
       )}
