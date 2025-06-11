@@ -471,6 +471,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // RentCast API endpoints
+  app.post("/api/rentcast/search", isAuthenticated, async (req: any, res) => {
+    try {
+      const filters = req.body;
+      const result = await apiIntegrationService.searchRentalProperties(filters);
+      res.json(result);
+    } catch (error) {
+      console.error("Error searching rental properties:", error);
+      res.status(500).json({ message: "Failed to search rental properties" });
+    }
+  });
+
+  app.post("/api/rentcast/property-details", isAuthenticated, async (req: any, res) => {
+    try {
+      const { address } = req.body;
+      const result = await apiIntegrationService.getRentCastPropertyDetails(address);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching property details:", error);
+      res.status(500).json({ message: "Failed to fetch property details" });
+    }
+  });
+
+  app.post("/api/rentcast/rent-estimate", isAuthenticated, async (req: any, res) => {
+    try {
+      const { address } = req.body;
+      const result = await apiIntegrationService.getRentEstimate(address);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching rent estimate:", error);
+      res.status(500).json({ message: "Failed to fetch rent estimate" });
+    }
+  });
+
+  app.post("/api/rentcast/market-data", isAuthenticated, async (req: any, res) => {
+    try {
+      const { city, state } = req.body;
+      const result = await apiIntegrationService.getRentCastMarketData(city, state);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching market data:", error);
+      res.status(500).json({ message: "Failed to fetch market data" });
+    }
+  });
+
   // File serving route
   app.get("/uploads/:filename", (req, res) => {
     const { filename } = req.params;

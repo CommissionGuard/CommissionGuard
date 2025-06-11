@@ -22,6 +22,7 @@ import BusinessOverview from "@/pages/business-overview";
 import ApiTest from "@/pages/api-test";
 import AdminDashboard from "@/pages/admin-dashboard";
 import FunctionalityTest from "@/pages/functionality-test";
+import RentalMarket from "@/pages/rental-market";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();

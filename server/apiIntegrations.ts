@@ -3,6 +3,164 @@ import { storage } from "./storage";
 // API Integration service for external real estate data
 export class ApiIntegrationService {
   
+  // RentCast API Integration for rental property data
+  async searchRentalProperties(filters: {
+    address?: string;
+    zipCode?: string;
+    city?: string;
+    state?: string;
+    bedrooms?: number;
+    bathrooms?: number;
+    radius?: number;
+  }) {
+    const rentCastApiKey = process.env.RENTCAST_API_KEY || "4930240cfb8e4aa5b1dced0f846d1ebd";
+    
+    try {
+      const queryParams = new URLSearchParams();
+      if (filters.address) queryParams.append('address', filters.address);
+      if (filters.zipCode) queryParams.append('zipCode', filters.zipCode);
+      if (filters.city) queryParams.append('city', filters.city);
+      if (filters.state) queryParams.append('state', filters.state);
+      if (filters.bedrooms) queryParams.append('bedrooms', filters.bedrooms.toString());
+      if (filters.bathrooms) queryParams.append('bathrooms', filters.bathrooms.toString());
+      if (filters.radius) queryParams.append('radius', filters.radius.toString());
+
+      const response = await fetch(
+        `https://api.rentcast.io/v1/listings/rental/long-term?${queryParams.toString()}`,
+        {
+          headers: {
+            'X-Api-Key': rentCastApiKey,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`RentCast API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data: data,
+        count: data.length || 0,
+        source: "RentCast"
+      };
+    } catch (error) {
+      console.error("RentCast API error:", error);
+      return {
+        success: false,
+        error: error.message,
+        source: "RentCast"
+      };
+    }
+  }
+
+  // RentCast Property Details
+  async getRentCastPropertyDetails(address: string) {
+    const rentCastApiKey = process.env.RENTCAST_API_KEY || "4930240cfb8e4aa5b1dced0f846d1ebd";
+    
+    try {
+      const response = await fetch(
+        `https://api.rentcast.io/v1/properties?address=${encodeURIComponent(address)}`,
+        {
+          headers: {
+            'X-Api-Key': rentCastApiKey,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`RentCast API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data: data,
+        source: "RentCast"
+      };
+    } catch (error) {
+      console.error("RentCast property details error:", error);
+      return {
+        success: false,
+        error: error.message,
+        source: "RentCast"
+      };
+    }
+  }
+
+  // RentCast Rent Estimate
+  async getRentEstimate(address: string) {
+    const rentCastApiKey = process.env.RENTCAST_API_KEY || "4930240cfb8e4aa5b1dced0f846d1ebd";
+    
+    try {
+      const response = await fetch(
+        `https://api.rentcast.io/v1/avm/rent/long-term?address=${encodeURIComponent(address)}`,
+        {
+          headers: {
+            'X-Api-Key': rentCastApiKey,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`RentCast API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data: data,
+        source: "RentCast"
+      };
+    } catch (error) {
+      console.error("RentCast rent estimate error:", error);
+      return {
+        success: false,
+        error: error.message,
+        source: "RentCast"
+      };
+    }
+  }
+
+  // RentCast Market Data
+  async getRentCastMarketData(city: string, state: string) {
+    const rentCastApiKey = process.env.RENTCAST_API_KEY || "4930240cfb8e4aa5b1dced0f846d1ebd";
+    
+    try {
+      const response = await fetch(
+        `https://api.rentcast.io/v1/markets?city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}`,
+        {
+          headers: {
+            'X-Api-Key': rentCastApiKey,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`RentCast API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data: data,
+        source: "RentCast"
+      };
+    } catch (error) {
+      console.error("RentCast market data error:", error);
+      return {
+        success: false,
+        error: error.message,
+        source: "RentCast"
+      };
+    }
+  }
+
   // MLS/Property Data Integration
   async searchProperties(filters: {
     location?: string;
