@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Shield, FileText, Clock, AlertTriangle, DollarSign, Users, TrendingUp, Eye, Lock, Home, CheckCircle } from "lucide-react";
+import { Shield, FileText, Clock, AlertTriangle, DollarSign, Users, TrendingUp, Eye, Lock, Home, CheckCircle, User } from "lucide-react";
 import AnimatedBackground from "@/components/animated-background";
 
 export default function Landing() {
@@ -288,25 +288,136 @@ export default function Landing() {
         </div>
       </div>
 
+      {/* Testimonials Section */}
+      <div className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Trusted by Top Real Estate Professionals
+            </h2>
+            <p className="text-lg text-gray-600">
+              See how Commission Guard has protected millions in commissions
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="bg-white border border-gray-200 shadow-lg">
+              <CardContent className="p-8">
+                <div className="flex items-center mb-4">
+                  {[1,2,3,4,5].map((star) => (
+                    <span key={star} className="text-yellow-400 text-xl">★</span>
+                  ))}
+                </div>
+                <blockquote className="text-gray-700 mb-6 italic">
+                  "Commission Guard saved me $18,500 when a client tried to work with another agent behind my back. The breach detection caught it within 24 hours."
+                </blockquote>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Users className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Sarah Chen</p>
+                    <p className="text-gray-600 text-sm">Top Producer, RE/MAX Premier</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white border border-gray-200 shadow-lg">
+              <CardContent className="p-8">
+                <div className="flex items-center mb-4">
+                  {[1,2,3,4,5].map((star) => (
+                    <span key={star} className="text-yellow-400 text-xl">★</span>
+                  ))}
+                </div>
+                <blockquote className="text-gray-700 mb-6 italic">
+                  "As a broker, Commission Guard gives me peace of mind knowing all my agents' contracts are monitored. It's paid for itself 10x over this year alone."
+                </blockquote>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <Users className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Michael Rodriguez</p>
+                    <p className="text-gray-600 text-sm">Broker/Owner, Pacific Realty Group</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white border border-gray-200 shadow-lg">
+              <CardContent className="p-8">
+                <div className="flex items-center mb-4">
+                  {[1,2,3,4,5].map((star) => (
+                    <span key={star} className="text-yellow-400 text-xl">★</span>
+                  ))}
+                </div>
+                <blockquote className="text-gray-700 mb-6 italic">
+                  "The automated contract tracking alone is worth the price. I never have to worry about missing a renewal deadline again."
+                </blockquote>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <Users className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Jennifer Thompson</p>
+                    <p className="text-gray-600 text-sm">Luxury Specialist, Coldwell Banker</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
       {/* Value Proposition */}
       <div className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">
-              One Lost $500K Transaction Costs You $10,000
+              One Lost $500K Transaction Costs You $15,000+
             </h2>
+            <p className="text-lg text-gray-600 mb-12 max-w-3xl mx-auto">
+              Don't let contract breaches drain your income. Commission Guard provides enterprise-level protection at a fraction of the cost.
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-red-800 mb-2">Without Protection</h3>
-                <p className="text-red-600">Lost commissions, legal fees, damaged reputation</p>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-8 transform hover:scale-105 transition-transform duration-300">
+                <div className="text-red-600 mb-4">
+                  <AlertTriangle className="h-12 w-12 mx-auto" />
+                </div>
+                <h3 className="text-xl font-semibold text-red-800 mb-4">Without Protection</h3>
+                <ul className="text-red-600 space-y-2 text-left">
+                  <li>• Lost commissions ($15,000+ per breach)</li>
+                  <li>• Legal fees ($5,000-$25,000)</li>
+                  <li>• Damaged client relationships</li>
+                  <li>• Reputation risk</li>
+                </ul>
               </div>
-              <div className="bg-primary text-white rounded-lg p-6">
-                <h3 className="text-xl font-semibold mb-2">Commission Guard</h3>
-                <p className="text-blue-100">$199.99/year comprehensive protection</p>
+              
+              <div className="bg-gradient-to-br from-primary to-blue-600 text-white rounded-xl p-8 transform hover:scale-105 transition-transform duration-300 shadow-xl">
+                <div className="text-white mb-4">
+                  <Shield className="h-12 w-12 mx-auto" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4">Commission Guard</h3>
+                <div className="text-blue-100 space-y-2">
+                  <p className="text-2xl font-bold text-white">$299/year</p>
+                  <p>Complete protection suite</p>
+                  <p>24/7 monitoring</p>
+                  <p>Legal support network</p>
+                </div>
               </div>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-success mb-2">50x ROI</h3>
-                <p className="text-green-600">Pays for itself with just one saved breach</p>
+              
+              <div className="bg-green-50 border border-green-200 rounded-xl p-8 transform hover:scale-105 transition-transform duration-300">
+                <div className="text-green-600 mb-4">
+                  <TrendingUp className="h-12 w-12 mx-auto" />
+                </div>
+                <h3 className="text-xl font-semibold text-green-800 mb-4">Return on Investment</h3>
+                <ul className="text-green-600 space-y-2 text-left">
+                  <li>• 50x ROI average</li>
+                  <li>• Pays for itself with one saved breach</li>
+                  <li>• $2.3M+ protected to date</li>
+                  <li>• 94% success rate</li>
+                </ul>
               </div>
             </div>
           </div>
