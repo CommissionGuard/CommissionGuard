@@ -80,8 +80,9 @@ export default function ApiIntegrations() {
           title: "Location Found",
           description: `Located: ${data.address}`,
         });
-        // Automatically get nearby properties
+        // Automatically get nearby properties and parcel data
         nearbyMutation.mutate({ lat: data.latitude, lng: data.longitude });
+        parcelMutation.mutate({ lat: data.latitude, lng: data.longitude });
       } else {
         toast({
           title: "Location Not Found",
@@ -139,6 +140,58 @@ export default function ApiIntegrations() {
         description: error.message,
         variant: "destructive",
       });
+    }
+  });
+
+  // Regrid Parcel Data
+  const parcelMutation = useMutation({
+    mutationFn: async ({ lat, lng }: { lat: number; lng: number }) => {
+      return apiRequest(`/api/parcels/coordinates?lat=${lat}&lng=${lng}`);
+    },
+    onSuccess: (data: any) => {
+      setParcelData(data);
+      if (data.success) {
+        toast({
+          title: "Property Data Found",
+          description: `Found parcel data for ${data.parcel.address}`,
+        });
+        // Get ownership history if available
+        if (data.parcel.parcelId) {
+          ownershipMutation.mutate(data.parcel.parcelId);
+        }
+      } else {
+        toast({
+          title: "No Parcel Data",
+          description: data.error || "No property data found for this location",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Parcel Data Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Ownership History
+  const ownershipMutation = useMutation({
+    mutationFn: async (parcelId: string) => {
+      return apiRequest(`/api/parcels/${parcelId}/ownership`);
+    },
+    onSuccess: (data: any) => {
+      setOwnershipHistory(data);
+      if (data.success && data.history.length > 0) {
+        toast({
+          title: "Ownership History Found",
+          description: `Found ${data.history.length} ownership records`,
+        });
+      }
+    },
+    onError: (error: any) => {
+      console.error("Ownership history error:", error);
     }
   });
 
@@ -385,6 +438,69 @@ export default function ApiIntegrations() {
                           <p className="text-gray-600">{place.address}</p>
                           {place.rating && (
                             <p className="text-yellow-600">Rating: {place.rating}/5</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Display Regrid Parcel Data */}
+                {parcelData && parcelData.success && (
+                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <h4 className="font-semibold mb-3 text-green-800">🏠 Property Parcel Data</h4>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="font-medium text-green-700">Owner:</span>
+                        <p className="text-green-600">{parcelData.parcel.owner || 'Not available'}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-green-700">Property Type:</span>
+                        <p className="text-green-600">{parcelData.parcel.propertyType || 'Not available'}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-green-700">Year Built:</span>
+                        <p className="text-green-600">{parcelData.parcel.yearBuilt || 'Not available'}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-green-700">Square Feet:</span>
+                        <p className="text-green-600">{parcelData.parcel.squareFeet || 'Not available'}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-green-700">Assessed Value:</span>
+                        <p className="text-green-600">
+                          {parcelData.parcel.assessedValue ? 
+                            `$${parseInt(parcelData.parcel.assessedValue).toLocaleString()}` : 
+                            'Not available'
+                          }
+                        </p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-green-700">Last Sale:</span>
+                        <p className="text-green-600">
+                          {parcelData.parcel.lastSalePrice ? 
+                            `$${parseInt(parcelData.parcel.lastSalePrice).toLocaleString()}` : 
+                            'Not available'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Display Ownership History */}
+                {ownershipHistory && ownershipHistory.success && ownershipHistory.history.length > 0 && (
+                  <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                    <h4 className="font-semibold mb-3 text-purple-800">📜 Ownership History</h4>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {ownershipHistory.history.slice(0, 3).map((record: any, index: number) => (
+                        <div key={index} className="p-2 bg-white rounded border text-xs">
+                          <div className="flex justify-between">
+                            <span className="font-medium">{record.owner_name}</span>
+                            <span className="text-gray-600">{record.deed_date}</span>
+                          </div>
+                          {record.sale_price && (
+                            <p className="text-purple-600">${parseInt(record.sale_price).toLocaleString()}</p>
                           )}
                         </div>
                       ))}
