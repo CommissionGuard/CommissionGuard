@@ -49,6 +49,7 @@ function Router() {
           <Route path="/api-test" component={ApiTest} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/functionality-test" component={FunctionalityTest} />
+          <Route path="/rental-market" component={RentalMarket} />
         </>
       )}
       <Route component={NotFound} />
