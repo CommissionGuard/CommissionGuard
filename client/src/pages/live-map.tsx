@@ -46,50 +46,62 @@ export default function LiveMap() {
   const queryClient = useQueryClient();
   
   const [searchLocation, setSearchLocation] = useState("");
-  const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.0060 }); // NYC default
+  const [mapCenter, setMapCenter] = useState({ lat: 40.7891, lng: -73.1350 }); // Long Island default
   const [zoom, setZoom] = useState(13);
   const [selectedProperty, setSelectedProperty] = useState<PropertyPin | null>(null);
   const [nearbyProperties, setNearbyProperties] = useState<PropertyPin[]>([]);
   const [customPins, setCustomPins] = useState<PropertyPin[]>([]);
   const [isMapLoaded, setIsMapLoaded] = useState(true);
 
-  // Sample property data for demonstration
+  // Long Island property data
   const sampleProperties: PropertyPin[] = [
     {
       id: "prop-1",
-      address: "123 Main St, New York, NY 10001",
-      latitude: 40.7505,
-      longitude: -73.9934,
+      address: "123 Maple Ave, Huntington, NY 11743",
+      latitude: 40.8686,
+      longitude: -73.4257,
       price: 850000,
-      propertyType: "Condo",
-      bedrooms: 2,
-      bathrooms: 2,
-      squareFootage: 1200,
-      notes: "Recently renovated"
+      propertyType: "Single Family",
+      bedrooms: 4,
+      bathrooms: 3,
+      squareFootage: 2400,
+      notes: "Beautiful colonial home"
     },
     {
       id: "prop-2", 
-      address: "456 Broadway, New York, NY 10013",
-      latitude: 40.7589,
-      longitude: -73.9851,
+      address: "456 Ocean Blvd, Long Beach, NY 11561",
+      latitude: 40.5882,
+      longitude: -73.6579,
       price: 1200000,
-      propertyType: "Co-op",
+      propertyType: "Beachfront Condo",
       bedrooms: 3,
       bathrooms: 2,
-      squareFootage: 1500,
-      notes: "Great investment opportunity"
+      squareFootage: 1800,
+      notes: "Ocean views, walk to beach"
     },
     {
       id: "prop-3",
-      address: "789 Central Park West, New York, NY 10025",
-      latitude: 40.7829,
-      longitude: -73.9654,
-      price: 2500000,
-      propertyType: "Luxury Condo",
-      bedrooms: 4,
-      bathrooms: 3,
-      squareFootage: 2800,
-      notes: "Park views, premium location"
+      address: "789 Pine St, Garden City, NY 11530",
+      latitude: 40.7267,
+      longitude: -73.6343,
+      price: 1850000,
+      propertyType: "Luxury Home",
+      bedrooms: 5,
+      bathrooms: 4,
+      squareFootage: 3200,
+      notes: "Premium neighborhood, top schools"
+    },
+    {
+      id: "prop-4",
+      address: "321 Bay Ave, Oyster Bay, NY 11771",
+      latitude: 40.8659,
+      longitude: -73.5321,
+      price: 2100000,
+      propertyType: "Waterfront Estate",
+      bedrooms: 6,
+      bathrooms: 5,
+      squareFootage: 4500,
+      notes: "Private dock, spectacular views"
     }
   ];
 
@@ -360,8 +372,28 @@ export default function LiveMap() {
 
                   {/* Property Markers */}
                   {allProperties.map((property, index) => {
-                    const x = ((property.longitude + 74.0060) * 1000) % 100;
-                    const y = ((property.latitude - 40.7128) * 1000) % 100;
+                    // Convert lat/lng to pixel coordinates using Web Mercator projection
+                    const metersPerPixel = 156543.03392 * Math.cos(mapCenter.lat * Math.PI / 180) / Math.pow(2, zoom);
+                    const mapWidth = 384; // approximate map width
+                    const mapHeight = 384; // approximate map height
+                    
+                    // Calculate offset from map center in meters
+                    const latOffsetMeters = (mapCenter.lat - property.latitude) * 111320;
+                    const lngOffsetMeters = (property.longitude - mapCenter.lng) * 111320 * Math.cos(mapCenter.lat * Math.PI / 180);
+                    
+                    // Convert to pixels
+                    const xPixels = mapWidth / 2 + (lngOffsetMeters / metersPerPixel);
+                    const yPixels = mapHeight / 2 + (latOffsetMeters / metersPerPixel);
+                    
+                    // Convert to percentages
+                    const xPercent = (xPixels / mapWidth) * 100;
+                    const yPercent = (yPixels / mapHeight) * 100;
+                    
+                    // Only show markers that are within the visible map area
+                    if (xPercent < 0 || xPercent > 100 || yPercent < 0 || yPercent > 100) {
+                      return null;
+                    }
+                    
                     const canDelete = property.propertyType === 'Custom Pin' || savedPins.some((p: any) => p.id === property.id);
                     
                     return (
@@ -369,8 +401,8 @@ export default function LiveMap() {
                         key={property.id}
                         className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
                         style={{
-                          left: `${Math.max(10, Math.min(90, x + 20))}%`,
-                          top: `${Math.max(10, Math.min(80, y + 30))}%`
+                          left: `${xPercent}%`,
+                          top: `${yPercent}%`
                         }}
                       >
                         <button
@@ -412,12 +444,23 @@ export default function LiveMap() {
                     className="absolute inset-0 cursor-crosshair"
                     onClick={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
-                      const x = ((e.clientX - rect.left) / rect.width) * 100;
-                      const y = ((e.clientY - rect.top) / rect.height) * 100;
+                      const x = e.clientX - rect.left;
+                      const y = e.clientY - rect.top;
                       
-                      // Convert screen coordinates to lat/lng approximation
-                      const lat = mapCenter.lat + (y - 50) * 0.001;
-                      const lng = mapCenter.lng + (x - 50) * 0.001;
+                      // Convert pixel coordinates to lat/lng using Web Mercator projection
+                      const mapWidth = rect.width;
+                      const mapHeight = rect.height;
+                      
+                      // Calculate meters per pixel at current zoom level and latitude
+                      const metersPerPixel = 156543.03392 * Math.cos(mapCenter.lat * Math.PI / 180) / Math.pow(2, zoom);
+                      
+                      // Convert pixel offset from center to meters
+                      const meterOffsetX = (x - mapWidth / 2) * metersPerPixel;
+                      const meterOffsetY = (y - mapHeight / 2) * metersPerPixel;
+                      
+                      // Convert meters to lat/lng (1 degree ≈ 111320 meters)
+                      const lat = mapCenter.lat - (meterOffsetY / 111320);
+                      const lng = mapCenter.lng + (meterOffsetX / (111320 * Math.cos(mapCenter.lat * Math.PI / 180)));
                       
                       createCustomPin(lat, lng);
                     }}
@@ -443,11 +486,11 @@ export default function LiveMap() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setMapCenter({ lat: 40.7128, lng: -74.0060 });
-                  setZoom(12);
+                  setMapCenter({ lat: 40.7891, lng: -73.1350 });
+                  setZoom(11);
                 }}
               >
-                Reset View
+                Reset to Long Island
               </Button>
               {customPins.length > 0 && (
                 <Button
