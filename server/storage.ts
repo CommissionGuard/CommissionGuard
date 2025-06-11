@@ -2,6 +2,7 @@ import {
   users,
   clients,
   contracts,
+  contractSigners,
   alerts,
   auditLogs,
   type User,
@@ -10,6 +11,8 @@ import {
   type Client,
   type InsertContract,
   type Contract,
+  type InsertContractSigner,
+  type ContractSigner,
   type InsertAlert,
   type Alert,
   type InsertAuditLog,
@@ -178,6 +181,7 @@ export class DatabaseStorage implements IStorage {
         clientId: contracts.clientId,
         agentId: contracts.agentId,
         representationType: contracts.representationType,
+        propertyAddress: contracts.propertyAddress,
         startDate: contracts.startDate,
         endDate: contracts.endDate,
         contractFileUrl: contracts.contractFileUrl,
@@ -216,10 +220,23 @@ export class DatabaseStorage implements IStorage {
         status: contract.status,
         createdAt: contract.createdAt,
         updatedAt: contract.updatedAt,
+        propertyAddress: contract.propertyAddress,
         client: contract.client,
         agent: contract.agent,
         alerts: contractAlerts,
+        signers: []
       });
+    }
+
+    // Get signers for each contract
+    for (const contract of result) {
+      const signers = await db
+        .select()
+        .from(contractSigners)
+        .where(eq(contractSigners.contractId, contract.id))
+        .orderBy(contractSigners.createdAt);
+      
+      contract.signers = signers;
     }
 
     return result;
@@ -413,6 +430,44 @@ export class DatabaseStorage implements IStorage {
       potentialBreaches: breaches.count,
       protectedCommission: activeResult.count * 2000, // Estimated average commission
     };
+  }
+
+  // Contract Signer operations
+  async createContractSigner(signer: InsertContractSigner): Promise<ContractSigner> {
+    const [newSigner] = await db.insert(contractSigners).values(signer).returning();
+    return newSigner;
+  }
+
+  async getContractSigners(contractId: number): Promise<ContractSigner[]> {
+    return await db
+      .select()
+      .from(contractSigners)
+      .where(eq(contractSigners.contractId, contractId))
+      .orderBy(contractSigners.createdAt);
+  }
+
+  async updateContractSigner(id: number, updates: Partial<InsertContractSigner>): Promise<ContractSigner> {
+    const [signer] = await db
+      .update(contractSigners)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(contractSigners.id, id))
+      .returning();
+    return signer;
+  }
+
+  async deleteContractSigner(id: number): Promise<void> {
+    await db.delete(contractSigners).where(eq(contractSigners.id, id));
+  }
+
+  async markSignerAsSigned(id: number): Promise<void> {
+    await db
+      .update(contractSigners)
+      .set({ 
+        signatureStatus: "signed", 
+        signedDate: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(contractSigners.id, id));
   }
 }
 
