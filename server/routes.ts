@@ -306,7 +306,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(location);
     } catch (error) {
       console.error("Geocoding error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // Nearby Properties API
+  app.get("/api/properties/nearby", isAuthenticated, async (req, res) => {
+    try {
+      const { lat, lng, radius } = req.query;
+      if (!lat || !lng) {
+        return res.status(400).json({ error: "Latitude and longitude are required" });
+      }
+
+      const result = await apiIntegrationService.getNearbyProperties(
+        parseFloat(lat as string),
+        parseFloat(lng as string),
+        radius ? parseInt(radius as string) : 1000
+      );
+      res.json(result);
+    } catch (error) {
+      console.error("Nearby properties error:", error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
