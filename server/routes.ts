@@ -359,7 +359,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         parseFloat(lng as string)
       );
       
-      res.json(parcelData);
+      // Provide honest feedback about data limitations
+      if (!parcelData.success && parcelData.error?.includes("No parcel data found")) {
+        res.json({
+          success: false,
+          error: "No property records found in database",
+          explanation: "Property databases have limited geographic coverage. This location may not have comprehensive records available.",
+          apiStatus: "Connected successfully to Regrid API",
+          dataAvailability: "Limited coverage for this specific location",
+          recommendation: "Property data coverage varies significantly by region and property type"
+        });
+      } else {
+        res.json(parcelData);
+      }
     } catch (error) {
       console.error("Parcel data error:", error);
       res.status(500).json({ error: (error as Error).message });

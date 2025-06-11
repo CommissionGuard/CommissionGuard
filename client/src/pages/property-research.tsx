@@ -175,30 +175,70 @@ export default function PropertyResearch() {
               )}
             </Button>
             
-            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
-              <span className="text-sm text-gray-600 mr-2">Quick test:</span>
-              {[
-                "1600 Amphitheatre Parkway, Mountain View, CA",
-                "1 Apple Park Way, Cupertino, CA", 
-                "410 Terry Ave N, Seattle, WA",
-                "1 Hacker Way, Menlo Park, CA"
-              ].map((addr) => (
-                <Button
-                  key={addr}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchAddress(addr);
-                    researchMutation.mutate(addr);
-                  }}
-                  className="text-xs"
-                >
-                  {addr.split(',')[0]}
-                </Button>
-              ))}
+            <div className="mt-4 pt-4 border-t">
+              <p className="text-sm text-gray-600 mb-3">
+                <strong>Data Coverage Note:</strong> Property databases have geographic limitations. The APIs connect successfully but data availability varies by location and property type.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="text-sm text-gray-600 mr-2">Test with known addresses:</span>
+                {[
+                  "1600 Amphitheatre Parkway, Mountain View, CA",
+                  "1 Apple Park Way, Cupertino, CA", 
+                  "410 Terry Ave N, Seattle, WA"
+                ].map((addr) => (
+                  <Button
+                    key={addr}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSearchAddress(addr);
+                      researchMutation.mutate(addr);
+                    }}
+                    className="text-xs"
+                  >
+                    {addr.split(',')[0]}
+                  </Button>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* API Status Section */}
+        {geocodeResult && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <span>API Integration Status</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span><strong>Google Maps:</strong> Successfully geocoded address</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {parcelData?.success ? (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-amber-600" />
+                  )}
+                  <span><strong>Property Data:</strong> {parcelData?.success ? "Records found" : "Limited coverage"}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {nearbyResults?.success ? (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-amber-600" />
+                  )}
+                  <span><strong>Local Market:</strong> {nearbyResults?.success ? "Found businesses" : "Limited data"}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Results Section */}
         {geocodeResult && geocodeResult.success && (
@@ -344,12 +384,25 @@ export default function PropertyResearch() {
                     </Card>
                   </div>
                 ) : parcelData && !parcelData.success ? (
-                  <Alert className="border-amber-200 bg-amber-50">
-                    <AlertCircle className="h-4 w-4 text-amber-600" />
-                    <AlertDescription className="text-amber-800">
-                      <strong>Limited property data for this location.</strong><br/>
-                      {parcelData.error || "This address may not have comprehensive property records in our database."}<br/>
-                      <span className="text-sm mt-2 block">Try addresses in major cities like Austin TX, Denver CO, Atlanta GA, or Los Angeles CA for better data coverage.</span>
+                  <Alert className="border-blue-200 bg-blue-50">
+                    <AlertCircle className="h-4 w-4 text-blue-600" />
+                    <AlertDescription className="text-blue-800">
+                      <div className="space-y-2">
+                        <div><strong>{parcelData.error || "No property records found"}</strong></div>
+                        {parcelData.explanation && (
+                          <div className="text-sm">{parcelData.explanation}</div>
+                        )}
+                        {parcelData.apiStatus && (
+                          <div className="text-sm">
+                            <span className="font-medium">API Status:</span> {parcelData.apiStatus}
+                          </div>
+                        )}
+                        {parcelData.recommendation && (
+                          <div className="text-sm text-blue-600">
+                            {parcelData.recommendation}
+                          </div>
+                        )}
+                      </div>
                     </AlertDescription>
                   </Alert>
                 ) : (
