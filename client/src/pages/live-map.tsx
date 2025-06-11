@@ -28,16 +28,16 @@ import {
 
 interface PropertyPin {
   id: string;
+  name: string;
   address: string;
   latitude: number;
   longitude: number;
-  price?: number;
-  propertyType?: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  squareFootage?: number;
-  notes?: string;
-  saved?: boolean;
+  estimatedValue: number;
+  propertyType: string;
+  bedrooms: number;
+  bathrooms: number;
+  squareFootage: number;
+  saved: boolean;
 }
 
 export default function LiveMap() {
@@ -214,7 +214,7 @@ export default function LiveMap() {
     }
   };
 
-  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMapClick = (e: React.MouseEvent<SVGSVGElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -224,7 +224,7 @@ export default function LiveMap() {
     const lng = mapCenter.lng + ((x / rect.width) * 0.4 - 0.2);
     
     const newPin: PropertyPin = {
-      id: Date.now(),
+      id: Date.now().toString(),
       name: `Custom Pin ${customPins.length + 1}`,
       address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
       latitude: lat,
@@ -354,48 +354,106 @@ export default function LiveMap() {
                 </div>
               </CardHeader>
               
-              <CardContent className="p-0">
-                {/* Interactive Map */}
-                <div 
-                  className="h-96 relative border border-gray-300 overflow-hidden cursor-crosshair"
-                  style={{
-                    background: `
-                      linear-gradient(45deg, #e8f4f8 25%, transparent 25%), 
-                      linear-gradient(-45deg, #e8f4f8 25%, transparent 25%), 
-                      linear-gradient(45deg, transparent 75%, #e8f4f8 75%), 
-                      linear-gradient(-45deg, transparent 75%, #e8f4f8 75%),
-                      linear-gradient(90deg, rgba(100,100,100,0.1) 1px, transparent 1px),
-                      linear-gradient(rgba(100,100,100,0.1) 1px, transparent 1px),
-                      linear-gradient(to bottom right, #f0f9ff, #dcfce7)
-                    `,
-                    backgroundSize: '40px 40px, 40px 40px, 40px 40px, 40px 40px, 20px 20px, 20px 20px, 100% 100%',
-                    backgroundPosition: '0 0, 0 20px, 20px -20px, -20px 0px, 0 0, 0 0, 0 0'
-                  }}
-                  onClick={handleMapClick}
-                >
-                  {/* Long Island Landmass */}
-                  <div className="absolute top-16 left-16 w-80 h-32 bg-green-100 opacity-70 rounded-full transform rotate-12 border border-green-300"></div>
-                  <div className="absolute top-20 left-32 w-64 h-24 bg-green-50 opacity-60 rounded-full transform rotate-8"></div>
-                  
-                  {/* Water Bodies */}
-                  <div className="absolute top-0 left-0 w-full h-8 bg-blue-200 opacity-50"></div>
-                  <div className="absolute bottom-0 left-0 w-full h-8 bg-blue-200 opacity-50"></div>
-                  <div className="absolute top-8 right-0 w-16 h-24 bg-blue-100 opacity-40 rounded-l-full"></div>
-                  
-                  {/* Major Roads */}
-                  <div className="absolute top-24 left-0 w-full h-0.5 bg-gray-400 opacity-60"></div>
-                  <div className="absolute top-32 left-0 w-3/4 h-0.5 bg-gray-400 opacity-60"></div>
-                  <div className="absolute top-40 left-8 w-2/3 h-0.5 bg-gray-400 opacity-50"></div>
-                  
-                  {/* City Labels */}
-                  <div className="absolute top-16 left-20 text-xs font-semibold text-gray-700 bg-white/80 px-1 rounded">Huntington</div>
-                  <div className="absolute top-52 left-80 text-xs font-semibold text-gray-700 bg-white/80 px-1 rounded">Long Beach</div>
-                  <div className="absolute top-36 left-48 text-xs font-semibold text-gray-700 bg-white/80 px-1 rounded">Garden City</div>
-                  <div className="absolute top-12 left-64 text-xs font-semibold text-gray-700 bg-white/80 px-1 rounded">Oyster Bay</div>
-                  
-                  {/* Parks and Green Spaces */}
-                  <div className="absolute top-28 left-24 w-8 h-6 bg-green-300 opacity-40 rounded"></div>
-                  <div className="absolute top-48 left-60 w-6 h-8 bg-green-300 opacity-40 rounded"></div>
+              <CardContent className="p-4">
+                {/* Interactive Map with SVG */}
+                <div className="w-full h-96 relative bg-gray-100 border-2 border-gray-400 rounded-lg overflow-hidden">
+                  <svg 
+                    width="100%" 
+                    height="100%" 
+                    viewBox="0 0 800 400" 
+                    className="absolute inset-0 cursor-crosshair"
+                    onClick={handleMapClick}
+                  >
+                    {/* Background */}
+                    <rect width="800" height="400" fill="#E6F3FF"/>
+                    
+                    {/* Water (Long Island Sound) */}
+                    <rect x="0" y="0" width="800" height="60" fill="#87CEEB" opacity="0.7"/>
+                    <rect x="0" y="340" width="800" height="60" fill="#87CEEB" opacity="0.7"/>
+                    
+                    {/* Long Island Shape */}
+                    <ellipse cx="400" cy="200" rx="300" ry="80" fill="#90EE90" opacity="0.5" transform="rotate(5 400 200)"/>
+                    <ellipse cx="350" cy="180" rx="200" ry="50" fill="#98FB98" opacity="0.6" transform="rotate(8 350 180)"/>
+                    
+                    {/* Grid Pattern */}
+                    <defs>
+                      <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#ccc" strokeWidth="0.5"/>
+                      </pattern>
+                    </defs>
+                    <rect width="800" height="400" fill="url(#grid)" opacity="0.3"/>
+                    
+                    {/* Major Roads */}
+                    <line x1="0" y1="120" x2="800" y2="120" stroke="#666" strokeWidth="2" opacity="0.6"/>
+                    <line x1="0" y1="160" x2="600" y2="160" stroke="#666" strokeWidth="2" opacity="0.6"/>
+                    <line x1="50" y1="200" x2="550" y2="200" stroke="#666" strokeWidth="1.5" opacity="0.5"/>
+                    
+                    {/* City Markers */}
+                    <circle cx="200" cy="140" r="3" fill="#FF6B6B"/>
+                    <text x="205" y="138" fontSize="12" fill="#333" fontWeight="bold">Huntington</text>
+                    
+                    <circle cx="600" cy="280" r="3" fill="#FF6B6B"/>
+                    <text x="605" y="278" fontSize="12" fill="#333" fontWeight="bold">Long Beach</text>
+                    
+                    <circle cx="360" cy="200" r="3" fill="#FF6B6B"/>
+                    <text x="365" y="198" fontSize="12" fill="#333" fontWeight="bold">Garden City</text>
+                    
+                    <circle cx="480" cy="120" r="3" fill="#FF6B6B"/>
+                    <text x="485" y="118" fontSize="12" fill="#333" fontWeight="bold">Oyster Bay</text>
+                    
+                    {/* Parks */}
+                    <rect x="220" y="160" width="25" height="15" fill="#228B22" opacity="0.4" rx="3"/>
+                    <rect x="450" y="240" width="20" height="25" fill="#228B22" opacity="0.4" rx="3"/>
+                    
+                    {/* Property Pins */}
+                    {allProperties.map((property, index) => {
+                      const positions = [
+                        { x: 200, y: 140 }, // Huntington
+                        { x: 600, y: 280 }, // Long Beach  
+                        { x: 360, y: 200 }, // Garden City
+                        { x: 480, y: 120 }, // Oyster Bay
+                      ];
+                      
+                      let position;
+                      if (property.propertyType === 'Custom Pin') {
+                        // Convert lat/lng to SVG coordinates for custom pins
+                        const x = ((property.longitude - mapCenter.lng + 0.2) / 0.4) * 800;
+                        const y = ((mapCenter.lat + 0.15 - property.latitude) / 0.3) * 400;
+                        position = { x: Math.max(10, Math.min(790, x)), y: Math.max(10, Math.min(390, y)) };
+                      } else {
+                        position = positions[index % positions.length] || { x: 400, y: 200 };
+                      }
+                      
+                      return (
+                        <g key={property.id}>
+                          <circle 
+                            cx={position.x} 
+                            cy={position.y} 
+                            r="8" 
+                            fill={selectedProperty?.id === property.id ? "#EF4444" : "#3B82F6"}
+                            stroke="white" 
+                            strokeWidth="2"
+                            style={{ cursor: 'pointer' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedProperty(property);
+                            }}
+                          />
+                          <text 
+                            x={position.x} 
+                            y={position.y + 3} 
+                            textAnchor="middle" 
+                            fontSize="10" 
+                            fill="white" 
+                            fontWeight="bold"
+                            style={{ pointerEvents: 'none' }}
+                          >
+                            $
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
                   
                   {/* Map attribution */}
                   <div className="absolute bottom-1 right-1 text-xs text-gray-700 bg-white/90 px-2 py-1 rounded shadow">
