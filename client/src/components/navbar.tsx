@@ -35,6 +35,7 @@ export default function Navbar() {
     { path: "/map", label: "Property Map" },
     { path: "/api-integrations", label: "API Integrations" },
     { path: "/reports", label: "Reports" },
+    { path: "/business-overview", label: "Overview" },
   ];
 
   return (
