@@ -8,6 +8,13 @@
       "when": 1749665664812,
       "tag": "0000_round_moonstone",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1749667320434,
+      "tag": "0001_chubby_metal_master",
+      "breakpoints": true
     }
   ]
 }

@@ -481,6 +481,109 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(contractSigners.id, id));
   }
+
+  // Admin operations
+  async getAdminStats(): Promise<{
+    totalUsers: number;
+    activeSubscriptions: number;
+    monthlyRevenue: number;
+    churnRate: number;
+    overduePayments: number;
+  }> {
+    try {
+      const totalUsersResult = await db.select().from(users);
+      const totalUsers = totalUsersResult.length;
+
+      const activeSubscriptions = totalUsersResult.filter(u => u.subscriptionStatus === 'active').length;
+      
+      // Calculate monthly revenue from recent payments
+      const monthlyRevenue = 29999; // Mock revenue for demo
+      const churnRate = 2.5; // Mock churn rate for demo
+      const overduePayments = totalUsersResult.filter(u => u.subscriptionStatus === 'expired').length;
+
+      return {
+        totalUsers,
+        activeSubscriptions,
+        monthlyRevenue,
+        churnRate,
+        overduePayments
+      };
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      return {
+        totalUsers: 0,
+        activeSubscriptions: 0,
+        monthlyRevenue: 0,
+        churnRate: 0,
+        overduePayments: 0
+      };
+    }
+  }
+
+  async getAllUsersWithSubscriptions(): Promise<any[]> {
+    try {
+      const result = await db.select().from(users);
+      return result.map(user => ({
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        subscriptionStatus: user.subscriptionStatus,
+        subscriptionPlan: user.subscriptionPlan,
+        subscriptionStartDate: user.subscriptionStartDate,
+        subscriptionEndDate: user.subscriptionEndDate,
+        lastPaymentDate: user.lastPaymentDate,
+        createdAt: user.createdAt
+      }));
+    } catch (error) {
+      console.error("Error fetching users with subscriptions:", error);
+      return [];
+    }
+  }
+
+  async getAllPayments(): Promise<any[]> {
+    try {
+      // Mock payment data for demo
+      return [
+        {
+          id: 1,
+          userEmail: "agent@example.com",
+          amount: "99.00",
+          status: "succeeded",
+          paymentMethod: "card",
+          createdAt: new Date()
+        },
+        {
+          id: 2,
+          userEmail: "broker@example.com",
+          amount: "199.00",
+          status: "succeeded",
+          paymentMethod: "card",
+          createdAt: new Date()
+        }
+      ];
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+      return [];
+    }
+  }
+
+  async updateUserSubscription(userId: string, updates: any): Promise<void> {
+    try {
+      await db
+        .update(users)
+        .set({
+          subscriptionStatus: updates.subscriptionStatus,
+          subscriptionPlan: updates.subscriptionPlan,
+          subscriptionEndDate: updates.subscriptionEndDate,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+    } catch (error) {
+      console.error("Error updating user subscription:", error);
+      throw error;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
