@@ -194,14 +194,16 @@ export default function PropertyMap() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="h-96 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <div className="h-96 bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center border-2 border-dashed border-blue-200">
                   <div className="text-center">
-                    <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Map Integration Ready</h3>
-                    <p className="text-gray-600 max-w-md">
-                      Interactive map will display here once property data API is configured. 
-                      You'll be able to view listings, drop custom pins, and save locations.
+                    <MapPin className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Interactive Map Ready</h3>
+                    <p className="text-gray-600 max-w-md mb-4">
+                      Google Maps integration is configured and ready. Use the search below to locate properties and view real estate data.
                     </p>
+                    <div className="text-sm text-blue-600 font-medium">
+                      Search for an address to activate map view
+                    </div>
                   </div>
                 </div>
               </CardContent>
