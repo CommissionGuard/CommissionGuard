@@ -39,6 +39,9 @@ export default function ApiIntegrations() {
   const [valuationAddress, setValuationAddress] = useState("");
   const [marketLocation, setMarketLocation] = useState("");
 
+  const [geocodeResult, setGeocodeResult] = useState<any>(null);
+  const [nearbyResults, setNearbyResults] = useState<any>(null);
+
   // Property Search
   const propertySearchMutation = useMutation({
     mutationFn: async (filters: any) => {
@@ -48,7 +51,7 @@ export default function ApiIntegrations() {
       });
       return apiRequest(`/api/properties/search?${params.toString()}`);
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "Search Complete",
         description: data.message || "Property search completed successfully",
@@ -66,17 +69,24 @@ export default function ApiIntegrations() {
   // Geocoding
   const geocodeMutation = useMutation({
     mutationFn: async (address: string) => {
-      return apiRequest("/api/properties/geocode", {
-        method: "POST",
-        body: JSON.stringify({ address }),
-        headers: { "Content-Type": "application/json" }
-      });
+      return apiRequest("/api/properties/geocode", "POST", { address });
     },
-    onSuccess: (data) => {
-      toast({
-        title: "Location Found",
-        description: `Located: ${data.address}`,
-      });
+    onSuccess: (data: any) => {
+      setGeocodeResult(data);
+      if (data.success) {
+        toast({
+          title: "Location Found",
+          description: `Located: ${data.address}`,
+        });
+        // Automatically get nearby properties
+        nearbyMutation.mutate({ lat: data.latitude, lng: data.longitude });
+      } else {
+        toast({
+          title: "Location Not Found",
+          description: data.error || "Could not locate this address",
+          variant: "destructive",
+        });
+      }
     },
     onError: (error: any) => {
       toast({
@@ -87,16 +97,35 @@ export default function ApiIntegrations() {
     }
   });
 
+  // Nearby Properties
+  const nearbyMutation = useMutation({
+    mutationFn: async ({ lat, lng, radius = 1000 }: { lat: number; lng: number; radius?: number }) => {
+      return apiRequest(`/api/properties/nearby?lat=${lat}&lng=${lng}&radius=${radius}`);
+    },
+    onSuccess: (data: any) => {
+      setNearbyResults(data);
+      if (data.success) {
+        toast({
+          title: "Nearby Properties Found",
+          description: `Found ${data.places?.length || 0} nearby real estate locations`,
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Nearby Search Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
   // Property Valuation
   const valuationMutation = useMutation({
     mutationFn: async (address: string) => {
-      return apiRequest("/api/properties/valuation", {
-        method: "POST",
-        body: JSON.stringify({ address }),
-        headers: { "Content-Type": "application/json" }
-      });
+      return apiRequest("/api/properties/valuation", "POST", { address });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "Valuation Retrieved",
         description: data.message || "Property valuation completed",
@@ -116,7 +145,7 @@ export default function ApiIntegrations() {
     mutationFn: async (location: string) => {
       return apiRequest(`/api/market-data/${encodeURIComponent(location)}`);
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "Market Data Retrieved",
         description: data.message || "Market analysis completed",
@@ -171,8 +200,9 @@ export default function ApiIntegrations() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Google Maps</p>
                   <div className="flex items-center space-x-2">
-                    <Badge variant="outline" className="text-yellow-600 border-yellow-600">
-                      Configure
+                    <Badge variant="outline" className="text-green-600 border-green-600">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Connected
                     </Badge>
                   </div>
                 </div>
@@ -318,6 +348,47 @@ export default function ApiIntegrations() {
                 >
                   {geocodeMutation.isPending ? "Locating..." : "Get Location"}
                 </Button>
+                
+                {/* Display Geocoding Results */}
+                {geocodeResult && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-semibold mb-2">Location Results:</h4>
+                    {geocodeResult.success ? (
+                      <div className="space-y-2 text-sm">
+                        <p><strong>Address:</strong> {geocodeResult.address}</p>
+                        <p><strong>Coordinates:</strong> {geocodeResult.latitude}, {geocodeResult.longitude}</p>
+                        <p><strong>Place ID:</strong> {geocodeResult.placeId}</p>
+                        <Badge variant="outline" className="text-green-600 border-green-600">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Successfully Located
+                        </Badge>
+                      </div>
+                    ) : (
+                      <div className="text-red-600 text-sm">
+                        <AlertCircle className="h-4 w-4 inline mr-2" />
+                        {geocodeResult.error}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Display Nearby Properties */}
+                {nearbyResults && nearbyResults.success && nearbyResults.places.length > 0 && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-semibold mb-2">Nearby Real Estate Locations:</h4>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {nearbyResults.places.slice(0, 5).map((place: any, index: number) => (
+                        <div key={index} className="p-2 bg-white rounded border text-sm">
+                          <p className="font-medium">{place.name}</p>
+                          <p className="text-gray-600">{place.address}</p>
+                          {place.rating && (
+                            <p className="text-yellow-600">Rating: {place.rating}/5</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

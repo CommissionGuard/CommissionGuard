@@ -31,6 +31,7 @@ export default function Navbar() {
     { path: "/prospecting", label: "Prospecting" },
     { path: "/alerts", label: "Alerts" },
     { path: "/map", label: "Property Map" },
+    { path: "/api-integrations", label: "API Integrations" },
     { path: "/reports", label: "Reports" },
   ];
 

@@ -37,22 +37,116 @@ export class ApiIntegrationService {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${googleMapsApiKey}`
       );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       
       if (data.status === 'OK' && data.results.length > 0) {
         const result = data.results[0];
         return {
+          success: true,
           address: result.formatted_address,
           latitude: result.geometry.location.lat,
           longitude: result.geometry.location.lng,
-          placeId: result.place_id
+          placeId: result.place_id,
+          components: result.address_components,
+          types: result.types
         };
       }
       
-      throw new Error(`Geocoding failed: ${data.status}`);
+      if (data.status === 'ZERO_RESULTS') {
+        return {
+          success: false,
+          error: 'No results found for this address',
+          status: data.status
+        };
+      }
+      
+      throw new Error(`Geocoding failed: ${data.status} - ${data.error_message || 'Unknown error'}`);
     } catch (error) {
       console.error('Google Maps API error:', error);
-      throw error;
+      throw new Error(`Failed to geocode address: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Get nearby properties using Places API
+  async getNearbyProperties(latitude: number, longitude: number, radius: number = 1000) {
+    const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
+    if (!googleMapsApiKey) {
+      throw new Error("Google Maps API key not configured");
+    }
+
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=real_estate_agency&key=${googleMapsApiKey}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.status === 'OK') {
+        return {
+          success: true,
+          places: data.results.map((place: any) => ({
+            placeId: place.place_id,
+            name: place.name,
+            address: place.vicinity,
+            location: place.geometry.location,
+            rating: place.rating,
+            types: place.types
+          }))
+        };
+      }
+      
+      return {
+        success: false,
+        error: data.status,
+        places: []
+      };
+    } catch (error) {
+      console.error('Places API error:', error);
+      throw new Error(`Failed to get nearby properties: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Calculate distance between two addresses
+  async getDistanceMatrix(origins: string[], destinations: string[]) {
+    const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
+    if (!googleMapsApiKey) {
+      throw new Error("Google Maps API key not configured");
+    }
+
+    try {
+      const originsStr = origins.map(encodeURIComponent).join('|');
+      const destinationsStr = destinations.map(encodeURIComponent).join('|');
+      
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${originsStr}&destinations=${destinationsStr}&units=imperial&key=${googleMapsApiKey}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.status === 'OK') {
+        return {
+          success: true,
+          results: data.rows
+        };
+      }
+      
+      throw new Error(`Distance matrix failed: ${data.status}`);
+    } catch (error) {
+      console.error('Distance Matrix API error:', error);
+      throw new Error(`Failed to calculate distances: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 

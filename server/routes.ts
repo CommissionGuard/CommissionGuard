@@ -306,6 +306,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Nearby Properties API
+  app.get("/api/properties/nearby", isAuthenticated, async (req, res) => {
+    try {
+      const { lat, lng, radius } = req.query;
+      
+      if (!lat || !lng) {
+        return res.status(400).json({ error: "Latitude and longitude are required" });
+      }
+
+      const nearby = await apiIntegrationService.getNearbyProperties(
+        parseFloat(lat as string),
+        parseFloat(lng as string),
+        radius ? parseInt(radius as string) : 1000
+      );
+      
+      res.json(nearby);
+    } catch (error) {
+      console.error("Nearby properties error:", error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // Distance Matrix API
+  app.post("/api/properties/distance", isAuthenticated, async (req, res) => {
+    try {
+      const { origins, destinations } = req.body;
+      
+      if (!origins || !destinations) {
+        return res.status(400).json({ error: "Origins and destinations are required" });
+      }
+
+      const distances = await apiIntegrationService.getDistanceMatrix(origins, destinations);
+      res.json(distances);
+    } catch (error) {
+      console.error("Distance calculation error:", error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
   // Public Records Monitoring API
   app.post("/api/monitoring/start", isAuthenticated, async (req, res) => {
     try {
@@ -315,7 +354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(monitoring);
     } catch (error) {
       console.error("Monitoring error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
