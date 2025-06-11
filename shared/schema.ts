@@ -36,6 +36,11 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   role: varchar("role").notNull().default("agent"), // agent, broker, admin
   brokerageId: varchar("brokerage_id"),
+  subscriptionStatus: varchar("subscription_status").notNull().default("trial"), // trial, active, expired, cancelled
+  subscriptionPlan: varchar("subscription_plan").default("basic"), // basic, premium, enterprise
+  subscriptionStartDate: timestamp("subscription_start_date"),
+  subscriptionEndDate: timestamp("subscription_end_date"),
+  lastPaymentDate: timestamp("last_payment_date"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -100,6 +105,36 @@ export const auditLogs = pgTable("audit_logs", {
   entityId: varchar("entity_id").notNull(),
   details: jsonb("details"),
   timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const subscriptions = pgTable("subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  plan: varchar("plan").notNull(), // basic, premium, enterprise
+  status: varchar("status").notNull(), // active, expired, cancelled, pending
+  amount: varchar("amount").notNull(),
+  currency: varchar("currency").notNull().default("USD"),
+  billingCycle: varchar("billing_cycle").notNull(), // monthly, yearly
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  paymentMethod: varchar("payment_method"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  subscriptionId: serial("subscription_id"),
+  amount: varchar("amount").notNull(),
+  currency: varchar("currency").notNull().default("USD"),
+  status: varchar("status").notNull(), // succeeded, failed, pending, refunded
+  paymentMethod: varchar("payment_method").notNull(),
+  stripePaymentId: varchar("stripe_payment_id"),
+  failureReason: text("failure_reason"),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Relations

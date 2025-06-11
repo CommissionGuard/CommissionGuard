@@ -72,6 +72,18 @@ export interface IStorage {
     potentialBreaches: number;
     protectedCommission: number;
   }>;
+  
+  // Admin operations
+  getAdminStats(): Promise<{
+    totalUsers: number;
+    activeSubscriptions: number;
+    monthlyRevenue: number;
+    churnRate: number;
+    overduePayments: number;
+  }>;
+  getAllUsersWithSubscriptions(): Promise<any[]>;
+  getAllPayments(): Promise<any[]>;
+  updateUserSubscription(userId: string, updates: any): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {

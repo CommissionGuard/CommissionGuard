@@ -541,6 +541,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin routes (restricted to admin users)
+  const isAdmin: RequestHandler = async (req: any, res, next) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      next();
+    } catch (error) {
+      res.status(500).json({ message: "Authentication error" });
+    }
+  };
+
+  app.get("/api/admin/stats", isAdmin, async (req: any, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ message: "Failed to fetch admin stats" });
+    }
+  });
+
+  app.get("/api/admin/users", isAdmin, async (req: any, res) => {
+    try {
+      const users = await storage.getAllUsersWithSubscriptions();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.get("/api/admin/payments", isAdmin, async (req: any, res) => {
+    try {
+      const payments = await storage.getAllPayments();
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+      res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
+  app.patch("/api/admin/users/:userId/subscription", isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const updates = req.body;
+      await storage.updateUserSubscription(userId, updates);
+      res.json({ message: "User subscription updated successfully" });
+    } catch (error) {
+      console.error("Error updating user subscription:", error);
+      res.status(500).json({ message: "Failed to update user subscription" });
+    }
+  });
+
+  // Functionality testing endpoint
+  app.get("/api/test/functionality", isAuthenticated, async (req: any, res) => {
+    try {
+      const testResults = {
+        auth: true,
+        database: true,
+        contracts: false,
+        clients: false,
+        alerts: false,
+        apiIntegrations: false
+      };
+
+      // Test contract functionality
+      try {
+        const userId = req.user.claims.sub;
+        await storage.getContractsByAgent(userId);
+        testResults.contracts = true;
+      } catch (error) {
+        console.error("Contract test failed:", error);
+      }
+
+      // Test client functionality
+      try {
+        const userId = req.user.claims.sub;
+        await storage.getClientsByAgent(userId);
+        testResults.clients = true;
+      } catch (error) {
+        console.error("Client test failed:", error);
+      }
+
+      // Test alerts functionality
+      try {
+        const userId = req.user.claims.sub;
+        await storage.getAlertsByAgent(userId);
+        testResults.alerts = true;
+      } catch (error) {
+        console.error("Alerts test failed:", error);
+      }
+
+      // Test API integrations
+      try {
+        const testAddress = "123 Main St, New York, NY";
+        await apiIntegrationService.getPropertyLocation(testAddress);
+        testResults.apiIntegrations = true;
+      } catch (error) {
+        console.error("API integration test failed:", error);
+      }
+
+      res.json(testResults);
+    } catch (error) {
+      console.error("Functionality test error:", error);
+      res.status(500).json({ message: "Failed to run functionality tests" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
