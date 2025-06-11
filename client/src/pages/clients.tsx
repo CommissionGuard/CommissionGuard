@@ -22,7 +22,7 @@ export default function Clients() {
   });
 
   const { data: clientContracts, isLoading: contractsLoading } = useQuery({
-    queryKey: ["/api/contracts/client", selectedClientId],
+    queryKey: [`/api/contracts/client/${selectedClientId}`],
     enabled: !!selectedClientId,
   });
 
