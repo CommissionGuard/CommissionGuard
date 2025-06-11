@@ -57,51 +57,55 @@ export default function LiveMap() {
   const sampleProperties: PropertyPin[] = [
     {
       id: "prop-1",
+      name: "Huntington Colonial",
       address: "123 Maple Ave, Huntington, NY 11743",
       latitude: 40.8686,
       longitude: -73.4257,
-      price: 850000,
+      estimatedValue: 850000,
       propertyType: "Single Family",
       bedrooms: 4,
       bathrooms: 3,
       squareFootage: 2400,
-      notes: "Beautiful colonial home"
+      saved: false
     },
     {
-      id: "prop-2", 
+      id: "prop-2",
+      name: "Long Beach Oceanfront", 
       address: "456 Ocean Blvd, Long Beach, NY 11561",
       latitude: 40.5882,
       longitude: -73.6579,
-      price: 1200000,
+      estimatedValue: 1200000,
       propertyType: "Beachfront Condo",
       bedrooms: 3,
       bathrooms: 2,
       squareFootage: 1800,
-      notes: "Ocean views, walk to beach"
+      saved: false
     },
     {
       id: "prop-3",
+      name: "Garden City Luxury",
       address: "789 Pine St, Garden City, NY 11530",
       latitude: 40.7267,
       longitude: -73.6343,
-      price: 1850000,
+      estimatedValue: 1850000,
       propertyType: "Luxury Home",
       bedrooms: 5,
       bathrooms: 4,
       squareFootage: 3200,
-      notes: "Premium neighborhood, top schools"
+      saved: false
     },
     {
       id: "prop-4",
+      name: "Oyster Bay Waterfront",
       address: "321 Bay Ave, Oyster Bay, NY 11771",
       latitude: 40.8659,
       longitude: -73.5321,
-      price: 2100000,
+      estimatedValue: 2100000,
       propertyType: "Waterfront Estate",
       bedrooms: 6,
       bathrooms: 5,
       squareFootage: 4500,
-      notes: "Private dock, spectacular views"
+      saved: false
     }
   ];
 
