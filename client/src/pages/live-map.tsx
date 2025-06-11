@@ -322,34 +322,32 @@ export default function LiveMap() {
                 </div>
               </CardHeader>
               
-              <CardContent className="p-0">
+              <CardContent className="p-4">
                 {/* Interactive Map with Street View */}
-                <div className="h-96 relative overflow-hidden border bg-gray-200">
-                  {/* Map Background with Street Pattern */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-green-50">
-                    {/* Street Grid Pattern */}
-                    <div 
-                      className="absolute inset-0 opacity-30"
-                      style={{
-                        backgroundImage: `
-                          linear-gradient(90deg, #e5e7eb 1px, transparent 1px),
-                          linear-gradient(#e5e7eb 1px, transparent 1px)
-                        `,
-                        backgroundSize: '20px 20px'
-                      }}
-                    ></div>
+                <div className="w-full h-96 relative bg-gradient-to-br from-blue-100 to-green-100 border-2 border-gray-300 rounded-lg overflow-hidden">
+                  {/* Street Grid Background */}
+                  <div 
+                    className="absolute inset-0"
+                    style={{
+                      backgroundImage: `
+                        linear-gradient(90deg, rgba(156, 163, 175, 0.3) 1px, transparent 1px),
+                        linear-gradient(rgba(156, 163, 175, 0.3) 1px, transparent 1px),
+                        linear-gradient(45deg, rgba(107, 114, 128, 0.2) 2px, transparent 2px),
+                        linear-gradient(-45deg, rgba(107, 114, 128, 0.2) 2px, transparent 2px)
+                      `,
+                      backgroundSize: '20px 20px, 20px 20px, 60px 60px, 60px 60px'
+                    }}
+                  ></div>
+                  
+                  {/* Long Island Geographic Features */}
+                  <div className="absolute inset-0">
+                    {/* Water bodies representation */}
+                    <div className="absolute top-0 left-0 w-full h-8 bg-blue-200 opacity-50"></div>
+                    <div className="absolute bottom-0 right-0 w-32 h-16 bg-blue-200 opacity-50 rounded-tl-full"></div>
                     
-                    {/* Major Roads Pattern */}
-                    <div 
-                      className="absolute inset-0 opacity-20"
-                      style={{
-                        backgroundImage: `
-                          linear-gradient(45deg, #9ca3af 2px, transparent 2px),
-                          linear-gradient(-45deg, #9ca3af 2px, transparent 2px)
-                        `,
-                        backgroundSize: '60px 60px'
-                      }}
-                    ></div>
+                    {/* Major highways overlay */}
+                    <div className="absolute top-1/3 left-0 w-full h-1 bg-gray-600 opacity-60"></div>
+                    <div className="absolute top-2/3 left-0 w-3/4 h-1 bg-gray-600 opacity-60"></div>
                   </div>
                   
                   {/* Map attribution */}

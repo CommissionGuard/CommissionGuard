@@ -30,10 +30,21 @@ import SystemTest from "@/pages/system-test";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
+      {!isAuthenticated ? (
+        <>
+          <Route path="/" component={Landing} />
+          <Route component={Landing} />
+        </>
       ) : (
         <>
           <Route path="/" component={Dashboard} />
@@ -56,9 +67,9 @@ function Router() {
           <Route path="/functionality-test" component={FunctionalityTest} />
           <Route path="/rental-market" component={RentalMarket} />
           <Route path="/system-test" component={SystemTest} />
+          <Route component={NotFound} />
         </>
       )}
-      <Route component={NotFound} />
     </Switch>
   );
 }
