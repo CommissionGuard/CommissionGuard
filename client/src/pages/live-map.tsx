@@ -322,33 +322,24 @@ export default function LiveMap() {
                 </div>
               </CardHeader>
               
-              <CardContent className="p-4">
-                {/* Interactive Map with Street View */}
-                <div className="w-full h-96 relative bg-gradient-to-br from-blue-100 to-green-100 border-2 border-gray-300 rounded-lg overflow-hidden">
-                  {/* Street Grid Background */}
+              <CardContent className="p-0">
+                {/* Interactive Map */}
+                <div className="h-96 relative bg-gradient-to-br from-blue-100 to-green-100 border border-gray-200">
+                  {/* Grid Pattern Background */}
                   <div 
                     className="absolute inset-0"
                     style={{
-                      backgroundImage: `
-                        linear-gradient(90deg, rgba(156, 163, 175, 0.3) 1px, transparent 1px),
-                        linear-gradient(rgba(156, 163, 175, 0.3) 1px, transparent 1px),
-                        linear-gradient(45deg, rgba(107, 114, 128, 0.2) 2px, transparent 2px),
-                        linear-gradient(-45deg, rgba(107, 114, 128, 0.2) 2px, transparent 2px)
-                      `,
-                      backgroundSize: '20px 20px, 20px 20px, 60px 60px, 60px 60px'
+                      backgroundImage: 'linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px)',
+                      backgroundSize: '20px 20px'
                     }}
                   ></div>
                   
-                  {/* Long Island Geographic Features */}
-                  <div className="absolute inset-0">
-                    {/* Water bodies representation */}
-                    <div className="absolute top-0 left-0 w-full h-8 bg-blue-200 opacity-50"></div>
-                    <div className="absolute bottom-0 right-0 w-32 h-16 bg-blue-200 opacity-50 rounded-tl-full"></div>
-                    
-                    {/* Major highways overlay */}
-                    <div className="absolute top-1/3 left-0 w-full h-1 bg-gray-600 opacity-60"></div>
-                    <div className="absolute top-2/3 left-0 w-3/4 h-1 bg-gray-600 opacity-60"></div>
-                  </div>
+                  {/* Long Island Shape */}
+                  <div className="absolute top-1/4 left-1/4 w-1/2 h-1/3 bg-green-200 opacity-60 rounded-full transform rotate-12"></div>
+                  
+                  {/* Water Areas */}
+                  <div className="absolute top-0 left-0 w-full h-6 bg-blue-300 opacity-40"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-6 bg-blue-300 opacity-40"></div>
                   
                   {/* Map attribution */}
                   <div className="absolute bottom-1 right-1 text-xs text-gray-700 bg-white/90 px-2 py-1 rounded shadow">
@@ -367,24 +358,35 @@ export default function LiveMap() {
 
                   {/* Property Markers */}
                   {allProperties.map((property, index) => {
-                    // Simple coordinate-based positioning for better reliability
-                    const latRange = 0.3; // Degrees of latitude to show
-                    const lngRange = 0.4; // Degrees of longitude to show
+                    // Position properties across the visible map area
+                    const positions = [
+                      { left: 25, top: 30 }, // Huntington area
+                      { left: 75, top: 70 }, // Long Beach area  
+                      { left: 45, top: 50 }, // Garden City area
+                      { left: 60, top: 25 }, // Oyster Bay area
+                    ];
                     
-                    const latMin = mapCenter.lat - latRange / 2;
-                    const latMax = mapCenter.lat + latRange / 2;
-                    const lngMin = mapCenter.lng - lngRange / 2;
-                    const lngMax = mapCenter.lng + lngRange / 2;
-                    
-                    // Check if property is within view
-                    if (property.latitude < latMin || property.latitude > latMax ||
-                        property.longitude < lngMin || property.longitude > lngMax) {
-                      return null;
+                    // Use predefined positions for sample properties, calculate for custom pins
+                    let position;
+                    if (property.propertyType === 'Custom Pin') {
+                      // For custom pins, use coordinate-based positioning
+                      const latRange = 0.3;
+                      const lngRange = 0.4;
+                      const latMin = mapCenter.lat - latRange / 2;
+                      const latMax = mapCenter.lat + latRange / 2;
+                      const lngMin = mapCenter.lng - lngRange / 2;
+                      const lngMax = mapCenter.lng + lngRange / 2;
+                      
+                      const xPercent = ((property.longitude - lngMin) / lngRange) * 100;
+                      const yPercent = ((latMax - property.latitude) / latRange) * 100;
+                      position = { 
+                        left: Math.max(5, Math.min(95, xPercent)), 
+                        top: Math.max(10, Math.min(90, yPercent)) 
+                      };
+                    } else {
+                      // Use predefined positions for sample properties
+                      position = positions[index % positions.length] || { left: 50, top: 50 };
                     }
-                    
-                    // Convert to percentage position
-                    const xPercent = ((property.longitude - lngMin) / lngRange) * 100;
-                    const yPercent = ((latMax - property.latitude) / latRange) * 100;
                     
                     const canDelete = property.propertyType === 'Custom Pin' || savedPins.some((p: any) => p.id === property.id);
                     
@@ -393,8 +395,8 @@ export default function LiveMap() {
                         key={property.id}
                         className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
                         style={{
-                          left: `${Math.max(5, Math.min(95, xPercent))}%`,
-                          top: `${Math.max(10, Math.min(90, yPercent))}%`
+                          left: `${position.left}%`,
+                          top: `${position.top}%`
                         }}
                       >
                         <button
