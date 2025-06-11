@@ -146,6 +146,14 @@ export default function ContractModal({ contract, isOpen, onClose }: ContractMod
             </div>
           )}
 
+          {/* Contract Signers Section */}
+          <ContractSignersForm 
+            contractId={contract.id}
+            onSignersUpdate={() => {
+              // Refresh contract data when signers are updated
+            }}
+          />
+
           <div>
             <Label className="block text-sm font-medium text-gray-700 mb-2">
               Recent Activity

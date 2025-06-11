@@ -108,9 +108,7 @@ export default function ContractSignersForm({ contractId, onSignersUpdate }: Con
 
   const deleteSignerMutation = useMutation({
     mutationFn: async (signerId: number) => {
-      return apiRequest(`/api/contract-signers/${signerId}`, {
-        method: "DELETE",
-      });
+      return apiRequest(`/api/contract-signers/${signerId}`, "DELETE");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/contracts/${contractId}/signers`] });
