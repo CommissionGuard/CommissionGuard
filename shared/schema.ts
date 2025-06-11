@@ -55,11 +55,26 @@ export const contracts = pgTable("contracts", {
   clientId: serial("client_id").notNull(),
   agentId: varchar("agent_id").notNull(),
   representationType: varchar("representation_type").notNull(), // buyer, seller
+  propertyAddress: text("property_address"),
   startDate: date("start_date").notNull(),
   endDate: date("end_date").notNull(),
   contractFileUrl: text("contract_file_url"),
   contractFileName: varchar("contract_file_name"),
   status: varchar("status").notNull().default("active"), // active, expired, breached, renewed
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const contractSigners = pgTable("contract_signers", {
+  id: serial("id").primaryKey(),
+  contractId: serial("contract_id").notNull(),
+  signerName: varchar("signer_name").notNull(),
+  signerEmail: varchar("signer_email"),
+  signerPhone: varchar("signer_phone"),
+  signerRole: varchar("signer_role").notNull(), // primary_buyer, co_buyer, spouse, business_partner, trustee, etc.
+  signedDate: timestamp("signed_date"),
+  signatureStatus: varchar("signature_status").notNull().default("pending"), // pending, signed, declined
+  isRequired: boolean("is_required").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -113,6 +128,14 @@ export const contractsRelations = relations(contracts, ({ one, many }) => ({
     references: [users.id],
   }),
   alerts: many(alerts),
+  signers: many(contractSigners),
+}));
+
+export const contractSignersRelations = relations(contractSigners, ({ one }) => ({
+  contract: one(contracts, {
+    fields: [contractSigners.contractId],
+    references: [contracts.id],
+  }),
 }));
 
 export const alertsRelations = relations(alerts, ({ one }) => ({
@@ -150,6 +173,12 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
   updatedAt: true,
 });
 
+export const insertContractSignerSchema = createInsertSchema(contractSigners).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertAlertSchema = createInsertSchema(alerts).omit({
   id: true,
   createdAt: true,
@@ -167,6 +196,8 @@ export type InsertClient = z.infer<typeof insertClientSchema>;
 export type Client = typeof clients.$inferSelect;
 export type InsertContract = z.infer<typeof insertContractSchema>;
 export type Contract = typeof contracts.$inferSelect;
+export type InsertContractSigner = z.infer<typeof insertContractSignerSchema>;
+export type ContractSigner = typeof contractSigners.$inferSelect;
 export type InsertAlert = z.infer<typeof insertAlertSchema>;
 export type Alert = typeof alerts.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
@@ -182,6 +213,7 @@ export type ContractWithDetails = Contract & {
   client: Client;
   agent: User;
   alerts: Alert[];
+  signers: ContractSigner[];
 };
 
 export type AlertWithDetails = Alert & {

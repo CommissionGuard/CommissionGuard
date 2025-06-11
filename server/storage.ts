@@ -44,6 +44,13 @@ export interface IStorage {
   deleteContract(id: number): Promise<void>;
   getExpiringContracts(agentId: string, daysAhead: number): Promise<ContractWithDetails[]>;
   
+  // Contract Signer operations
+  createContractSigner(signer: InsertContractSigner): Promise<ContractSigner>;
+  getContractSigners(contractId: number): Promise<ContractSigner[]>;
+  updateContractSigner(id: number, updates: Partial<InsertContractSigner>): Promise<ContractSigner>;
+  deleteContractSigner(id: number): Promise<void>;
+  markSignerAsSigned(id: number): Promise<void>;
+  
   // Alert operations
   createAlert(alert: InsertAlert): Promise<Alert>;
   getAlert(id: number): Promise<Alert | undefined>;
