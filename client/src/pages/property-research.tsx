@@ -150,7 +150,7 @@ export default function PropertyResearch() {
               <Label htmlFor="address">Property Address</Label>
               <Input
                 id="address"
-                placeholder="123 Main Street, Beverly Hills, CA 90210"
+                placeholder="Try: 1234 Elm Street, Austin, TX 78701"
                 value={searchAddress}
                 onChange={(e) => setSearchAddress(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleResearch()}
