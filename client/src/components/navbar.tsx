@@ -29,6 +29,7 @@ export default function Navbar() {
     { path: "/clients", label: "Clients" },
     { path: "/contracts", label: "Contracts" },
     { path: "/prospecting", label: "Prospecting" },
+    { path: "/deal-pipeline", label: "Deal Pipeline" },
     { path: "/property-analyzer", label: "Market Analyzer" },
     { path: "/alerts", label: "Alerts" },
     { path: "/map", label: "Property Map" },
