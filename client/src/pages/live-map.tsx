@@ -47,7 +47,7 @@ export default function LiveMap() {
   
   const [searchLocation, setSearchLocation] = useState("");
   const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.0060 }); // NYC default
-  const [zoom, setZoom] = useState(12);
+  const [zoom, setZoom] = useState(13);
   const [selectedProperty, setSelectedProperty] = useState<PropertyPin | null>(null);
   const [nearbyProperties, setNearbyProperties] = useState<PropertyPin[]>([]);
   const [customPins, setCustomPins] = useState<PropertyPin[]>([]);
@@ -311,17 +311,50 @@ export default function LiveMap() {
               </CardHeader>
               
               <CardContent className="p-0">
-                {/* Interactive Map Simulation */}
-                <div className="h-96 bg-gradient-to-br from-blue-100 to-green-100 relative overflow-hidden border">
-                  <div className="absolute inset-0 bg-grid-pattern opacity-20"></div>
+                {/* Interactive Map with Street View */}
+                <div className="h-96 relative overflow-hidden border bg-gray-100">
+                  {/* Map Tiles Grid */}
+                  <div className="absolute inset-0">
+                    {Array.from({ length: 4 }).map((_, i) => 
+                      Array.from({ length: 4 }).map((_, j) => {
+                        const tileX = Math.floor((mapCenter.lng + 180) / 360 * Math.pow(2, zoom)) + (i - 2);
+                        const tileY = Math.floor((1 - Math.log(Math.tan(mapCenter.lat * Math.PI / 180) + 1 / Math.cos(mapCenter.lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom)) + (j - 2);
+                        
+                        return (
+                          <img
+                            key={`${i}-${j}`}
+                            src={`https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`}
+                            alt=""
+                            className="absolute w-64 h-64 object-cover"
+                            style={{
+                              left: `${(i - 2) * 256 + 128}px`,
+                              top: `${(j - 2) * 256 + 128}px`,
+                              transform: 'translate(-50%, -50%)'
+                            }}
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        );
+                      })
+                    )}
+                  </div>
+
+                  {/* Street overlay pattern for better visibility */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/5"></div>
+                  
+                  {/* Map attribution */}
+                  <div className="absolute bottom-1 right-1 text-xs text-gray-700 bg-white/90 px-2 py-1 rounded shadow">
+                    © OpenStreetMap contributors
+                  </div>
                   
                   {/* Map Header */}
                   <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
-                    <Badge variant="secondary" className="bg-white/90">
-                      Center: {mapCenter.lat.toFixed(4)}, {mapCenter.lng.toFixed(4)}
+                    <Badge variant="secondary" className="bg-white/95 shadow">
+                      {mapCenter.lat.toFixed(4)}, {mapCenter.lng.toFixed(4)}
                     </Badge>
-                    <Badge variant="secondary" className="bg-white/90">
-                      Zoom: {zoom}x
+                    <Badge variant="secondary" className="bg-white/95 shadow">
+                      Zoom: {zoom}
                     </Badge>
                   </div>
 
