@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { apiIntegrationService } from "./apiIntegrations";
 import { insertClientSchema, insertContractSchema, insertAlertSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -219,6 +220,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching unread alerts count:", error);
       res.status(500).json({ message: "Failed to fetch unread alerts count" });
+    }
+  });
+
+  // Property Search API Integration
+  app.get("/api/properties/search", isAuthenticated, async (req, res) => {
+    try {
+      const { location, minPrice, maxPrice, propertyType, bedrooms, bathrooms } = req.query;
+      
+      const results = await apiIntegrationService.searchProperties({
+        location: location as string,
+        minPrice: minPrice ? parseInt(minPrice as string) : undefined,
+        maxPrice: maxPrice ? parseInt(maxPrice as string) : undefined,
+        propertyType: propertyType as string,
+        bedrooms: bedrooms ? parseInt(bedrooms as string) : undefined,
+        bathrooms: bathrooms ? parseInt(bathrooms as string) : undefined,
+      });
+
+      res.json(results);
+    } catch (error) {
+      console.error("Property search error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Property Location/Geocoding API
+  app.post("/api/properties/geocode", isAuthenticated, async (req, res) => {
+    try {
+      const { address } = req.body;
+      if (!address) {
+        return res.status(400).json({ error: "Address is required" });
+      }
+
+      const location = await apiIntegrationService.getPropertyLocation(address);
+      res.json(location);
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Property Valuation API
+  app.post("/api/properties/valuation", isAuthenticated, async (req, res) => {
+    try {
+      const { address } = req.body;
+      if (!address) {
+        return res.status(400).json({ error: "Address is required" });
+      }
+
+      const valuation = await apiIntegrationService.getPropertyValuation(address);
+      res.json(valuation);
+    } catch (error) {
+      console.error("Valuation error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Market Data API
+  app.get("/api/market-data/:location", isAuthenticated, async (req, res) => {
+    try {
+      const { location } = req.params;
+      const marketData = await apiIntegrationService.getMarketData(location);
+      res.json(marketData);
+    } catch (error) {
+      console.error("Market data error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Lead Generation API
+  app.post("/api/leads/generate", isAuthenticated, async (req, res) => {
+    try {
+      const { location, priceRange, propertyType } = req.body;
+      
+      const leads = await apiIntegrationService.generateLeads({
+        location,
+        priceRange,
+        propertyType
+      });
+
+      res.json(leads);
+    } catch (error) {
+      console.error("Lead generation error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Public Records Monitoring API
+  app.post("/api/monitoring/start", isAuthenticated, async (req, res) => {
+    try {
+      const { propertyAddress, clientId } = req.body;
+      
+      const monitoring = await apiIntegrationService.monitorPublicRecords(propertyAddress, clientId);
+      res.json(monitoring);
+    } catch (error) {
+      console.error("Monitoring error:", error);
+      res.status(500).json({ error: error.message });
     }
   });
 

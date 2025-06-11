@@ -14,6 +14,7 @@ import Reports from "@/pages/reports";
 import LegalSupport from "@/pages/legal-support";
 import PropertyMap from "@/pages/map";
 import Prospecting from "@/pages/prospecting";
+import ApiIntegrations from "@/pages/api-integrations";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -32,6 +33,7 @@ function Router() {
           <Route path="/legal-support" component={LegalSupport} />
           <Route path="/map" component={PropertyMap} />
           <Route path="/prospecting" component={Prospecting} />
+          <Route path="/api-integrations" component={ApiIntegrations} />
         </>
       )}
       <Route component={NotFound} />
