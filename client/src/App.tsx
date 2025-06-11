@@ -13,6 +13,7 @@ import Alerts from "@/pages/alerts";
 import Reports from "@/pages/reports";
 import LegalSupport from "@/pages/legal-support";
 import PropertyMap from "@/pages/map";
+import LiveMap from "@/pages/live-map";
 import Prospecting from "@/pages/prospecting";
 import ApiIntegrations from "@/pages/api-integrations";
 import PropertyResearch from "@/pages/property-research";
@@ -42,6 +43,7 @@ function Router() {
           <Route path="/reports" component={Reports} />
           <Route path="/legal-support" component={LegalSupport} />
           <Route path="/map" component={PropertyMap} />
+          <Route path="/live-map" component={LiveMap} />
           <Route path="/prospecting" component={Prospecting} />
           <Route path="/api-integrations" component={ApiIntegrations} />
           <Route path="/property-research" component={PropertyResearch} />

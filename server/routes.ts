@@ -414,6 +414,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Property pins endpoints
+  app.get("/api/property-pins", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      // For now, return empty array - this would connect to database
+      res.json([]);
+    } catch (error) {
+      console.error("Get property pins error:", error);
+      res.status(500).json({ error: "Failed to fetch property pins" });
+    }
+  });
+
+  app.post("/api/property-pins", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const pinData = req.body;
+      
+      // Here you would save to database
+      // For demo, we'll just return success
+      res.json({ 
+        success: true, 
+        message: "Property pin saved successfully",
+        pin: { ...pinData, id: Date.now(), userId }
+      });
+    } catch (error) {
+      console.error("Save property pin error:", error);
+      res.status(500).json({ error: "Failed to save property pin" });
+    }
+  });
+
   // Nearby Properties API
   app.get("/api/properties/nearby", isAuthenticated, async (req, res) => {
     try {

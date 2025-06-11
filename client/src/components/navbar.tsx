@@ -32,7 +32,7 @@ export default function Navbar() {
     { path: "/deal-pipeline", label: "Deal Pipeline" },
     { path: "/property-analyzer", label: "Market Analyzer" },
     { path: "/alerts", label: "Alerts" },
-    { path: "/map", label: "Property Map" },
+    { path: "/live-map", label: "Interactive Map" },
     { path: "/api-integrations", label: "API Integrations" },
     { path: "/reports", label: "Reports" },
     { path: "/business-overview", label: "Overview" },
