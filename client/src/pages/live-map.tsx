@@ -214,7 +214,7 @@ export default function LiveMap() {
     }
   };
 
-  const handleMapClick = (e: React.MouseEvent<SVGSVGElement>) => {
+  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -355,105 +355,136 @@ export default function LiveMap() {
               </CardHeader>
               
               <CardContent className="p-4">
-                {/* Interactive Map with SVG */}
-                <div className="w-full h-96 relative bg-gray-100 border-2 border-gray-400 rounded-lg overflow-hidden">
-                  <svg 
-                    width="100%" 
-                    height="100%" 
-                    viewBox="0 0 800 400" 
-                    className="absolute inset-0 cursor-crosshair"
-                    onClick={handleMapClick}
-                  >
-                    {/* Background */}
-                    <rect width="800" height="400" fill="#E6F3FF"/>
+                {/* Interactive Map - HTML/CSS Based */}
+                <div 
+                  className="w-full h-96 relative border-2 border-gray-400 rounded-lg overflow-hidden cursor-crosshair"
+                  style={{
+                    backgroundColor: '#E6F3FF',
+                    backgroundImage: `
+                      repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 20px),
+                      repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 20px)
+                    `
+                  }}
+                  onClick={handleMapClick}
+                >
+                  {/* Water Areas */}
+                  <div className="absolute top-0 left-0 w-full h-16 bg-blue-300 opacity-60"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-16 bg-blue-300 opacity-60"></div>
+                  
+                  {/* Long Island Landmass */}
+                  <div 
+                    className="absolute bg-green-200 opacity-70 border border-green-400 rounded-full"
+                    style={{
+                      top: '20%',
+                      left: '10%',
+                      width: '70%',
+                      height: '40%',
+                      transform: 'rotate(8deg)'
+                    }}
+                  ></div>
+                  <div 
+                    className="absolute bg-green-100 opacity-60 rounded-full"
+                    style={{
+                      top: '25%',
+                      left: '20%',
+                      width: '50%',
+                      height: '25%',
+                      transform: 'rotate(12deg)'
+                    }}
+                  ></div>
+                  
+                  {/* Major Roads */}
+                  <div className="absolute top-24 left-0 w-full h-0.5 bg-gray-600 opacity-70"></div>
+                  <div className="absolute top-32 left-0 w-3/4 h-0.5 bg-gray-600 opacity-70"></div>
+                  <div className="absolute top-40 left-8 w-2/3 h-0.5 bg-gray-500 opacity-60"></div>
+                  
+                  {/* City Labels */}
+                  <div className="absolute top-20 left-20 text-sm font-bold text-gray-800 bg-white/90 px-2 py-1 rounded shadow">
+                    📍 Huntington
+                  </div>
+                  <div className="absolute top-60 right-16 text-sm font-bold text-gray-800 bg-white/90 px-2 py-1 rounded shadow">
+                    📍 Long Beach
+                  </div>
+                  <div className="absolute top-40 left-1/2 text-sm font-bold text-gray-800 bg-white/90 px-2 py-1 rounded shadow">
+                    📍 Garden City
+                  </div>
+                  <div className="absolute top-16 right-32 text-sm font-bold text-gray-800 bg-white/90 px-2 py-1 rounded shadow">
+                    📍 Oyster Bay
+                  </div>
+                  
+                  {/* Parks and Green Spaces */}
+                  <div className="absolute top-28 left-24 w-8 h-6 bg-green-400 opacity-50 rounded"></div>
+                  <div className="absolute top-48 right-32 w-6 h-8 bg-green-400 opacity-50 rounded"></div>
+                  
+                  {/* Property Pins */}
+                  {allProperties.map((property, index) => {
+                    const positions = [
+                      { left: '20%', top: '25%' }, // Huntington area
+                      { left: '75%', top: '70%' }, // Long Beach area  
+                      { left: '45%', top: '50%' }, // Garden City area
+                      { left: '65%', top: '20%' }, // Oyster Bay area
+                    ];
                     
-                    {/* Water (Long Island Sound) */}
-                    <rect x="0" y="0" width="800" height="60" fill="#87CEEB" opacity="0.7"/>
-                    <rect x="0" y="340" width="800" height="60" fill="#87CEEB" opacity="0.7"/>
-                    
-                    {/* Long Island Shape */}
-                    <ellipse cx="400" cy="200" rx="300" ry="80" fill="#90EE90" opacity="0.5" transform="rotate(5 400 200)"/>
-                    <ellipse cx="350" cy="180" rx="200" ry="50" fill="#98FB98" opacity="0.6" transform="rotate(8 350 180)"/>
-                    
-                    {/* Grid Pattern */}
-                    <defs>
-                      <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#ccc" strokeWidth="0.5"/>
-                      </pattern>
-                    </defs>
-                    <rect width="800" height="400" fill="url(#grid)" opacity="0.3"/>
-                    
-                    {/* Major Roads */}
-                    <line x1="0" y1="120" x2="800" y2="120" stroke="#666" strokeWidth="2" opacity="0.6"/>
-                    <line x1="0" y1="160" x2="600" y2="160" stroke="#666" strokeWidth="2" opacity="0.6"/>
-                    <line x1="50" y1="200" x2="550" y2="200" stroke="#666" strokeWidth="1.5" opacity="0.5"/>
-                    
-                    {/* City Markers */}
-                    <circle cx="200" cy="140" r="3" fill="#FF6B6B"/>
-                    <text x="205" y="138" fontSize="12" fill="#333" fontWeight="bold">Huntington</text>
-                    
-                    <circle cx="600" cy="280" r="3" fill="#FF6B6B"/>
-                    <text x="605" y="278" fontSize="12" fill="#333" fontWeight="bold">Long Beach</text>
-                    
-                    <circle cx="360" cy="200" r="3" fill="#FF6B6B"/>
-                    <text x="365" y="198" fontSize="12" fill="#333" fontWeight="bold">Garden City</text>
-                    
-                    <circle cx="480" cy="120" r="3" fill="#FF6B6B"/>
-                    <text x="485" y="118" fontSize="12" fill="#333" fontWeight="bold">Oyster Bay</text>
-                    
-                    {/* Parks */}
-                    <rect x="220" y="160" width="25" height="15" fill="#228B22" opacity="0.4" rx="3"/>
-                    <rect x="450" y="240" width="20" height="25" fill="#228B22" opacity="0.4" rx="3"/>
-                    
-                    {/* Property Pins */}
-                    {allProperties.map((property, index) => {
-                      const positions = [
-                        { x: 200, y: 140 }, // Huntington
-                        { x: 600, y: 280 }, // Long Beach  
-                        { x: 360, y: 200 }, // Garden City
-                        { x: 480, y: 120 }, // Oyster Bay
-                      ];
+                    let position;
+                    if (property.propertyType === 'Custom Pin') {
+                      // For custom pins, use coordinate-based positioning
+                      const latRange = 0.3;
+                      const lngRange = 0.4;
+                      const latMin = mapCenter.lat - latRange / 2;
+                      const latMax = mapCenter.lat + latRange / 2;
+                      const lngMin = mapCenter.lng - lngRange / 2;
+                      const lngMax = mapCenter.lng + lngRange / 2;
                       
-                      let position;
-                      if (property.propertyType === 'Custom Pin') {
-                        // Convert lat/lng to SVG coordinates for custom pins
-                        const x = ((property.longitude - mapCenter.lng + 0.2) / 0.4) * 800;
-                        const y = ((mapCenter.lat + 0.15 - property.latitude) / 0.3) * 400;
-                        position = { x: Math.max(10, Math.min(790, x)), y: Math.max(10, Math.min(390, y)) };
-                      } else {
-                        position = positions[index % positions.length] || { x: 400, y: 200 };
-                      }
-                      
-                      return (
-                        <g key={property.id}>
-                          <circle 
-                            cx={position.x} 
-                            cy={position.y} 
-                            r="8" 
-                            fill={selectedProperty?.id === property.id ? "#EF4444" : "#3B82F6"}
-                            stroke="white" 
-                            strokeWidth="2"
-                            style={{ cursor: 'pointer' }}
+                      const xPercent = ((property.longitude - lngMin) / lngRange) * 100;
+                      const yPercent = ((latMax - property.latitude) / latRange) * 100;
+                      position = { 
+                        left: `${Math.max(5, Math.min(95, xPercent))}%`, 
+                        top: `${Math.max(10, Math.min(90, yPercent))}%` 
+                      };
+                    } else {
+                      position = positions[index % positions.length] || { left: '50%', top: '50%' };
+                    }
+                    
+                    const canDelete = property.propertyType === 'Custom Pin' || savedPins.some((p: any) => p.id === property.id);
+                    
+                    return (
+                      <div
+                        key={property.id}
+                        className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
+                        style={{
+                          left: position.left,
+                          top: position.top
+                        }}
+                      >
+                        <button
+                          className={`w-8 h-8 rounded-full border-2 border-white shadow-lg transition-all hover:scale-110 ${
+                            selectedProperty?.id === property.id 
+                              ? 'bg-red-500' 
+                              : 'bg-blue-500'
+                          } flex items-center justify-center text-white text-xs font-bold`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedProperty(property);
+                          }}
+                          title={`${property.name} - $${property.estimatedValue.toLocaleString()}`}
+                        >
+                          $
+                        </button>
+                        {canDelete && (
+                          <button
+                            className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 text-white rounded-full text-xs hover:bg-red-700 flex items-center justify-center"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setSelectedProperty(property);
+                              handleDeleteProperty(property.id);
                             }}
-                          />
-                          <text 
-                            x={position.x} 
-                            y={position.y + 3} 
-                            textAnchor="middle" 
-                            fontSize="10" 
-                            fill="white" 
-                            fontWeight="bold"
-                            style={{ pointerEvents: 'none' }}
+                            title="Remove pin"
                           >
-                            $
-                          </text>
-                        </g>
-                      );
-                    })}
-                  </svg>
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
                   
                   {/* Map attribution */}
                   <div className="absolute bottom-1 right-1 text-xs text-gray-700 bg-white/90 px-2 py-1 rounded shadow">
