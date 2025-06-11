@@ -214,6 +214,38 @@ export default function LiveMap() {
     }
   };
 
+  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Convert pixel coordinates to approximate lat/lng
+    const lat = mapCenter.lat + (0.15 - (y / rect.height) * 0.3);
+    const lng = mapCenter.lng + ((x / rect.width) * 0.4 - 0.2);
+    
+    const newPin: PropertyPin = {
+      id: Date.now(),
+      name: `Custom Pin ${customPins.length + 1}`,
+      address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+      latitude: lat,
+      longitude: lng,
+      estimatedValue: 500000,
+      propertyType: 'Custom Pin',
+      bedrooms: 3,
+      bathrooms: 2,
+      squareFootage: 1800,
+      saved: false
+    };
+    
+    setCustomPins(prev => [...prev, newPin]);
+    setSelectedProperty(newPin);
+    
+    toast({
+      title: "Pin Added",
+      description: `Custom pin added at ${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+    });
+  };
+
   const handleSaveProperty = (property: PropertyPin) => {
     savePropertyMutation.mutate({
       ...property,
@@ -324,22 +356,46 @@ export default function LiveMap() {
               
               <CardContent className="p-0">
                 {/* Interactive Map */}
-                <div className="h-96 relative bg-gradient-to-br from-blue-100 to-green-100 border border-gray-200">
-                  {/* Grid Pattern Background */}
-                  <div 
-                    className="absolute inset-0"
-                    style={{
-                      backgroundImage: 'linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px)',
-                      backgroundSize: '20px 20px'
-                    }}
-                  ></div>
+                <div 
+                  className="h-96 relative border border-gray-300 overflow-hidden cursor-crosshair"
+                  style={{
+                    background: `
+                      linear-gradient(45deg, #e8f4f8 25%, transparent 25%), 
+                      linear-gradient(-45deg, #e8f4f8 25%, transparent 25%), 
+                      linear-gradient(45deg, transparent 75%, #e8f4f8 75%), 
+                      linear-gradient(-45deg, transparent 75%, #e8f4f8 75%),
+                      linear-gradient(90deg, rgba(100,100,100,0.1) 1px, transparent 1px),
+                      linear-gradient(rgba(100,100,100,0.1) 1px, transparent 1px),
+                      linear-gradient(to bottom right, #f0f9ff, #dcfce7)
+                    `,
+                    backgroundSize: '40px 40px, 40px 40px, 40px 40px, 40px 40px, 20px 20px, 20px 20px, 100% 100%',
+                    backgroundPosition: '0 0, 0 20px, 20px -20px, -20px 0px, 0 0, 0 0, 0 0'
+                  }}
+                  onClick={handleMapClick}
+                >
+                  {/* Long Island Landmass */}
+                  <div className="absolute top-16 left-16 w-80 h-32 bg-green-100 opacity-70 rounded-full transform rotate-12 border border-green-300"></div>
+                  <div className="absolute top-20 left-32 w-64 h-24 bg-green-50 opacity-60 rounded-full transform rotate-8"></div>
                   
-                  {/* Long Island Shape */}
-                  <div className="absolute top-1/4 left-1/4 w-1/2 h-1/3 bg-green-200 opacity-60 rounded-full transform rotate-12"></div>
+                  {/* Water Bodies */}
+                  <div className="absolute top-0 left-0 w-full h-8 bg-blue-200 opacity-50"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-8 bg-blue-200 opacity-50"></div>
+                  <div className="absolute top-8 right-0 w-16 h-24 bg-blue-100 opacity-40 rounded-l-full"></div>
                   
-                  {/* Water Areas */}
-                  <div className="absolute top-0 left-0 w-full h-6 bg-blue-300 opacity-40"></div>
-                  <div className="absolute bottom-0 left-0 w-full h-6 bg-blue-300 opacity-40"></div>
+                  {/* Major Roads */}
+                  <div className="absolute top-24 left-0 w-full h-0.5 bg-gray-400 opacity-60"></div>
+                  <div className="absolute top-32 left-0 w-3/4 h-0.5 bg-gray-400 opacity-60"></div>
+                  <div className="absolute top-40 left-8 w-2/3 h-0.5 bg-gray-400 opacity-50"></div>
+                  
+                  {/* City Labels */}
+                  <div className="absolute top-16 left-20 text-xs font-semibold text-gray-700 bg-white/80 px-1 rounded">Huntington</div>
+                  <div className="absolute top-52 left-80 text-xs font-semibold text-gray-700 bg-white/80 px-1 rounded">Long Beach</div>
+                  <div className="absolute top-36 left-48 text-xs font-semibold text-gray-700 bg-white/80 px-1 rounded">Garden City</div>
+                  <div className="absolute top-12 left-64 text-xs font-semibold text-gray-700 bg-white/80 px-1 rounded">Oyster Bay</div>
+                  
+                  {/* Parks and Green Spaces */}
+                  <div className="absolute top-28 left-24 w-8 h-6 bg-green-300 opacity-40 rounded"></div>
+                  <div className="absolute top-48 left-60 w-6 h-8 bg-green-300 opacity-40 rounded"></div>
                   
                   {/* Map attribution */}
                   <div className="absolute bottom-1 right-1 text-xs text-gray-700 bg-white/90 px-2 py-1 rounded shadow">
