@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, DollarSign, Bed, Bath, Square } from "lucide-react";
+import Navbar from "@/components/navbar";
 
 interface Property {
   id: string;
@@ -70,11 +71,13 @@ export default function LiveMap() {
   ];
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Long Island Property Map</h1>
-        <p className="text-gray-600 mt-2">Interactive property visualization for Long Island, NY</p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="container mx-auto p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Long Island Property Map</h1>
+          <p className="text-gray-600 mt-2">Interactive property visualization for Long Island, NY</p>
+        </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Map Area */}
@@ -209,6 +212,7 @@ export default function LiveMap() {
             </CardContent>
           </Card>
         </div>
+      </div>
       </div>
     </div>
   );
