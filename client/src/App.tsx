@@ -19,6 +19,7 @@ import PropertyResearch from "@/pages/property-research";
 import PropertyAnalyzer from "@/pages/property-analyzer";
 import DealPipeline from "@/pages/deal-pipeline";
 import BusinessOverview from "@/pages/business-overview";
+import AIContractAnalysis from "@/pages/ai-contract-analysis";
 import ApiTest from "@/pages/api-test";
 import AdminDashboard from "@/pages/admin-dashboard";
 import FunctionalityTest from "@/pages/functionality-test";
@@ -47,6 +48,7 @@ function Router() {
           <Route path="/property-analyzer" component={PropertyAnalyzer} />
           <Route path="/deal-pipeline" component={DealPipeline} />
           <Route path="/business-overview" component={BusinessOverview} />
+          <Route path="/ai-contract-analysis" component={AIContractAnalysis} />
           <Route path="/api-test" component={ApiTest} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/functionality-test" component={FunctionalityTest} />
