@@ -20,6 +20,7 @@ import {
   Activity,
   MapPin
 } from "lucide-react";
+import Navbar from "@/components/navbar";
 
 export default function BusinessOverview() {
   const { data: stats } = useQuery({
@@ -35,19 +36,20 @@ export default function BusinessOverview() {
   });
 
   // Calculate business metrics
-  const totalCommissionProtected = contracts?.reduce((sum: number, contract: any) => {
+  const totalCommissionProtected = (contracts as any)?.reduce((sum: number, contract: any) => {
     return sum + (contract.commissionAmount || 0);
   }, 0) || 0;
 
-  const activeContracts = stats?.activeContracts || 0;
-  const expiringSoon = stats?.expiringSoon || 0;
-  const potentialBreaches = stats?.potentialBreaches || 0;
+  const activeContracts = (stats as any)?.activeContracts || 0;
+  const expiringSoon = (stats as any)?.expiringSoon || 0;
+  const potentialBreaches = (stats as any)?.potentialBreaches || 0;
 
-  const recentAlerts = alerts?.slice(0, 5) || [];
-  const criticalAlerts = alerts?.filter((alert: any) => alert.priority === 'high').length || 0;
+  const recentAlerts = (alerts as any)?.slice(0, 5) || [];
+  const criticalAlerts = (alerts as any)?.filter((alert: any) => alert.priority === 'high').length || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+      <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Business Overview</h1>
