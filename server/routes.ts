@@ -1,7 +1,7 @@
 import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated, isAuthenticatedOrDemo } from "./replitAuth";
 import { apiIntegrationService } from "./apiIntegrations";
 import { aiService } from "./aiService";
 import { enhancedPropertyService } from "./enhancedPropertyService";
@@ -32,8 +32,8 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware - temporarily disabled for demo
-  // await setupAuth(app);
+  // Auth middleware
+  await setupAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -627,7 +627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // RentCast API endpoints
-  app.post("/api/rentcast/search", async (req: any, res) => {
+  app.post("/api/rentcast/search", isAuthenticatedOrDemo, async (req: any, res) => {
     try {
       const filters = req.body;
       const result = await apiIntegrationService.searchRentalProperties(filters);
@@ -638,7 +638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/rentcast/property-details", async (req: any, res) => {
+  app.post("/api/rentcast/property-details", isAuthenticatedOrDemo, async (req: any, res) => {
     try {
       const { address } = req.body;
       const result = await apiIntegrationService.getRentCastPropertyDetails(address);
@@ -649,7 +649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/rentcast/rent-estimate", async (req: any, res) => {
+  app.post("/api/rentcast/rent-estimate", isAuthenticatedOrDemo, async (req: any, res) => {
     try {
       const { address } = req.body;
       const result = await apiIntegrationService.getRentEstimate(address);
@@ -660,7 +660,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/rentcast/market-data", async (req: any, res) => {
+  app.post("/api/rentcast/market-data", isAuthenticatedOrDemo, async (req: any, res) => {
     try {
       const { city, state } = req.body;
       const result = await apiIntegrationService.getRentCastMarketData(city, state);
