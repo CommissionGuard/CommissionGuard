@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,9 +11,13 @@ import ContractModal from "./contract-modal";
 export default function ContractsTable() {
   const [selectedContract, setSelectedContract] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
+  const { isAuthenticated } = useAuth();
 
-  const { data: contracts, isLoading } = useQuery({
+  const { data: contracts = [], isLoading, error } = useQuery({
     queryKey: ["/api/contracts"],
+    enabled: isAuthenticated,
+    retry: 3,
+    staleTime: 30000,
   });
 
   const getStatusColor = (status: string) => {
@@ -54,6 +59,22 @@ export default function ContractsTable() {
     setShowModal(true);
   };
 
+  if (!isAuthenticated) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Active Contracts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Authentication Required</h3>
+            <p className="text-gray-600">Please log in to view your contracts.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (isLoading) {
     return (
       <Card>
@@ -63,6 +84,22 @@ export default function ContractsTable() {
         <CardContent>
           <div className="animate-pulse">
             <div className="h-64 bg-gray-200 rounded"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Active Contracts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-red-600 mb-2">Error Loading Contracts</h3>
+            <p className="text-gray-600">Unable to fetch contracts. Please refresh the page.</p>
           </div>
         </CardContent>
       </Card>
@@ -81,10 +118,15 @@ export default function ContractsTable() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          {!contracts || contracts.length === 0 ? (
+          {!contracts || !Array.isArray(contracts) || contracts.length === 0 ? (
             <div className="text-center py-12">
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Contracts Found</h3>
               <p className="text-gray-600">Start by adding your first client and contract.</p>
+              {contracts && (
+                <p className="text-xs text-gray-400 mt-2">
+                  Data type: {typeof contracts}, Value: {JSON.stringify(contracts).substring(0, 100)}...
+                </p>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">
