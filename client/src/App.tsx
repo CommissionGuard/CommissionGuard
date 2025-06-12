@@ -26,6 +26,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import FunctionalityTest from "@/pages/functionality-test";
 import RentalMarket from "@/pages/rental-market";
 import SystemTest from "@/pages/system-test";
+import ShowingTracker from "@/pages/showing-tracker";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -67,6 +68,7 @@ function Router() {
           <Route path="/functionality-test" component={FunctionalityTest} />
           <Route path="/rental-market" component={RentalMarket} />
           <Route path="/system-test" component={SystemTest} />
+          <Route path="/showing-tracker" component={ShowingTracker} />
           <Route path="*" component={NotFound} />
         </>
       )}

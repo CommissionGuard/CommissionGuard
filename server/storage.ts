@@ -103,6 +103,42 @@ export interface IStorage {
   getAllUsersWithSubscriptions(): Promise<any[]>;
   getAllPayments(): Promise<any[]>;
   updateUserSubscription(userId: string, updates: any): Promise<void>;
+  
+  // Property operations
+  createProperty(property: InsertProperty): Promise<Property>;
+  getProperty(id: number): Promise<Property | undefined>;
+  getPropertiesByAgent(agentId: string): Promise<Property[]>;
+  updateProperty(id: number, updates: Partial<InsertProperty>): Promise<Property>;
+  searchProperties(criteria: { address?: string; city?: string; priceMin?: number; priceMax?: number; }): Promise<Property[]>;
+  
+  // Showing operations
+  createShowing(showing: InsertShowing): Promise<Showing>;
+  getShowing(id: number): Promise<Showing | undefined>;
+  getShowingsByAgent(agentId: string): Promise<ShowingWithDetails[]>;
+  getShowingsByClient(clientId: number): Promise<ShowingWithDetails[]>;
+  updateShowing(id: number, updates: Partial<InsertShowing>): Promise<Showing>;
+  deleteShowing(id: number): Promise<void>;
+  getUpcomingShowings(agentId: string): Promise<ShowingWithDetails[]>;
+  
+  // Location tracking operations
+  createLocationTracking(location: InsertLocationTracking): Promise<LocationTracking>;
+  getLocationTrackingByShowing(showingId: number): Promise<LocationTrackingWithDetails[]>;
+  getLocationTrackingByAgent(agentId: string, startDate: Date, endDate: Date): Promise<LocationTrackingWithDetails[]>;
+  detectOffRouteVisits(showingId: number, radiusMeters: number): Promise<LocationTrackingWithDetails[]>;
+  
+  // Property visit operations
+  createPropertyVisit(visit: InsertPropertyVisit): Promise<PropertyVisit>;
+  getPropertyVisitsByAgent(agentId: string): Promise<PropertyVisitWithDetails[]>;
+  getPropertyVisitsByClient(clientId: number): Promise<PropertyVisitWithDetails[]>;
+  getUnauthorizedVisits(agentId: string): Promise<PropertyVisitWithDetails[]>;
+  updatePropertyVisit(id: number, updates: Partial<InsertPropertyVisit>): Promise<PropertyVisit>;
+  
+  // Commission protection operations
+  createCommissionProtection(protection: InsertCommissionProtection): Promise<CommissionProtection>;
+  getCommissionProtectionByAgent(agentId: string): Promise<CommissionProtectionWithDetails[]>;
+  getCommissionProtectionByProperty(propertyId: number): Promise<CommissionProtectionWithDetails[]>;
+  updateCommissionProtection(id: number, updates: Partial<InsertCommissionProtection>): Promise<CommissionProtection>;
+  getExpiringProtections(agentId: string, daysAhead: number): Promise<CommissionProtectionWithDetails[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -602,6 +638,352 @@ export class DatabaseStorage implements IStorage {
       console.error("Error updating user subscription:", error);
       throw error;
     }
+  }
+
+  // Property operations
+  async createProperty(property: InsertProperty): Promise<Property> {
+    const [newProperty] = await db.insert(properties).values(property).returning();
+    return newProperty;
+  }
+
+  async getProperty(id: number): Promise<Property | undefined> {
+    const [property] = await db.select().from(properties).where(eq(properties.id, id));
+    return property;
+  }
+
+  async getPropertiesByAgent(agentId: string): Promise<Property[]> {
+    return await db.select().from(properties);
+  }
+
+  async updateProperty(id: number, updates: Partial<InsertProperty>): Promise<Property> {
+    const [property] = await db
+      .update(properties)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(properties.id, id))
+      .returning();
+    return property;
+  }
+
+  async searchProperties(criteria: { address?: string; city?: string; priceMin?: number; priceMax?: number; }): Promise<Property[]> {
+    let query = db.select().from(properties);
+    
+    if (criteria.city) {
+      query = query.where(eq(properties.city, criteria.city));
+    }
+    
+    return await query;
+  }
+
+  // Showing operations
+  async createShowing(showing: InsertShowing): Promise<Showing> {
+    const [newShowing] = await db.insert(showings).values(showing).returning();
+    return newShowing;
+  }
+
+  async getShowing(id: number): Promise<Showing | undefined> {
+    const [showing] = await db.select().from(showings).where(eq(showings.id, id));
+    return showing;
+  }
+
+  async getShowingsByAgent(agentId: string): Promise<ShowingWithDetails[]> {
+    const result = await db
+      .select()
+      .from(showings)
+      .leftJoin(users, eq(showings.agentId, users.id))
+      .leftJoin(clients, eq(showings.clientId, clients.id))
+      .leftJoin(properties, eq(showings.propertyId, properties.id))
+      .where(eq(showings.agentId, agentId))
+      .orderBy(desc(showings.scheduledDate));
+
+    return result.map(row => ({
+      ...row.showings,
+      agent: row.users!,
+      client: row.clients!,
+      property: row.properties!,
+      locationTracking: []
+    }));
+  }
+
+  async getShowingsByClient(clientId: number): Promise<ShowingWithDetails[]> {
+    const result = await db
+      .select()
+      .from(showings)
+      .leftJoin(users, eq(showings.agentId, users.id))
+      .leftJoin(clients, eq(showings.clientId, clients.id))
+      .leftJoin(properties, eq(showings.propertyId, properties.id))
+      .where(eq(showings.clientId, clientId))
+      .orderBy(desc(showings.scheduledDate));
+
+    return result.map(row => ({
+      ...row.showings,
+      agent: row.users!,
+      client: row.clients!,
+      property: row.properties!,
+      locationTracking: []
+    }));
+  }
+
+  async updateShowing(id: number, updates: Partial<InsertShowing>): Promise<Showing> {
+    const [showing] = await db
+      .update(showings)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(showings.id, id))
+      .returning();
+    return showing;
+  }
+
+  async deleteShowing(id: number): Promise<void> {
+    await db.delete(showings).where(eq(showings.id, id));
+  }
+
+  async getUpcomingShowings(agentId: string): Promise<ShowingWithDetails[]> {
+    const today = new Date();
+    const result = await db
+      .select()
+      .from(showings)
+      .leftJoin(users, eq(showings.agentId, users.id))
+      .leftJoin(clients, eq(showings.clientId, clients.id))
+      .leftJoin(properties, eq(showings.propertyId, properties.id))
+      .where(and(
+        eq(showings.agentId, agentId),
+        gte(showings.scheduledDate, today)
+      ))
+      .orderBy(asc(showings.scheduledDate));
+
+    return result.map(row => ({
+      ...row.showings,
+      agent: row.users!,
+      client: row.clients!,
+      property: row.properties!,
+      locationTracking: []
+    }));
+  }
+
+  // Location tracking operations
+  async createLocationTracking(location: InsertLocationTracking): Promise<LocationTracking> {
+    const [newLocation] = await db.insert(locationTracking).values(location).returning();
+    return newLocation;
+  }
+
+  async getLocationTrackingByShowing(showingId: number): Promise<LocationTrackingWithDetails[]> {
+    const result = await db
+      .select()
+      .from(locationTracking)
+      .leftJoin(users, eq(locationTracking.agentId, users.id))
+      .leftJoin(clients, eq(locationTracking.clientId, clients.id))
+      .leftJoin(showings, eq(locationTracking.showingId, showings.id))
+      .leftJoin(properties, eq(locationTracking.propertyId, properties.id))
+      .where(eq(locationTracking.showingId, showingId))
+      .orderBy(asc(locationTracking.timestamp));
+
+    return result.map(row => ({
+      ...row.location_tracking,
+      agent: row.users!,
+      client: row.clients!,
+      showing: row.showings!,
+      property: row.properties || undefined
+    }));
+  }
+
+  async getLocationTrackingByAgent(agentId: string, startDate: Date, endDate: Date): Promise<LocationTrackingWithDetails[]> {
+    const result = await db
+      .select()
+      .from(locationTracking)
+      .leftJoin(users, eq(locationTracking.agentId, users.id))
+      .leftJoin(clients, eq(locationTracking.clientId, clients.id))
+      .leftJoin(showings, eq(locationTracking.showingId, showings.id))
+      .leftJoin(properties, eq(locationTracking.propertyId, properties.id))
+      .where(and(
+        eq(locationTracking.agentId, agentId),
+        gte(locationTracking.timestamp, startDate),
+        lte(locationTracking.timestamp, endDate)
+      ))
+      .orderBy(asc(locationTracking.timestamp));
+
+    return result.map(row => ({
+      ...row.location_tracking,
+      agent: row.users!,
+      client: row.clients!,
+      showing: row.showings!,
+      property: row.properties || undefined
+    }));
+  }
+
+  async detectOffRouteVisits(showingId: number, radiusMeters: number): Promise<LocationTrackingWithDetails[]> {
+    const result = await db
+      .select()
+      .from(locationTracking)
+      .leftJoin(users, eq(locationTracking.agentId, users.id))
+      .leftJoin(clients, eq(locationTracking.clientId, clients.id))
+      .leftJoin(showings, eq(locationTracking.showingId, showings.id))
+      .leftJoin(properties, eq(locationTracking.propertyId, properties.id))
+      .where(and(
+        eq(locationTracking.showingId, showingId),
+        sql`${locationTracking.distanceFromScheduled} > ${radiusMeters}`
+      ));
+
+    return result.map(row => ({
+      ...row.location_tracking,
+      agent: row.users!,
+      client: row.clients!,
+      showing: row.showings!,
+      property: row.properties || undefined
+    }));
+  }
+
+  // Property visit operations
+  async createPropertyVisit(visit: InsertPropertyVisit): Promise<PropertyVisit> {
+    const [newVisit] = await db.insert(propertyVisits).values(visit).returning();
+    return newVisit;
+  }
+
+  async getPropertyVisitsByAgent(agentId: string): Promise<PropertyVisitWithDetails[]> {
+    const result = await db
+      .select()
+      .from(propertyVisits)
+      .leftJoin(users, eq(propertyVisits.agentId, users.id))
+      .leftJoin(clients, eq(propertyVisits.clientId, clients.id))
+      .leftJoin(properties, eq(propertyVisits.propertyId, properties.id))
+      .leftJoin(showings, eq(propertyVisits.showingId, showings.id))
+      .where(eq(propertyVisits.agentId, agentId))
+      .orderBy(desc(propertyVisits.visitDate));
+
+    return result.map(row => ({
+      ...row.property_visits,
+      agent: row.users!,
+      client: row.clients!,
+      property: row.properties!,
+      showing: row.showings || undefined
+    }));
+  }
+
+  async getPropertyVisitsByClient(clientId: number): Promise<PropertyVisitWithDetails[]> {
+    const result = await db
+      .select()
+      .from(propertyVisits)
+      .leftJoin(users, eq(propertyVisits.agentId, users.id))
+      .leftJoin(clients, eq(propertyVisits.clientId, clients.id))
+      .leftJoin(properties, eq(propertyVisits.propertyId, properties.id))
+      .leftJoin(showings, eq(propertyVisits.showingId, showings.id))
+      .where(eq(propertyVisits.clientId, clientId))
+      .orderBy(desc(propertyVisits.visitDate));
+
+    return result.map(row => ({
+      ...row.property_visits,
+      agent: row.users!,
+      client: row.clients!,
+      property: row.properties!,
+      showing: row.showings || undefined
+    }));
+  }
+
+  async getUnauthorizedVisits(agentId: string): Promise<PropertyVisitWithDetails[]> {
+    const result = await db
+      .select()
+      .from(propertyVisits)
+      .leftJoin(users, eq(propertyVisits.agentId, users.id))
+      .leftJoin(clients, eq(propertyVisits.clientId, clients.id))
+      .leftJoin(properties, eq(propertyVisits.propertyId, properties.id))
+      .leftJoin(showings, eq(propertyVisits.showingId, showings.id))
+      .where(and(
+        eq(propertyVisits.agentId, agentId),
+        eq(propertyVisits.agentPresent, false),
+        eq(propertyVisits.wasScheduled, false)
+      ))
+      .orderBy(desc(propertyVisits.visitDate));
+
+    return result.map(row => ({
+      ...row.property_visits,
+      agent: row.users!,
+      client: row.clients!,
+      property: row.properties!,
+      showing: row.showings || undefined
+    }));
+  }
+
+  async updatePropertyVisit(id: number, updates: Partial<InsertPropertyVisit>): Promise<PropertyVisit> {
+    const [visit] = await db
+      .update(propertyVisits)
+      .set(updates)
+      .where(eq(propertyVisits.id, id))
+      .returning();
+    return visit;
+  }
+
+  // Commission protection operations
+  async createCommissionProtection(protection: InsertCommissionProtection): Promise<CommissionProtection> {
+    const [newProtection] = await db.insert(commissionProtection).values(protection).returning();
+    return newProtection;
+  }
+
+  async getCommissionProtectionByAgent(agentId: string): Promise<CommissionProtectionWithDetails[]> {
+    const result = await db
+      .select()
+      .from(commissionProtection)
+      .leftJoin(users, eq(commissionProtection.agentId, users.id))
+      .leftJoin(clients, eq(commissionProtection.clientId, clients.id))
+      .leftJoin(properties, eq(commissionProtection.propertyId, properties.id))
+      .where(eq(commissionProtection.agentId, agentId))
+      .orderBy(desc(commissionProtection.protectionDate));
+
+    return result.map(row => ({
+      ...row.commission_protection,
+      agent: row.users!,
+      client: row.clients!,
+      property: row.properties!
+    }));
+  }
+
+  async getCommissionProtectionByProperty(propertyId: number): Promise<CommissionProtectionWithDetails[]> {
+    const result = await db
+      .select()
+      .from(commissionProtection)
+      .leftJoin(users, eq(commissionProtection.agentId, users.id))
+      .leftJoin(clients, eq(commissionProtection.clientId, clients.id))
+      .leftJoin(properties, eq(commissionProtection.propertyId, properties.id))
+      .where(eq(commissionProtection.propertyId, propertyId))
+      .orderBy(desc(commissionProtection.protectionDate));
+
+    return result.map(row => ({
+      ...row.commission_protection,
+      agent: row.users!,
+      client: row.clients!,
+      property: row.properties!
+    }));
+  }
+
+  async updateCommissionProtection(id: number, updates: Partial<InsertCommissionProtection>): Promise<CommissionProtection> {
+    const [protection] = await db
+      .update(commissionProtection)
+      .set(updates)
+      .where(eq(commissionProtection.id, id))
+      .returning();
+    return protection;
+  }
+
+  async getExpiringProtections(agentId: string, daysAhead: number): Promise<CommissionProtectionWithDetails[]> {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + daysAhead);
+
+    const result = await db
+      .select()
+      .from(commissionProtection)
+      .leftJoin(users, eq(commissionProtection.agentId, users.id))
+      .leftJoin(clients, eq(commissionProtection.clientId, clients.id))
+      .leftJoin(properties, eq(commissionProtection.propertyId, properties.id))
+      .where(and(
+        eq(commissionProtection.agentId, agentId),
+        eq(commissionProtection.status, "active"),
+        lte(commissionProtection.expirationDate, futureDate)
+      ))
+      .orderBy(asc(commissionProtection.expirationDate));
+
+    return result.map(row => ({
+      ...row.commission_protection,
+      agent: row.users!,
+      client: row.clients!,
+      property: row.properties!
+    }));
   }
 }
 

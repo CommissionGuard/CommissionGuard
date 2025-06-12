@@ -5,7 +5,17 @@ import { setupAuth, isAuthenticated, isAuthenticatedOrDemo } from "./replitAuth"
 import { apiIntegrationService } from "./apiIntegrations";
 import { aiService } from "./aiService";
 import { enhancedPropertyService } from "./enhancedPropertyService";
-import { insertClientSchema, insertContractSchema, insertContractSignerSchema, insertAlertSchema } from "@shared/schema";
+import { 
+  insertClientSchema, 
+  insertContractSchema, 
+  insertContractSignerSchema, 
+  insertAlertSchema,
+  insertPropertySchema,
+  insertShowingSchema,
+  insertLocationTrackingSchema,
+  insertPropertyVisitSchema,
+  insertCommissionProtectionSchema
+} from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
@@ -1041,6 +1051,224 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Functionality test error:", error);
       res.status(500).json({ message: "Failed to run functionality tests" });
+    }
+  });
+
+  // Property tracking and commission protection routes
+  
+  // Property routes
+  app.post("/api/properties", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const propertyData = insertPropertySchema.parse(req.body);
+      const property = await storage.createProperty(propertyData);
+      res.json(property);
+    } catch (error) {
+      console.error("Error creating property:", error);
+      res.status(500).json({ message: "Failed to create property" });
+    }
+  });
+
+  app.get("/api/properties", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const properties = await storage.getPropertiesByAgent(agentId);
+      res.json(properties);
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+      res.status(500).json({ message: "Failed to fetch properties" });
+    }
+  });
+
+  app.get("/api/properties/search", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const { address, city, priceMin, priceMax } = req.query;
+      const criteria = {
+        address: address ? String(address) : undefined,
+        city: city ? String(city) : undefined,
+        priceMin: priceMin ? Number(priceMin) : undefined,
+        priceMax: priceMax ? Number(priceMax) : undefined,
+      };
+      const properties = await storage.searchProperties(criteria);
+      res.json(properties);
+    } catch (error) {
+      console.error("Error searching properties:", error);
+      res.status(500).json({ message: "Failed to search properties" });
+    }
+  });
+
+  // Showing routes
+  app.post("/api/showings", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const showingData = insertShowingSchema.parse({ ...req.body, agentId });
+      const showing = await storage.createShowing(showingData);
+      res.json(showing);
+    } catch (error) {
+      console.error("Error creating showing:", error);
+      res.status(500).json({ message: "Failed to create showing" });
+    }
+  });
+
+  app.get("/api/showings", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const showings = await storage.getShowingsByAgent(agentId);
+      res.json(showings);
+    } catch (error) {
+      console.error("Error fetching showings:", error);
+      res.status(500).json({ message: "Failed to fetch showings" });
+    }
+  });
+
+  app.get("/api/showings/upcoming", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const showings = await storage.getUpcomingShowings(agentId);
+      res.json(showings);
+    } catch (error) {
+      console.error("Error fetching upcoming showings:", error);
+      res.status(500).json({ message: "Failed to fetch upcoming showings" });
+    }
+  });
+
+  app.put("/api/showings/:id", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const showing = await storage.updateShowing(id, updates);
+      res.json(showing);
+    } catch (error) {
+      console.error("Error updating showing:", error);
+      res.status(500).json({ message: "Failed to update showing" });
+    }
+  });
+
+  // Location tracking routes
+  app.post("/api/location-tracking", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const locationData = insertLocationTrackingSchema.parse({ ...req.body, agentId });
+      const location = await storage.createLocationTracking(locationData);
+      res.json(location);
+    } catch (error) {
+      console.error("Error creating location tracking:", error);
+      res.status(500).json({ message: "Failed to create location tracking" });
+    }
+  });
+
+  app.get("/api/location-tracking/showing/:showingId", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const showingId = parseInt(req.params.showingId);
+      const locations = await storage.getLocationTrackingByShowing(showingId);
+      res.json(locations);
+    } catch (error) {
+      console.error("Error fetching location tracking:", error);
+      res.status(500).json({ message: "Failed to fetch location tracking" });
+    }
+  });
+
+  app.get("/api/location-tracking/off-route/:showingId", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const showingId = parseInt(req.params.showingId);
+      const radiusMeters = parseInt(req.query.radius as string) || 500;
+      const offRouteVisits = await storage.detectOffRouteVisits(showingId, radiusMeters);
+      res.json(offRouteVisits);
+    } catch (error) {
+      console.error("Error detecting off-route visits:", error);
+      res.status(500).json({ message: "Failed to detect off-route visits" });
+    }
+  });
+
+  // Property visit routes
+  app.post("/api/property-visits", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const visitData = insertPropertyVisitSchema.parse({ ...req.body, agentId });
+      const visit = await storage.createPropertyVisit(visitData);
+      res.json(visit);
+    } catch (error) {
+      console.error("Error creating property visit:", error);
+      res.status(500).json({ message: "Failed to create property visit" });
+    }
+  });
+
+  app.get("/api/property-visits", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const visits = await storage.getPropertyVisitsByAgent(agentId);
+      res.json(visits);
+    } catch (error) {
+      console.error("Error fetching property visits:", error);
+      res.status(500).json({ message: "Failed to fetch property visits" });
+    }
+  });
+
+  app.get("/api/property-visits/unauthorized", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const unauthorizedVisits = await storage.getUnauthorizedVisits(agentId);
+      res.json(unauthorizedVisits);
+    } catch (error) {
+      console.error("Error fetching unauthorized visits:", error);
+      res.status(500).json({ message: "Failed to fetch unauthorized visits" });
+    }
+  });
+
+  app.get("/api/property-visits/client/:clientId", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const visits = await storage.getPropertyVisitsByClient(clientId);
+      res.json(visits);
+    } catch (error) {
+      console.error("Error fetching client property visits:", error);
+      res.status(500).json({ message: "Failed to fetch client property visits" });
+    }
+  });
+
+  // Commission protection routes
+  app.post("/api/commission-protection", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const protectionData = insertCommissionProtectionSchema.parse({ ...req.body, agentId });
+      const protection = await storage.createCommissionProtection(protectionData);
+      res.json(protection);
+    } catch (error) {
+      console.error("Error creating commission protection:", error);
+      res.status(500).json({ message: "Failed to create commission protection" });
+    }
+  });
+
+  app.get("/api/commission-protection", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const protections = await storage.getCommissionProtectionByAgent(agentId);
+      res.json(protections);
+    } catch (error) {
+      console.error("Error fetching commission protections:", error);
+      res.status(500).json({ message: "Failed to fetch commission protections" });
+    }
+  });
+
+  app.get("/api/commission-protection/expiring", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const daysAhead = parseInt(req.query.days as string) || 30;
+      const expiringProtections = await storage.getExpiringProtections(agentId, daysAhead);
+      res.json(expiringProtections);
+    } catch (error) {
+      console.error("Error fetching expiring protections:", error);
+      res.status(500).json({ message: "Failed to fetch expiring protections" });
+    }
+  });
+
+  app.get("/api/commission-protection/property/:propertyId", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const propertyId = parseInt(req.params.propertyId);
+      const protections = await storage.getCommissionProtectionByProperty(propertyId);
+      res.json(protections);
+    } catch (error) {
+      console.error("Error fetching property commission protections:", error);
+      res.status(500).json({ message: "Failed to fetch property commission protections" });
     }
   });
 
