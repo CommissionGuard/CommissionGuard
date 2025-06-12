@@ -230,6 +230,31 @@ export const commissionProtection = pgTable("commission_protection", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const buyerPreApprovals = pgTable("buyer_pre_approvals", {
+  id: serial("id").primaryKey(),
+  agentId: varchar("agent_id").notNull(),
+  clientId: serial("client_id").notNull(),
+  lenderName: varchar("lender_name").notNull(),
+  approvalAmount: numeric("approval_amount", { precision: 12, scale: 2 }).notNull(),
+  interestRate: numeric("interest_rate", { precision: 5, scale: 3 }),
+  approvalDate: timestamp("approval_date").notNull(),
+  expirationDate: timestamp("expiration_date").notNull(),
+  loanType: varchar("loan_type").notNull(), // conventional, fha, va, usda, jumbo
+  downPaymentPercent: numeric("down_payment_percent", { precision: 5, scale: 2 }),
+  monthlyIncome: numeric("monthly_income", { precision: 10, scale: 2 }),
+  debtToIncomeRatio: numeric("debt_to_income_ratio", { precision: 5, scale: 2 }),
+  creditScore: numeric("credit_score"),
+  employmentStatus: varchar("employment_status"), // employed, self-employed, retired, other
+  preApprovalLetter: text("pre_approval_letter"), // Base64 encoded document
+  verificationStatus: varchar("verification_status").default("pending"), // pending, verified, expired, invalid
+  commissionRate: numeric("commission_rate", { precision: 5, scale: 3 }).default("2.5"), // Expected commission percentage
+  estimatedCommission: numeric("estimated_commission", { precision: 10, scale: 2 }), // Calculated commission value
+  protectedStatus: boolean("protected_status").default(true),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   clients: many(clients),
@@ -327,6 +352,17 @@ export const commissionProtectionRelations = relations(commissionProtection, ({ 
   property: one(properties, {
     fields: [commissionProtection.propertyId],
     references: [properties.id],
+  }),
+}));
+
+export const buyerPreApprovalsRelations = relations(buyerPreApprovals, ({ one }) => ({
+  agent: one(users, {
+    fields: [buyerPreApprovals.agentId],
+    references: [users.id],
+  }),
+  client: one(clients, {
+    fields: [buyerPreApprovals.clientId],
+    references: [clients.id],
   }),
 }));
 
@@ -428,6 +464,12 @@ export const insertCommissionProtectionSchema = createInsertSchema(commissionPro
   createdAt: true,
 });
 
+export const insertBuyerPreApprovalSchema = createInsertSchema(buyerPreApprovals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -453,6 +495,8 @@ export type InsertPropertyVisit = z.infer<typeof insertPropertyVisitSchema>;
 export type PropertyVisit = typeof propertyVisits.$inferSelect;
 export type InsertCommissionProtection = z.infer<typeof insertCommissionProtectionSchema>;
 export type CommissionProtection = typeof commissionProtection.$inferSelect;
+export type InsertBuyerPreApproval = z.infer<typeof insertBuyerPreApprovalSchema>;
+export type BuyerPreApproval = typeof buyerPreApprovals.$inferSelect;
 
 // Extended types with relations
 export type ClientWithContracts = Client & {

@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { UserPlus, Mail, Phone, FileText, Calendar, Eye } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UserPlus, Mail, Phone, FileText, Calendar, Eye, DollarSign, Shield, TrendingUp } from "lucide-react";
 import AddClientForm from "@/components/add-client-form";
 
 export default function Clients() {
