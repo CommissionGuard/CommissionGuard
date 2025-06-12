@@ -230,15 +230,15 @@ export default function AlertsSection() {
                     <>
                       <div className="flex items-center space-x-2">
                         <Eye className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">Review unauthorized property visit details</span>
+                        <span className="text-sm">Review public records deed recording details</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Phone className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">Contact client immediately to discuss commission protection</span>
+                        <span className="text-sm">Contact client immediately - they purchased without you</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <MapPin className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">Document GPS evidence of unauthorized visits</span>
+                        <span className="text-sm">Document MLS transaction evidence for legal action</span>
                       </div>
                     </>
                   ) : (

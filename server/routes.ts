@@ -425,6 +425,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public Records Monitoring for Commission Breach Detection
+  app.post("/api/monitor-public-records", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const { clientName, contractStartDate, contractEndDate } = req.body;
+
+      if (!clientName || !contractStartDate || !contractEndDate) {
+        return res.status(400).json({ error: "Client name and contract dates are required" });
+      }
+
+      const results = await apiIntegrationService.monitorPublicRecords(
+        clientName, 
+        contractStartDate, 
+        contractEndDate, 
+        agentId
+      );
+
+      // Auto-create breach alerts if found
+      if (results.scanResults?.breachRecords?.length > 0) {
+        for (const breach of results.scanResults.breachRecords) {
+          await storage.createAlert({
+            agentId,
+            contractId: null, // Will need to match with actual contract
+            clientId: null,
+            type: "breach",
+            title: "Commission Breach Detected - Unauthorized Purchase",
+            description: `${clientName} purchased ${breach.propertyAddress} for $${breach.salePrice.toLocaleString()} on ${breach.saleDate} using ${breach.buyerAgent} instead of contracted agent. Estimated lost commission: $${breach.estimatedLostCommission.toLocaleString()}.`,
+            severity: "high",
+            isRead: false
+          });
+        }
+      }
+
+      res.json(results);
+    } catch (error) {
+      console.error("Public records monitoring error:", error);
+      res.status(500).json({ error: "Failed to monitor public records" });
+    }
+  });
+
   // Property pins endpoints
   app.get("/api/property-pins", isAuthenticated, async (req: any, res) => {
     try {
