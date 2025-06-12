@@ -67,7 +67,7 @@ function Router() {
           <Route path="/functionality-test" component={FunctionalityTest} />
           <Route path="/rental-market" component={RentalMarket} />
           <Route path="/system-test" component={SystemTest} />
-          <Route component={NotFound} />
+          <Route path="*" component={NotFound} />
         </>
       )}
     </Switch>
