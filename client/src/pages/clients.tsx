@@ -9,7 +9,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserPlus, Mail, Phone, FileText, Calendar, Eye, DollarSign, Shield, TrendingUp } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { UserPlus, Mail, Phone, FileText, Calendar, Eye, DollarSign, Shield, TrendingUp, Edit3 } from "lucide-react";
 import AddClientForm from "@/components/add-client-form";
 
 export default function Clients() {
@@ -28,7 +30,7 @@ export default function Clients() {
   });
 
   // Sample buyer pre-approval data to demonstrate commission protection values
-  const buyerPreApprovals = [
+  const [buyerPreApprovals, setBuyerPreApprovals] = useState([
     {
       id: 1,
       clientId: 1,
@@ -62,12 +64,27 @@ export default function Clients() {
       creditScore: 745,
       employmentStatus: "employed",
       verificationStatus: "verified",
-      commissionRate: 2.5,
-      estimatedCommission: 17500,
+      commissionRate: 3.0,
+      estimatedCommission: 21000,
       protectedStatus: true,
-      notes: "Higher approval amount with better rate - preferred option"
+      notes: "Higher approval amount with better rate - preferred option (3% commission negotiated)"
     }
-  ];
+  ]);
+
+  // Update estimated commission when rate changes
+  const updateCommissionRate = (approvalId: number, newRate: number) => {
+    setBuyerPreApprovals(prev => 
+      prev.map(approval => 
+        approval.id === approvalId 
+          ? { 
+              ...approval, 
+              commissionRate: newRate, 
+              estimatedCommission: Math.round(approval.approvalAmount * (newRate / 100))
+            }
+          : approval
+      )
+    );
+  };
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -305,12 +322,47 @@ export default function Clients() {
                           )}
                         </div>
                         
-                        <div className="text-right">
+                        <div className="text-right space-y-3">
                           <div className="text-2xl font-bold text-green-600">
                             ${approval.estimatedCommission.toLocaleString()}
                           </div>
                           <p className="text-sm text-gray-500">Protected Commission</p>
-                          <p className="text-xs text-gray-400 mt-1">{approval.commissionRate}% of sale price</p>
+                          
+                          {/* Editable Commission Rate */}
+                          <div className="space-y-2">
+                            <Label htmlFor={`commission-rate-${approval.id}`} className="text-xs text-gray-600">
+                              Commission Rate
+                            </Label>
+                            <div className="flex items-center space-x-2">
+                              <Input
+                                id={`commission-rate-${approval.id}`}
+                                type="number"
+                                min="1"
+                                max="10"
+                                step="0.1"
+                                value={approval.commissionRate}
+                                onChange={(e) => updateCommissionRate(approval.id, parseFloat(e.target.value) || 0)}
+                                className="w-16 h-8 text-sm text-center"
+                              />
+                              <span className="text-sm text-gray-600">%</span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0"
+                                onClick={() => {
+                                  const commonRates = [2.0, 2.5, 3.0];
+                                  const currentIndex = commonRates.indexOf(approval.commissionRate);
+                                  const nextRate = commonRates[(currentIndex + 1) % commonRates.length];
+                                  updateCommissionRate(approval.id, nextRate);
+                                }}
+                              >
+                                <Edit3 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <p className="text-xs text-gray-400">
+                              Quick: 2% | 2.5% | 3%
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
