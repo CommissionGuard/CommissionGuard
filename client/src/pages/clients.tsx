@@ -27,6 +27,48 @@ export default function Clients() {
     enabled: !!selectedClientId,
   });
 
+  // Sample buyer pre-approval data to demonstrate commission protection values
+  const buyerPreApprovals = [
+    {
+      id: 1,
+      clientId: 1,
+      lenderName: "Wells Fargo Home Mortgage",
+      approvalAmount: 650000,
+      interestRate: 7.25,
+      approvalDate: new Date(2024, 11, 1),
+      expirationDate: new Date(2025, 2, 1),
+      loanType: "conventional",
+      downPaymentPercent: 20,
+      monthlyIncome: 12500,
+      creditScore: 745,
+      employmentStatus: "employed",
+      verificationStatus: "verified",
+      commissionRate: 2.5,
+      estimatedCommission: 16250,
+      protectedStatus: true,
+      notes: "Strong buyer profile with excellent credit and stable employment"
+    },
+    {
+      id: 2,
+      clientId: 1,
+      lenderName: "Chase Bank",
+      approvalAmount: 700000,
+      interestRate: 7.125,
+      approvalDate: new Date(2024, 10, 15),
+      expirationDate: new Date(2025, 1, 15),
+      loanType: "conventional",
+      downPaymentPercent: 25,
+      monthlyIncome: 12500,
+      creditScore: 745,
+      employmentStatus: "employed",
+      verificationStatus: "verified",
+      commissionRate: 2.5,
+      estimatedCommission: 17500,
+      protectedStatus: true,
+      notes: "Higher approval amount with better rate - preferred option"
+    }
+  ];
+
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -151,6 +193,203 @@ export default function Clients() {
           <div>
             <AddClientForm />
           </div>
+        </div>
+
+        {/* Commission Protection Summary */}
+        <div className="mt-8">
+          <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-gray-900 flex items-center">
+                <Shield className="h-6 w-6 text-green-600 mr-2" />
+                Commission Protection Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600">
+                    ${buyerPreApprovals.reduce((sum, approval) => sum + approval.estimatedCommission, 0).toLocaleString()}
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">Total Protected Commissions</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600">
+                    ${buyerPreApprovals.reduce((sum, approval) => sum + approval.approvalAmount, 0).toLocaleString()}
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">Total Buyer Purchasing Power</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">
+                    {buyerPreApprovals.filter(approval => approval.protectedStatus).length}
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">Active Pre-Approvals</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Buyer Pre-Approvals Section */}
+        <div className="mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-gray-900 flex items-center">
+                <DollarSign className="h-6 w-6 text-green-600 mr-2" />
+                Buyer Pre-Approvals & Commission Protection
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="active" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="active">Active Pre-Approvals</TabsTrigger>
+                  <TabsTrigger value="summary">Financial Summary</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="active" className="space-y-4">
+                  {buyerPreApprovals.map((approval) => (
+                    <div key={approval.id} className="border rounded-lg p-6 bg-white">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-4">
+                            <h3 className="text-lg font-semibold text-gray-900">{approval.lenderName}</h3>
+                            <Badge className={approval.verificationStatus === 'verified' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                              {approval.verificationStatus.toUpperCase()}
+                            </Badge>
+                            {approval.protectedStatus && (
+                              <Badge className="bg-blue-100 text-blue-800">
+                                <Shield className="h-3 w-3 mr-1" />
+                                PROTECTED
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div>
+                              <p className="text-gray-500">Approval Amount</p>
+                              <p className="font-semibold text-green-600">${approval.approvalAmount.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Interest Rate</p>
+                              <p className="font-semibold">{approval.interestRate}%</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Loan Type</p>
+                              <p className="font-semibold capitalize">{approval.loanType}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Down Payment</p>
+                              <p className="font-semibold">{approval.downPaymentPercent}%</p>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                              <p className="text-gray-500">Credit Score</p>
+                              <p className="font-semibold">{approval.creditScore}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Monthly Income</p>
+                              <p className="font-semibold">${approval.monthlyIncome.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Expires</p>
+                              <p className="font-semibold">{approval.expirationDate.toLocaleDateString()}</p>
+                            </div>
+                          </div>
+
+                          {approval.notes && (
+                            <div className="mt-3">
+                              <p className="text-gray-500 text-sm">Notes</p>
+                              <p className="text-sm text-gray-700">{approval.notes}</p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-green-600">
+                            ${approval.estimatedCommission.toLocaleString()}
+                          </div>
+                          <p className="text-sm text-gray-500">Protected Commission</p>
+                          <p className="text-xs text-gray-400 mt-1">{approval.commissionRate}% of sale price</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </TabsContent>
+                
+                <TabsContent value="summary">
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Card className="border-green-200 bg-green-50">
+                        <CardHeader>
+                          <CardTitle className="text-lg text-green-800 flex items-center">
+                            <TrendingUp className="h-5 w-5 mr-2" />
+                            Commission Protection Impact
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex justify-between">
+                            <span className="text-green-700">Total Protected Value:</span>
+                            <span className="font-bold text-green-800">
+                              ${buyerPreApprovals.reduce((sum, approval) => sum + approval.estimatedCommission, 0).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-green-700">Average Commission:</span>
+                            <span className="font-bold text-green-800">
+                              ${Math.round(buyerPreApprovals.reduce((sum, approval) => sum + approval.estimatedCommission, 0) / buyerPreApprovals.length).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-green-700">Protection Rate:</span>
+                            <span className="font-bold text-green-800">100%</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="border-blue-200 bg-blue-50">
+                        <CardHeader>
+                          <CardTitle className="text-lg text-blue-800 flex items-center">
+                            <DollarSign className="h-5 w-5 mr-2" />
+                            Buyer Financial Strength
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">Total Buying Power:</span>
+                            <span className="font-bold text-blue-800">
+                              ${buyerPreApprovals.reduce((sum, approval) => sum + approval.approvalAmount, 0).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">Average Credit Score:</span>
+                            <span className="font-bold text-blue-800">
+                              {Math.round(buyerPreApprovals.reduce((sum, approval) => sum + approval.creditScore, 0) / buyerPreApprovals.length)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">Qualified Buyers:</span>
+                            <span className="font-bold text-blue-800">{buyerPreApprovals.length}</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-yellow-800 mb-2">Commission Protection Benefits</h4>
+                      <ul className="text-sm text-yellow-700 space-y-1">
+                        <li>• Automated tracking of all buyer pre-approvals and their commission values</li>
+                        <li>• Legal documentation establishing agent representation before property showings</li>
+                        <li>• GPS and time-stamped evidence of all client property interactions</li>
+                        <li>• Protection against commission disputes with comprehensive activity records</li>
+                        <li>• Real-time monitoring of unauthorized property visits by clients</li>
+                      </ul>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Client Contracts Modal */}
