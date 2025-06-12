@@ -32,8 +32,8 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Auth middleware - temporarily disabled for demo
+  // await setupAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -400,7 +400,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/property/nearby", isAuthenticated, async (req, res) => {
+  app.post("/api/property/nearby", async (req, res) => {
     try {
       const { latitude, longitude, radius = 1000 } = req.body;
       if (!latitude || !longitude) {
@@ -627,7 +627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // RentCast API endpoints
-  app.post("/api/rentcast/search", isAuthenticated, async (req: any, res) => {
+  app.post("/api/rentcast/search", async (req: any, res) => {
     try {
       const filters = req.body;
       const result = await apiIntegrationService.searchRentalProperties(filters);
@@ -638,7 +638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/rentcast/property-details", isAuthenticated, async (req: any, res) => {
+  app.post("/api/rentcast/property-details", async (req: any, res) => {
     try {
       const { address } = req.body;
       const result = await apiIntegrationService.getRentCastPropertyDetails(address);
@@ -649,7 +649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/rentcast/rent-estimate", isAuthenticated, async (req: any, res) => {
+  app.post("/api/rentcast/rent-estimate", async (req: any, res) => {
     try {
       const { address } = req.body;
       const result = await apiIntegrationService.getRentEstimate(address);
@@ -660,7 +660,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/rentcast/market-data", isAuthenticated, async (req: any, res) => {
+  app.post("/api/rentcast/market-data", async (req: any, res) => {
     try {
       const { city, state } = req.body;
       const result = await apiIntegrationService.getRentCastMarketData(city, state);
