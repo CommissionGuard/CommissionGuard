@@ -137,12 +137,109 @@ export const payments = pgTable("payments", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Property showing tracking tables
+export const properties = pgTable("properties", {
+  id: serial("id").primaryKey(),
+  mlsNumber: varchar("mls_number"),
+  address: text("address").notNull(),
+  city: varchar("city").notNull(),
+  state: varchar("state").notNull(),
+  zipCode: varchar("zip_code").notNull(),
+  latitude: numeric("latitude", { precision: 10, scale: 8 }),
+  longitude: numeric("longitude", { precision: 11, scale: 8 }),
+  price: numeric("price", { precision: 12, scale: 2 }),
+  bedrooms: numeric("bedrooms"),
+  bathrooms: numeric("bathrooms"),
+  squareFeet: numeric("square_feet"),
+  propertyType: varchar("property_type"), // single-family, condo, townhouse, etc.
+  listingStatus: varchar("listing_status").default("active"), // active, pending, sold, expired
+  listingAgent: varchar("listing_agent"),
+  listingBrokerage: varchar("listing_brokerage"),
+  neighborhood: varchar("neighborhood"),
+  propertyDetails: jsonb("property_details"), // Additional property info
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const showings = pgTable("showings", {
+  id: serial("id").primaryKey(),
+  agentId: varchar("agent_id").notNull(),
+  clientId: serial("client_id").notNull(),
+  propertyId: serial("property_id").notNull(),
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  actualStartTime: timestamp("actual_start_time"),
+  actualEndTime: timestamp("actual_end_time"),
+  showingType: varchar("showing_type").notNull(), // scheduled, walk-in, drive-by
+  status: varchar("status").notNull().default("scheduled"), // scheduled, in-progress, completed, cancelled, no-show
+  agentPresent: boolean("agent_present").default(true),
+  clientFeedback: text("client_feedback"),
+  agentNotes: text("agent_notes"),
+  interestLevel: varchar("interest_level"), // high, medium, low, no-interest
+  nextSteps: text("next_steps"),
+  commissionProtected: boolean("commission_protected").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const locationTracking = pgTable("location_tracking", {
+  id: serial("id").primaryKey(),
+  showingId: serial("showing_id").notNull(),
+  agentId: varchar("agent_id").notNull(),
+  clientId: serial("client_id").notNull(),
+  latitude: numeric("latitude", { precision: 10, scale: 8 }).notNull(),
+  longitude: numeric("longitude", { precision: 11, scale: 8 }).notNull(),
+  address: text("address"),
+  locationAccuracy: numeric("location_accuracy"), // GPS accuracy in meters
+  timestamp: timestamp("timestamp").defaultNow(),
+  locationType: varchar("location_type").notNull(), // scheduled-property, nearby-property, off-route
+  distanceFromScheduled: numeric("distance_from_scheduled"), // Distance in meters from scheduled property
+  propertyId: serial("property_id"), // If location matches a known property
+  notes: text("notes"),
+});
+
+export const propertyVisits = pgTable("property_visits", {
+  id: serial("id").primaryKey(),
+  agentId: varchar("agent_id").notNull(),
+  clientId: serial("client_id").notNull(),
+  propertyId: serial("property_id").notNull(),
+  visitDate: timestamp("visit_date").notNull(),
+  visitType: varchar("visit_type").notNull(), // showing, drive-by, walk-by, online-view
+  duration: numeric("duration"), // Duration in minutes
+  agentPresent: boolean("agent_present").default(false),
+  wasScheduled: boolean("was_scheduled").default(false),
+  showingId: serial("showing_id"), // Reference to scheduled showing if applicable
+  discoveryMethod: varchar("discovery_method"), // how visit was discovered: gps, client-report, agent-observation
+  riskLevel: varchar("risk_level").default("low"), // low, medium, high (commission risk)
+  followUpRequired: boolean("follow_up_required").default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const commissionProtection = pgTable("commission_protection", {
+  id: serial("id").primaryKey(),
+  agentId: varchar("agent_id").notNull(),
+  clientId: serial("client_id").notNull(),
+  propertyId: serial("property_id").notNull(),
+  protectionType: varchar("protection_type").notNull(), // showing, inquiry, negotiation, contract
+  protectionDate: timestamp("protection_date").notNull(),
+  expirationDate: timestamp("expiration_date"),
+  evidenceType: varchar("evidence_type").notNull(), // gps-tracking, signed-document, email-trail, witness
+  evidenceData: jsonb("evidence_data"), // Supporting evidence
+  status: varchar("status").default("active"), // active, expired, claimed, disputed
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   clients: many(clients),
   contracts: many(contracts),
   alerts: many(alerts),
   auditLogs: many(auditLogs),
+  showings: many(showings),
+  locationTracking: many(locationTracking),
+  propertyVisits: many(propertyVisits),
+  commissionProtection: many(commissionProtection),
 }));
 
 export const clientsRelations = relations(clients, ({ one, many }) => ({
@@ -151,6 +248,86 @@ export const clientsRelations = relations(clients, ({ one, many }) => ({
     references: [users.id],
   }),
   contracts: many(contracts),
+  showings: many(showings),
+  locationTracking: many(locationTracking),
+  propertyVisits: many(propertyVisits),
+  commissionProtection: many(commissionProtection),
+}));
+
+export const propertiesRelations = relations(properties, ({ many }) => ({
+  showings: many(showings),
+  propertyVisits: many(propertyVisits),
+  commissionProtection: many(commissionProtection),
+  locationTracking: many(locationTracking),
+}));
+
+export const showingsRelations = relations(showings, ({ one, many }) => ({
+  agent: one(users, {
+    fields: [showings.agentId],
+    references: [users.id],
+  }),
+  client: one(clients, {
+    fields: [showings.clientId],
+    references: [clients.id],
+  }),
+  property: one(properties, {
+    fields: [showings.propertyId],
+    references: [properties.id],
+  }),
+  locationTracking: many(locationTracking),
+}));
+
+export const locationTrackingRelations = relations(locationTracking, ({ one }) => ({
+  showing: one(showings, {
+    fields: [locationTracking.showingId],
+    references: [showings.id],
+  }),
+  agent: one(users, {
+    fields: [locationTracking.agentId],
+    references: [users.id],
+  }),
+  client: one(clients, {
+    fields: [locationTracking.clientId],
+    references: [clients.id],
+  }),
+  property: one(properties, {
+    fields: [locationTracking.propertyId],
+    references: [properties.id],
+  }),
+}));
+
+export const propertyVisitsRelations = relations(propertyVisits, ({ one }) => ({
+  agent: one(users, {
+    fields: [propertyVisits.agentId],
+    references: [users.id],
+  }),
+  client: one(clients, {
+    fields: [propertyVisits.clientId],
+    references: [clients.id],
+  }),
+  property: one(properties, {
+    fields: [propertyVisits.propertyId],
+    references: [properties.id],
+  }),
+  showing: one(showings, {
+    fields: [propertyVisits.showingId],
+    references: [showings.id],
+  }),
+}));
+
+export const commissionProtectionRelations = relations(commissionProtection, ({ one }) => ({
+  agent: one(users, {
+    fields: [commissionProtection.agentId],
+    references: [users.id],
+  }),
+  client: one(clients, {
+    fields: [commissionProtection.clientId],
+    references: [clients.id],
+  }),
+  property: one(properties, {
+    fields: [commissionProtection.propertyId],
+    references: [properties.id],
+  }),
 }));
 
 export const contractsRelations = relations(contracts, ({ one, many }) => ({
@@ -224,6 +401,33 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
   timestamp: true,
 });
 
+export const insertPropertySchema = createInsertSchema(properties).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertShowingSchema = createInsertSchema(showings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLocationTrackingSchema = createInsertSchema(locationTracking).omit({
+  id: true,
+  timestamp: true,
+});
+
+export const insertPropertyVisitSchema = createInsertSchema(propertyVisits).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCommissionProtectionSchema = createInsertSchema(commissionProtection).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -237,6 +441,18 @@ export type InsertAlert = z.infer<typeof insertAlertSchema>;
 export type Alert = typeof alerts.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
+
+// Property showing tracking types
+export type InsertProperty = z.infer<typeof insertPropertySchema>;
+export type Property = typeof properties.$inferSelect;
+export type InsertShowing = z.infer<typeof insertShowingSchema>;
+export type Showing = typeof showings.$inferSelect;
+export type InsertLocationTracking = z.infer<typeof insertLocationTrackingSchema>;
+export type LocationTracking = typeof locationTracking.$inferSelect;
+export type InsertPropertyVisit = z.infer<typeof insertPropertyVisitSchema>;
+export type PropertyVisit = typeof propertyVisits.$inferSelect;
+export type InsertCommissionProtection = z.infer<typeof insertCommissionProtectionSchema>;
+export type CommissionProtection = typeof commissionProtection.$inferSelect;
 
 // Extended types with relations
 export type ClientWithContracts = Client & {
@@ -255,4 +471,32 @@ export type AlertWithDetails = Alert & {
   contract?: Contract;
   client?: Client;
   agent: User;
+};
+
+// Property tracking extended types
+export type ShowingWithDetails = Showing & {
+  agent: User;
+  client: Client;
+  property: Property;
+  locationTracking: LocationTracking[];
+};
+
+export type PropertyVisitWithDetails = PropertyVisit & {
+  agent: User;
+  client: Client;
+  property: Property;
+  showing?: Showing;
+};
+
+export type LocationTrackingWithDetails = LocationTracking & {
+  agent: User;
+  client: Client;
+  showing: Showing;
+  property?: Property;
+};
+
+export type CommissionProtectionWithDetails = CommissionProtection & {
+  agent: User;
+  client: Client;
+  property: Property;
 };
