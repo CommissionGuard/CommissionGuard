@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bell, AlertTriangle, Clock, CheckCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Bell, AlertTriangle, Clock, CheckCircle, MapPin, Eye, Phone } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -9,6 +12,8 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 export default function AlertsSection() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedAlert, setSelectedAlert] = useState<any>(null);
+  const [showBreachDetails, setShowBreachDetails] = useState(false);
 
   const { data: alerts, isLoading } = useQuery({
     queryKey: ["/api/alerts"],
@@ -136,9 +141,26 @@ export default function AlertsSection() {
                         <Button
                           variant="link"
                           size="sm"
+                          onClick={() => {
+                            setSelectedAlert(alert);
+                            setShowBreachDetails(true);
+                          }}
+                          className="text-red-600 text-sm font-medium hover:underline p-0"
+                        >
+                          View Breach Details
+                        </Button>
+                      )}
+                      {alert.type === "expiration" && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedAlert(alert);
+                            setShowBreachDetails(true);
+                          }}
                           className="text-primary text-sm font-medium hover:underline p-0"
                         >
-                          Contact Legal
+                          View Details
                         </Button>
                       )}
                     </div>
@@ -149,6 +171,125 @@ export default function AlertsSection() {
           )}
         </div>
       </CardContent>
+
+      {/* Breach/Alert Details Modal */}
+      <Dialog open={showBreachDetails} onOpenChange={setShowBreachDetails}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              {selectedAlert?.type === "breach" ? (
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+              ) : (
+                <Clock className="h-5 w-5 text-yellow-600" />
+              )}
+              <span>
+                {selectedAlert?.type === "breach" ? "Potential Breach Details" : "Alert Details"}
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedAlert && (
+            <div className="space-y-6">
+              {/* Alert Summary */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-900 mb-2">{selectedAlert.title}</h3>
+                <p className="text-gray-700">{selectedAlert.description}</p>
+                <div className="flex items-center space-x-4 mt-3">
+                  <Badge variant={selectedAlert.severity === "high" ? "destructive" : "secondary"}>
+                    {selectedAlert.severity.toUpperCase()} PRIORITY
+                  </Badge>
+                  <span className="text-sm text-gray-500">
+                    {new Date(selectedAlert.createdAt).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Contract Information */}
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                  <CheckCircle className="h-4 w-4 mr-2 text-blue-600" />
+                  Related Contract
+                </h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Contract ID:</span>
+                    <span className="ml-2 font-medium">#{selectedAlert.contractId}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Client:</span>
+                    <span className="ml-2 font-medium">{selectedAlert.clientName || "Contract Details"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Items */}
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-3">Recommended Actions</h4>
+                <div className="space-y-2">
+                  {selectedAlert.type === "breach" ? (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        <Eye className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm">Review unauthorized property visit details</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Phone className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm">Contact client immediately to discuss commission protection</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <MapPin className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm">Document GPS evidence of unauthorized visits</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        <Phone className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm">Contact client about contract renewal</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm">Prepare new representation agreement</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Protection Status */}
+              {selectedAlert.type === "breach" && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <h4 className="font-medium text-red-900 mb-2">Commission Protection Status</h4>
+                  <p className="text-sm text-red-700">
+                    Your commission is protected under the representation agreement. All property visits 
+                    are being tracked and documented for legal protection.
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowBreachDetails(false)}
+                >
+                  Close
+                </Button>
+                <div className="space-x-2">
+                  {selectedAlert.type === "breach" && (
+                    <Button variant="destructive">
+                      Contact Legal Team
+                    </Button>
+                  )}
+                  <Button>
+                    Mark as Resolved
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
