@@ -54,6 +54,39 @@ export default function Dashboard() {
     },
   });
 
+  const createShowingDataMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/demo-showing-data");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/showings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/property-visits"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/commission-protection"] });
+      toast({
+        title: "Commission Protection Active",
+        description: "Property showing data created with automated commission protection protocols",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to create showing data. Please ensure client data exists first.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -132,7 +165,7 @@ export default function Dashboard() {
                   Try the Platform
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
                 <p className="text-sm text-gray-600 mb-4">
                   Add sample data to explore Commission Guard's features and see how it protects your commissions.
                 </p>
@@ -141,7 +174,16 @@ export default function Dashboard() {
                   disabled={createDemoDataMutation.isPending}
                   className="w-full bg-primary text-white hover:bg-blue-700"
                 >
-                  {createDemoDataMutation.isPending ? "Creating..." : "Add Sample Data"}
+                  {createDemoDataMutation.isPending ? "Creating..." : "Add Client & Contract Data"}
+                </Button>
+                
+                <Button
+                  onClick={() => createShowingDataMutation.mutate()}
+                  disabled={createShowingDataMutation.isPending}
+                  variant="outline"
+                  className="w-full border-primary text-primary hover:bg-blue-50"
+                >
+                  {createShowingDataMutation.isPending ? "Creating..." : "Add Property Showing Data"}
                 </Button>
               </CardContent>
             </Card>

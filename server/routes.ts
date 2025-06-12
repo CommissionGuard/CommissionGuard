@@ -1272,6 +1272,210 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sample data generation for showing tracker
+  app.post("/api/demo-showing-data", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      
+      // Create sample properties
+      const properties = [
+        {
+          address: "1234 Maple Street",
+          city: "Dallas",
+          state: "TX",
+          zipCode: "75201",
+          latitude: "32.7767",
+          longitude: "-96.7970",
+          price: "450000",
+          bedrooms: "3",
+          bathrooms: "2",
+          squareFeet: "2100",
+          propertyType: "single-family",
+          listingStatus: "active",
+          neighborhood: "Downtown Dallas"
+        },
+        {
+          address: "5678 Oak Avenue",
+          city: "Dallas", 
+          state: "TX",
+          zipCode: "75202",
+          latitude: "32.7831",
+          longitude: "-96.8067",
+          price: "525000",
+          bedrooms: "4",
+          bathrooms: "3",
+          squareFeet: "2450",
+          propertyType: "single-family",
+          listingStatus: "active",
+          neighborhood: "Uptown Dallas"
+        },
+        {
+          address: "9012 Pine Drive",
+          city: "Dallas",
+          state: "TX", 
+          zipCode: "75203",
+          latitude: "32.7580",
+          longitude: "-96.7856",
+          price: "385000",
+          bedrooms: "3",
+          bathrooms: "2",
+          squareFeet: "1850",
+          propertyType: "townhouse",
+          listingStatus: "active",
+          neighborhood: "Bishop Arts District"
+        }
+      ];
+
+      const createdProperties = [];
+      for (const property of properties) {
+        const created = await storage.createProperty(property);
+        createdProperties.push(created);
+      }
+
+      // Get existing client (assuming client ID 1 exists from demo data)
+      const client = await storage.getClient(1);
+      if (!client) {
+        return res.status(400).json({ message: "Please create demo client data first" });
+      }
+
+      // Create sample showings
+      const now = new Date();
+      const showings = [
+        {
+          agentId,
+          clientId: client.id,
+          propertyId: createdProperties[0].id,
+          scheduledDate: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
+          showingType: "scheduled",
+          status: "scheduled",
+          agentPresent: true,
+          commissionProtected: true,
+          agentNotes: "Client very interested in this property. Schedule follow-up."
+        },
+        {
+          agentId,
+          clientId: client.id,
+          propertyId: createdProperties[1].id,
+          scheduledDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+          actualStartTime: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          actualEndTime: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000 + 45 * 60 * 1000).toISOString(),
+          showingType: "scheduled",
+          status: "completed",
+          agentPresent: true,
+          commissionProtected: true,
+          clientFeedback: "Loved the open floor plan and neighborhood",
+          agentNotes: "Strong interest. Client wants to see similar properties.",
+          interestLevel: "high",
+          nextSteps: "Schedule second showing and prepare offer strategy"
+        }
+      ];
+
+      const createdShowings = [];
+      for (const showing of showings) {
+        const created = await storage.createShowing(showing);
+        createdShowings.push(created);
+      }
+
+      // Create sample property visits (including unauthorized ones)
+      const propertyVisits = [
+        {
+          agentId,
+          clientId: client.id,
+          propertyId: createdProperties[2].id,
+          visitDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+          visitType: "drive-by",
+          duration: "15",
+          agentPresent: false,
+          wasScheduled: false,
+          discoveryMethod: "client-report",
+          riskLevel: "medium",
+          followUpRequired: true,
+          notes: "Client mentioned driving by this property after our scheduled showing"
+        },
+        {
+          agentId,
+          clientId: client.id,
+          propertyId: createdProperties[0].id,
+          visitDate: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+          visitType: "walk-by",
+          duration: "30",
+          agentPresent: false,
+          wasScheduled: false,
+          discoveryMethod: "gps-tracking",
+          riskLevel: "high",
+          followUpRequired: true,
+          notes: "GPS tracking detected unauthorized visit. Need to establish commission protection immediately."
+        }
+      ];
+
+      const createdVisits = [];
+      for (const visit of propertyVisits) {
+        const created = await storage.createPropertyVisit(visit);
+        createdVisits.push(created);
+      }
+
+      // Create commission protection records
+      const protections = [
+        {
+          agentId,
+          clientId: client.id,
+          propertyId: createdProperties[0].id,
+          protectionType: "showing",
+          protectionDate: new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(),
+          expirationDate: new Date(now.getTime() + 89 * 24 * 60 * 60 * 1000).toISOString(), // 90 days from yesterday
+          evidenceType: "gps-tracking",
+          evidenceData: { showingId: createdShowings[0].id, locationData: "verified" },
+          status: "active",
+          notes: "Commission protection established through scheduled showing and GPS verification"
+        },
+        {
+          agentId,
+          clientId: client.id,
+          propertyId: createdProperties[1].id,
+          protectionType: "showing",
+          protectionDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          expirationDate: new Date(now.getTime() + 88 * 24 * 60 * 60 * 1000).toISOString(),
+          evidenceType: "signed-document",
+          evidenceData: { showingId: createdShowings[1].id, signedAgreement: true },
+          status: "active",
+          notes: "Strong protection with signed buyer agreement and completed showing"
+        },
+        {
+          agentId,
+          clientId: client.id,
+          propertyId: createdProperties[2].id,
+          protectionType: "inquiry",
+          protectionDate: new Date().toISOString(),
+          expirationDate: new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+          evidenceType: "gps-tracking",
+          evidenceData: { unauthorizedVisit: true, followUpAction: "immediate protection" },
+          status: "active",
+          notes: "Emergency commission protection due to unauthorized client visit detected via GPS"
+        }
+      ];
+
+      const createdProtections = [];
+      for (const protection of protections) {
+        const created = await storage.createCommissionProtection(protection);
+        createdProtections.push(created);
+      }
+
+      res.json({
+        message: "Sample showing tracker data created successfully",
+        data: {
+          properties: createdProperties.length,
+          showings: createdShowings.length,
+          propertyVisits: createdVisits.length,
+          commissionProtections: createdProtections.length
+        }
+      });
+
+    } catch (error) {
+      console.error("Error creating demo showing data:", error);
+      res.status(500).json({ message: "Failed to create demo showing data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
