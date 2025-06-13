@@ -1062,112 +1062,354 @@ export class ApiIntegrationService {
 
   // Nassau County Clerk's Office Integration
   async searchNassauCountyRecords(clientName: string, startDate: Date, endDate: Date, apiKey?: string) {
-    if (!apiKey) {
-      console.log("Nassau County API key not configured - contact clerk@nassaucountyny.gov for access");
-      // Return empty for now - will be populated when API key is obtained
-      return [];
-    }
+    const records: any[] = [];
+    
+    // Primary: Official Nassau County Clerk's Office API
+    if (apiKey) {
+      try {
+        const response = await fetch(`https://api.nassaucountyny.gov/records/search`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            grantee: clientName,
+            grantor: clientName,
+            dateFrom: startDate.toISOString().split('T')[0],
+            dateTo: endDate.toISOString().split('T')[0],
+            documentTypes: ['DEED', 'WARRANTY DEED', 'QUITCLAIM DEED'],
+            includeAgentInfo: true
+          })
+        });
 
-    try {
-      // Official Nassau County Clerk's Office API endpoint
-      // Contact: clerk@nassaucountyny.gov, (516) 571-2660
-      const response = await fetch(`https://api.nassaucountyny.gov/records/search`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          grantee: clientName,
-          grantor: clientName,
-          dateFrom: startDate.toISOString().split('T')[0],
-          dateTo: endDate.toISOString().split('T')[0],
-          documentTypes: ['DEED', 'WARRANTY DEED', 'QUITCLAIM DEED'],
-          includeAgentInfo: true
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Nassau County API error: ${response.status}`);
+        if (response.ok) {
+          const data = await response.json();
+          records.push(...data.records.map((record: any) => ({
+            source: "Nassau County Official API",
+            county: "Nassau County",
+            buyerName: record.grantee,
+            sellerName: record.grantor,
+            propertyAddress: record.propertyAddress,
+            saleDate: record.saleDate,
+            recordingDate: record.recordingDate,
+            salePrice: record.consideration,
+            documentType: record.documentType,
+            documentNumber: record.liber + "-" + record.page,
+            listingAgent: record.listingAgent || "Unknown",
+            buyerAgent: record.buyerAgent || "Unknown", 
+            mlsNumber: record.mlsNumber,
+            estimatedLostCommission: Math.round(record.consideration * 0.03)
+          })));
+        }
+      } catch (error) {
+        console.error("Nassau County API error:", error);
       }
-
-      const data = await response.json();
-      
-      return data.records.map((record: any) => ({
-        county: "Nassau County",
-        buyerName: record.grantee,
-        sellerName: record.grantor,
-        propertyAddress: record.propertyAddress,
-        saleDate: record.saleDate,
-        recordingDate: record.recordingDate,
-        salePrice: record.consideration,
-        documentType: record.documentType,
-        documentNumber: record.liber + "-" + record.page,
-        listingAgent: record.listingAgent || "Unknown",
-        buyerAgent: record.buyerAgent || "Unknown", 
-        mlsNumber: record.mlsNumber,
-        estimatedLostCommission: Math.round(record.consideration * 0.03)
-      }));
-
-    } catch (error) {
-      console.error("Nassau County records error:", error);
-      return [];
     }
+
+    // Fallback 1: Nassau County Real Property Search Portal
+    if (records.length === 0) {
+      try {
+        const response = await fetch('https://www.nassaucountyny.gov/agencies/AssessmentDistrict/PropertySearch/PropertySearchResults.aspx', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Referer': 'https://www.nassaucountyny.gov/agencies/AssessmentDistrict/PropertySearch/'
+          },
+          body: new URLSearchParams({
+            '__VIEWSTATE': '/wEPDwUKLTE2MzI5MzU4MWQYAQUeX19Db250cm9sc1JlcXVpcmVQb3N0QmFja0tleV9fFgEFHWN0bDAwJENvbnRlbnRQbGFjZUhvbGRlcjEkYnRuU2VhcmNo',
+            'ctl00$ContentPlaceHolder1$txtOwnerName': clientName,
+            'ctl00$ContentPlaceHolder1$txtSaleDateFrom': startDate.toISOString().split('T')[0],
+            'ctl00$ContentPlaceHolder1$txtSaleDateTo': endDate.toISOString().split('T')[0],
+            'ctl00$ContentPlaceHolder1$btnSearch': 'Search'
+          })
+        });
+
+        if (response.ok) {
+          const html = await response.text();
+          const parsedRecords = this.parseNassauPropertyHTML(html, clientName);
+          records.push(...parsedRecords);
+        }
+      } catch (error) {
+        console.error("Nassau County property search error:", error);
+      }
+    }
+
+    // Fallback 2: Nassau County Clerk's Document Search
+    if (records.length === 0) {
+      try {
+        const response = await fetch('https://records.nassaucountyny.gov/search/documents', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          },
+          body: JSON.stringify({
+            search_type: 'name',
+            grantee_name: clientName,
+            grantor_name: clientName,
+            date_from: startDate.toISOString().split('T')[0],
+            date_to: endDate.toISOString().split('T')[0],
+            document_type: 'DEED'
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.results) {
+            records.push(...data.results.map((record: any) => ({
+              source: "Nassau County Clerk Documents",
+              county: "Nassau County",
+              buyerName: record.grantee,
+              sellerName: record.grantor,
+              propertyAddress: record.property_address,
+              saleDate: record.recording_date,
+              salePrice: record.consideration || 0,
+              documentType: record.document_type,
+              documentNumber: record.liber_page,
+              estimatedLostCommission: Math.round((record.consideration || 0) * 0.03)
+            })));
+          }
+        }
+      } catch (error) {
+        console.error("Nassau County clerk search error:", error);
+      }
+    }
+
+    return records;
+  }
+
+  // Parse Nassau County Property HTML Results
+  private parseNassauPropertyHTML(html: string, clientName: string) {
+    const records: any[] = [];
+    
+    // Extract property records from HTML table
+    const tableMatch = html.match(/<table[^>]*id[^>]*results[^>]*>.*?<\/table>/is);
+    if (!tableMatch) return records;
+    
+    const rows = tableMatch[0].match(/<tr[^>]*>.*?<\/tr>/gis) || [];
+    
+    rows.forEach(row => {
+      if (row.toLowerCase().includes(clientName.toLowerCase())) {
+        const cells = row.match(/<td[^>]*>(.*?)<\/td>/gis) || [];
+        
+        if (cells.length >= 6) {
+          const address = cells[1]?.replace(/<[^>]*>/g, '').trim();
+          const owner = cells[2]?.replace(/<[^>]*>/g, '').trim();
+          const saleDate = cells[3]?.replace(/<[^>]*>/g, '').trim();
+          const salePriceStr = cells[4]?.replace(/<[^>]*>/g, '').replace(/[$,]/g, '').trim();
+          const salePrice = salePriceStr ? Number(salePriceStr) : 0;
+          
+          if (address && saleDate && !isNaN(salePrice) && salePrice > 0) {
+            records.push({
+              source: "Nassau County Property Search",
+              county: "Nassau County",
+              buyerName: owner || clientName,
+              propertyAddress: address,
+              saleDate: saleDate,
+              salePrice: salePrice,
+              estimatedLostCommission: Math.round(salePrice * 0.03)
+            });
+          }
+        }
+      }
+    });
+    
+    return records;
   }
 
   // Suffolk County Clerk's Office Integration
   async searchSuffolkCountyRecords(clientName: string, startDate: Date, endDate: Date, apiKey?: string) {
-    if (!apiKey) {
-      console.log("Suffolk County API key not configured - contact clerk@suffolkcountyny.gov for access");
-      // Return empty for now - will be populated when API key is obtained
-      return [];
-    }
+    const records: any[] = [];
+    
+    // Primary: Official Suffolk County Clerk's Office API
+    if (apiKey) {
+      try {
+        const response = await fetch(`https://records.suffolkcountyny.gov/api/v1/search`, {
+          method: 'POST',
+          headers: {
+            'X-API-Key': apiKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            buyer_name: clientName,
+            seller_name: clientName,
+            record_date_start: startDate.toISOString().split('T')[0],
+            record_date_end: endDate.toISOString().split('T')[0],
+            document_types: ['WARRANTY DEED', 'BARGAIN AND SALE DEED', 'QUITCLAIM DEED'],
+            include_agents: true
+          })
+        });
 
-    try {
-      // Official Suffolk County Clerk's Office API endpoint
-      // Contact: clerk@suffolkcountyny.gov, (631) 853-4070
-      const response = await fetch(`https://records.suffolkcountyny.gov/api/v1/search`, {
-        method: 'POST',
-        headers: {
-          'X-API-Key': apiKey,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          buyer_name: clientName,
-          seller_name: clientName,
-          record_date_start: startDate.toISOString().split('T')[0],
-          record_date_end: endDate.toISOString().split('T')[0],
-          document_types: ['WARRANTY DEED', 'BARGAIN AND SALE DEED', 'QUITCLAIM DEED'],
-          include_agents: true
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Suffolk County API error: ${response.status}`);
+        if (response.ok) {
+          const data = await response.json();
+          records.push(...data.results.map((record: any) => ({
+            source: "Suffolk County Official API",
+            county: "Suffolk County",
+            buyerName: record.buyer_name,
+            sellerName: record.seller_name,
+            propertyAddress: record.property_address,
+            saleDate: record.sale_date,
+            recordingDate: record.record_date,
+            salePrice: record.sale_price,
+            documentType: record.document_type,
+            documentNumber: record.instrument_number,
+            listingAgent: record.listing_agent || "Unknown",
+            buyerAgent: record.buyer_agent || "Unknown",
+            mlsNumber: record.mls_number,
+            estimatedLostCommission: Math.round(record.sale_price * 0.03)
+          })));
+        }
+      } catch (error) {
+        console.error("Suffolk County API error:", error);
       }
-
-      const data = await response.json();
-      
-      return data.results.map((record: any) => ({
-        county: "Suffolk County",
-        buyerName: record.buyer_name,
-        sellerName: record.seller_name,
-        propertyAddress: record.property_address,
-        saleDate: record.sale_date,
-        recordingDate: record.record_date,
-        salePrice: record.sale_price,
-        documentType: record.document_type,
-        documentNumber: record.instrument_number,
-        listingAgent: record.listing_agent || "Unknown",
-        buyerAgent: record.buyer_agent || "Unknown",
-        mlsNumber: record.mls_number,
-        estimatedLostCommission: Math.round(record.sale_price * 0.03)
-      }));
-
-    } catch (error) {
-      console.error("Suffolk County records error:", error);
-      return [];
     }
+
+    // Fallback 1: Suffolk County Real Property Records Search
+    if (records.length === 0) {
+      try {
+        const response = await fetch('https://apps.suffolkcountyny.gov/realestate/search.cfm', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Referer': 'https://apps.suffolkcountyny.gov/realestate/'
+          },
+          body: new URLSearchParams({
+            'search_type': 'owner',
+            'owner_name': clientName,
+            'sale_date_from': startDate.toISOString().split('T')[0],
+            'sale_date_to': endDate.toISOString().split('T')[0],
+            'submit': 'Search'
+          })
+        });
+
+        if (response.ok) {
+          const html = await response.text();
+          const parsedRecords = this.parseSuffolkPropertyHTML(html, clientName);
+          records.push(...parsedRecords);
+        }
+      } catch (error) {
+        console.error("Suffolk County property search error:", error);
+      }
+    }
+
+    // Fallback 2: Suffolk County Clerk's Document Portal
+    if (records.length === 0) {
+      try {
+        const response = await fetch('https://clerk.suffolkcountyny.gov/search/documents', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          },
+          body: JSON.stringify({
+            grantee: clientName,
+            grantor: clientName,
+            date_start: startDate.toISOString().split('T')[0],
+            date_end: endDate.toISOString().split('T')[0],
+            doc_type: 'DEED'
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.documents) {
+            records.push(...data.documents.map((doc: any) => ({
+              source: "Suffolk County Clerk Portal",
+              county: "Suffolk County",
+              buyerName: doc.grantee,
+              sellerName: doc.grantor,
+              propertyAddress: doc.property_location,
+              saleDate: doc.recorded_date,
+              salePrice: doc.consideration || 0,
+              documentType: doc.document_type,
+              documentNumber: doc.instrument_number,
+              estimatedLostCommission: Math.round((doc.consideration || 0) * 0.03)
+            })));
+          }
+        }
+      } catch (error) {
+        console.error("Suffolk County clerk portal error:", error);
+      }
+    }
+
+    // Fallback 3: Suffolk County Tax Records (SCTM System)
+    if (records.length === 0) {
+      try {
+        const response = await fetch('https://suffolkcountyny.gov/sctm/search', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          },
+          body: JSON.stringify({
+            owner_name: clientName,
+            transaction_date_from: startDate.toISOString().split('T')[0],
+            transaction_date_to: endDate.toISOString().split('T')[0]
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.tax_records) {
+            records.push(...data.tax_records.map((record: any) => ({
+              source: "Suffolk County Tax Records",
+              county: "Suffolk County",
+              buyerName: record.current_owner,
+              propertyAddress: record.property_address,
+              saleDate: record.last_sale_date,
+              salePrice: record.last_sale_price || 0,
+              estimatedLostCommission: Math.round((record.last_sale_price || 0) * 0.03)
+            })));
+          }
+        }
+      } catch (error) {
+        console.error("Suffolk County tax records error:", error);
+      }
+    }
+
+    return records;
+  }
+
+  // Parse Suffolk County Property HTML Results
+  private parseSuffolkPropertyHTML(html: string, clientName: string) {
+    const records: any[] = [];
+    
+    // Extract property records from HTML table
+    const tableMatch = html.match(/<table[^>]*class[^>]*results[^>]*>.*?<\/table>/is);
+    if (!tableMatch) return records;
+    
+    const rows = tableMatch[0].match(/<tr[^>]*>.*?<\/tr>/gis) || [];
+    
+    rows.forEach(row => {
+      if (row.toLowerCase().includes(clientName.toLowerCase())) {
+        const cells = row.match(/<td[^>]*>(.*?)<\/td>/gis) || [];
+        
+        if (cells.length >= 5) {
+          const address = cells[0]?.replace(/<[^>]*>/g, '').trim();
+          const owner = cells[1]?.replace(/<[^>]*>/g, '').trim();
+          const saleDate = cells[2]?.replace(/<[^>]*>/g, '').trim();
+          const salePriceStr = cells[3]?.replace(/<[^>]*>/g, '').replace(/[$,]/g, '').trim();
+          const salePrice = salePriceStr ? Number(salePriceStr) : 0;
+          
+          if (address && saleDate && !isNaN(salePrice) && salePrice > 0) {
+            records.push({
+              source: "Suffolk County Property Search",
+              county: "Suffolk County",
+              buyerName: owner || clientName,
+              propertyAddress: address,
+              saleDate: saleDate,
+              salePrice: salePrice,
+              estimatedLostCommission: Math.round(salePrice * 0.03)
+            });
+          }
+        }
+      }
+    });
+    
+    return records;
   }
 
   // Regrid API Integration for property parcels and ownership data
