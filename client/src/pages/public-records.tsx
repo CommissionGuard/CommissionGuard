@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "../lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,13 +55,28 @@ export default function PublicRecordsPage() {
 
   const searchMutation = useMutation({
     mutationFn: async (searchData: { clientName: string; startDate: string; endDate: string; county: string }) => {
+      let endpoint = "/api/public-records/search";
       if (searchData.county === "nassau") {
-        return apiRequest("/api/public-records/nassau", "POST", searchData) as Promise<SearchResult>;
+        endpoint = "/api/public-records/nassau";
       } else if (searchData.county === "suffolk") {
-        return apiRequest("/api/public-records/suffolk", "POST", searchData) as Promise<SearchResult>;
-      } else {
-        return apiRequest("/api/public-records/search", "POST", searchData) as Promise<SearchResult>;
+        endpoint = "/api/public-records/suffolk";
       }
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(searchData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Search failed: ${response.status} ${errorText}`);
+      }
+
+      return await response.json() as SearchResult;
     },
     onSuccess: (data) => {
       const recordCount = data.recordsFound || data.monitoring?.scanResults?.totalRecordsFound || 0;
