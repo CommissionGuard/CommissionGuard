@@ -358,9 +358,15 @@ export class ApiIntegrationService {
 
       // Fallback: Public Property APIs
       if (allRecords.length === 0) {
-        console.log("Using fallback public records APIs");
+        console.log("Using fallback public records APIs for Nassau/Suffolk County");
         const fallbackRecords = await this.searchPublicPropertyAPIs(clientName, contractStart, contractEnd);
         allRecords = fallbackRecords;
+      }
+
+      // Immediate fallback: Public property search engines
+      if (allRecords.length === 0) {
+        console.log("Searching public property databases for Nassau/Suffolk County");
+        allRecords = await this.searchPublicPropertyDatabases(clientName, contractStart, contractEnd);
       }
 
       // Filter for commission breaches
@@ -654,6 +660,404 @@ export class ApiIntegrationService {
       console.error("MLS API error:", error);
       return [];
     }
+  }
+
+  // Public Data Sources Search (Web Scraping & Open Records)
+  async searchPublicDataSources(clientName: string, startDate: Date, endDate: Date) {
+    const records: any[] = [];
+    
+    try {
+      // Nassau County Public Records Portal
+      const nassauPublicRecords = await this.scrapeNassauPublicRecords(clientName, startDate, endDate);
+      records.push(...nassauPublicRecords);
+      
+      // Suffolk County Public Records Portal  
+      const suffolkPublicRecords = await this.scrapeSuffolkPublicRecords(clientName, startDate, endDate);
+      records.push(...suffolkPublicRecords);
+      
+      // MLS Public Listings Archive
+      const mlsPublicData = await this.searchMLSPublicListings(clientName, startDate, endDate);
+      records.push(...mlsPublicData);
+      
+    } catch (error) {
+      console.error("Public data sources search error:", error);
+    }
+    
+    return records;
+  }
+
+  // Nassau County Public Records Portal Scraping
+  async scrapeNassauPublicRecords(clientName: string, startDate: Date, endDate: Date) {
+    try {
+      // Nassau County has a public records search at:
+      // https://www.nassaucountyny.gov/agencies/CountyClerk/ClerkRecords/
+      
+      const response = await fetch('https://www.nassaucountyny.gov/api/public-records/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'Mozilla/5.0 (compatible; CommissionGuard/1.0)'
+        },
+        body: new URLSearchParams({
+          'grantee': clientName,
+          'grantor': clientName,
+          'dateFrom': startDate.toISOString().split('T')[0],
+          'dateTo': endDate.toISOString().split('T')[0],
+          'docType': 'DEED'
+        })
+      });
+
+      if (response.ok) {
+        const html = await response.text();
+        // Parse HTML response for property records
+        return this.parseNassauRecordsHTML(html, clientName);
+      }
+      
+    } catch (error) {
+      console.error("Nassau County public records error:", error);
+    }
+    
+    return [];
+  }
+
+  // Suffolk County Public Records Portal Scraping
+  async scrapeSuffolkPublicRecords(clientName: string, startDate: Date, endDate: Date) {
+    try {
+      // Suffolk County public records search
+      // https://www.suffolkcountyny.gov/Departments/CountyClerk/RecordsSearch
+      
+      const response = await fetch('https://records.suffolkcountyny.gov/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (compatible; CommissionGuard/1.0)'
+        },
+        body: JSON.stringify({
+          'buyer_name': clientName,
+          'seller_name': clientName,
+          'start_date': startDate.toISOString().split('T')[0],
+          'end_date': endDate.toISOString().split('T')[0],
+          'document_type': 'WARRANTY DEED'
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return this.parseSuffolkRecordsData(data, clientName);
+      }
+      
+    } catch (error) {
+      console.error("Suffolk County public records error:", error);
+    }
+    
+    return [];
+  }
+
+  // MLS Public Listings Archive Search
+  async searchMLSPublicListings(clientName: string, startDate: Date, endDate: Date) {
+    try {
+      // Search public MLS archives and closed listings
+      const response = await fetch('https://api.mlsli.com/public/closed-sales', {
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (compatible; CommissionGuard/1.0)'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return this.parseMLSPublicData(data, clientName, startDate, endDate);
+      }
+      
+    } catch (error) {
+      console.error("MLS public listings error:", error);
+    }
+    
+    return [];
+  }
+
+  // Parse Nassau County HTML Records
+  private parseNassauRecordsHTML(html: string, clientName: string) {
+    const records: any[] = [];
+    
+    // Parse HTML table rows for property records
+    // This would use a proper HTML parser in production
+    const recordMatches = html.match(/<tr[^>]*>.*?<\/tr>/gi) || [];
+    
+    recordMatches.forEach(row => {
+      if (row.includes(clientName)) {
+        // Extract property details from HTML
+        const addressMatch = row.match(/address['">[^<]*([^<]+)/i);
+        const priceMatch = row.match(/\$([0-9,]+)/);
+        const dateMatch = row.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
+        
+        if (addressMatch && priceMatch && dateMatch) {
+          records.push({
+            source: "Nassau County Public Records",
+            county: "Nassau County",
+            buyerName: clientName,
+            propertyAddress: addressMatch[1],
+            salePrice: parseInt(priceMatch[1].replace(/,/g, '')),
+            saleDate: dateMatch[1],
+            estimatedLostCommission: Math.round(parseInt(priceMatch[1].replace(/,/g, '')) * 0.03)
+          });
+        }
+      }
+    });
+    
+    return records;
+  }
+
+  // Parse Suffolk County JSON Records  
+  private parseSuffolkRecordsData(data: any, clientName: string) {
+    const records: any[] = [];
+    
+    if (data.results) {
+      data.results.forEach((record: any) => {
+        if (record.buyer_name === clientName || record.seller_name === clientName) {
+          records.push({
+            source: "Suffolk County Public Records",
+            county: "Suffolk County", 
+            buyerName: record.buyer_name,
+            sellerName: record.seller_name,
+            propertyAddress: record.property_address,
+            saleDate: record.sale_date,
+            salePrice: record.sale_price,
+            documentNumber: record.instrument_number,
+            estimatedLostCommission: Math.round(record.sale_price * 0.03)
+          });
+        }
+      });
+    }
+    
+    return records;
+  }
+
+  // Parse MLS Public Data
+  private parseMLSPublicData(data: any, clientName: string, startDate: Date, endDate: Date) {
+    const records: any[] = [];
+    
+    if (data.listings) {
+      data.listings.forEach((listing: any) => {
+        const saleDate = new Date(listing.close_date);
+        if (saleDate >= startDate && saleDate <= endDate && 
+            (listing.buyer_name === clientName || listing.co_buyer_name === clientName)) {
+          
+          records.push({
+            source: "MLS Public Archive",
+            county: listing.county,
+            buyerName: listing.buyer_name,
+            propertyAddress: listing.address,
+            saleDate: listing.close_date,
+            salePrice: listing.close_price,
+            listingAgent: listing.listing_agent,
+            buyerAgent: listing.buyer_agent,
+            mlsNumber: listing.mls_number,
+            estimatedLostCommission: Math.round(listing.close_price * 0.03)
+          });
+        }
+      });
+    }
+    
+    return records;
+  }
+
+  // Search Public Property Databases
+  async searchPublicPropertyDatabases(clientName: string, startDate: Date, endDate: Date) {
+    const records: any[] = [];
+
+    try {
+      // Search Zillow Public Records
+      const zillowRecords = await this.searchZillowPublicRecords(clientName, startDate, endDate);
+      records.push(...zillowRecords);
+
+      // Search Realtor.com sold listings
+      const realtorRecords = await this.searchRealtorSoldListings(clientName, startDate, endDate);
+      records.push(...realtorRecords);
+
+      // Search PropertyShark public records
+      const propertySharkRecords = await this.searchPropertySharkRecords(clientName, startDate, endDate);
+      records.push(...propertySharkRecords);
+
+    } catch (error) {
+      console.error("Public property databases search error:", error);
+    }
+
+    return records;
+  }
+
+  // Zillow Public Records Search
+  async searchZillowPublicRecords(clientName: string, startDate: Date, endDate: Date) {
+    try {
+      // Zillow has public APIs for property data
+      const response = await fetch('https://www.zillow.com/webservice/GetSearchResults.htm', {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; CommissionGuard/1.0)'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.text();
+        return this.parseZillowData(data, clientName, startDate, endDate);
+      }
+
+    } catch (error) {
+      console.error("Zillow public records error:", error);
+    }
+
+    return [];
+  }
+
+  // Realtor.com Sold Listings Search
+  async searchRealtorSoldListings(clientName: string, startDate: Date, endDate: Date) {
+    try {
+      // Realtor.com has publicly accessible sold listings
+      const response = await fetch('https://www.realtor.com/api/v1/rdc_search_srp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (compatible; CommissionGuard/1.0)'
+        },
+        body: JSON.stringify({
+          query: {
+            status: ['sold'],
+            state_code: ['NY'],
+            county: ['Nassau County', 'Suffolk County'],
+            sold_date: {
+              min: startDate.toISOString().split('T')[0],
+              max: endDate.toISOString().split('T')[0]
+            }
+          }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return this.parseRealtorData(data, clientName);
+      }
+
+    } catch (error) {
+      console.error("Realtor.com search error:", error);
+    }
+
+    return [];
+  }
+
+  // PropertyShark Records Search
+  async searchPropertySharkRecords(clientName: string, startDate: Date, endDate: Date) {
+    try {
+      // PropertyShark provides public property transaction data
+      const response = await fetch('https://www.propertyshark.com/api/sales/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (compatible; CommissionGuard/1.0)'
+        },
+        body: JSON.stringify({
+          buyer_name: clientName,
+          counties: ['Nassau, NY', 'Suffolk, NY'],
+          date_range: {
+            start: startDate.toISOString().split('T')[0],
+            end: endDate.toISOString().split('T')[0]
+          }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return this.parsePropertySharkData(data, clientName);
+      }
+
+    } catch (error) {
+      console.error("PropertyShark search error:", error);
+    }
+
+    return [];
+  }
+
+  // Parse Zillow Data
+  private parseZillowData(data: string, clientName: string, startDate: Date, endDate: Date) {
+    const records: any[] = [];
+    
+    // Parse XML response for property records
+    const propertyMatches = data.match(/<result>.*?<\/result>/gs) || [];
+    
+    propertyMatches.forEach(property => {
+      const addressMatch = property.match(/<address>.*?<\/address>/s);
+      const lastSoldMatch = property.match(/<lastSoldDate>([^<]+)<\/lastSoldDate>/);
+      const lastSoldPriceMatch = property.match(/<lastSoldPrice[^>]*>([^<]+)<\/lastSoldPrice>/);
+      
+      if (addressMatch && lastSoldMatch && lastSoldPriceMatch) {
+        const saleDate = new Date(lastSoldMatch[1]);
+        if (saleDate >= startDate && saleDate <= endDate) {
+          records.push({
+            source: "Zillow Public Records",
+            county: "Nassau/Suffolk County",
+            buyerName: clientName,
+            propertyAddress: addressMatch[1],
+            saleDate: lastSoldMatch[1],
+            salePrice: parseInt(lastSoldPriceMatch[1].replace(/[^0-9]/g, '')),
+            estimatedLostCommission: Math.round(parseInt(lastSoldPriceMatch[1].replace(/[^0-9]/g, '')) * 0.03)
+          });
+        }
+      }
+    });
+    
+    return records;
+  }
+
+  // Parse Realtor.com Data
+  private parseRealtorData(data: any, clientName: string) {
+    const records: any[] = [];
+    
+    if (data.results) {
+      data.results.forEach((property: any) => {
+        if (property.buyer_name === clientName) {
+          records.push({
+            source: "Realtor.com Sold Listings",
+            county: property.location.county,
+            buyerName: property.buyer_name,
+            propertyAddress: property.location.address,
+            saleDate: property.sold_date,
+            salePrice: property.sold_price,
+            listingAgent: property.listing_agent,
+            buyerAgent: property.buyer_agent,
+            mlsNumber: property.mls_id,
+            estimatedLostCommission: Math.round(property.sold_price * 0.03)
+          });
+        }
+      });
+    }
+    
+    return records;
+  }
+
+  // Parse PropertyShark Data
+  private parsePropertySharkData(data: any, clientName: string) {
+    const records: any[] = [];
+    
+    if (data.sales) {
+      data.sales.forEach((sale: any) => {
+        if (sale.buyer_name === clientName) {
+          records.push({
+            source: "PropertyShark Records",
+            county: sale.county,
+            buyerName: sale.buyer_name,
+            sellerName: sale.seller_name,
+            propertyAddress: sale.property_address,
+            saleDate: sale.sale_date,
+            recordingDate: sale.recording_date,
+            salePrice: sale.sale_price,
+            documentType: sale.deed_type,
+            documentNumber: sale.document_number,
+            estimatedLostCommission: Math.round(sale.sale_price * 0.03)
+          });
+        }
+      });
+    }
+    
+    return records;
   }
 
   // Nassau County Clerk's Office Integration
