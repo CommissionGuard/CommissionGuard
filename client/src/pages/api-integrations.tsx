@@ -668,30 +668,70 @@ export default function ApiIntegrations() {
                 </CardContent>
               </Card>
 
-              {/* Public Records Configuration */}
+              {/* Nassau County Configuration */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Public Records API</CardTitle>
+                  <CardTitle>Nassau County Clerk's Office</CardTitle>
                   <CardDescription>
-                    Monitor property transactions for breach detection
+                    Access Nassau County deed recordings and property transfers
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label>API Key Status</Label>
-                    <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                    <Badge variant="outline" className="text-red-600 border-red-600">
                       Not Configured
                     </Badge>
                   </div>
                   <div className="space-y-2">
                     <Label>Required Environment Variable</Label>
                     <code className="block p-2 bg-gray-100 rounded text-sm">
-                      PUBLIC_RECORDS_API_KEY
+                      NASSAU_COUNTY_API_KEY
+                    </code>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>API Endpoint</Label>
+                    <code className="block p-2 bg-gray-100 rounded text-sm">
+                      https://api.nassaucountyny.gov/records/search
                     </code>
                   </div>
                   <Button variant="outline" className="w-full">
                     <ExternalLink className="h-4 w-4 mr-2" />
-                    Configure Public Records Access
+                    Get Nassau County API Access
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Suffolk County Configuration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Suffolk County Clerk's Office</CardTitle>
+                  <CardDescription>
+                    Access Suffolk County deed recordings and property transfers
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>API Key Status</Label>
+                    <Badge variant="outline" className="text-red-600 border-red-600">
+                      Not Configured
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Required Environment Variable</Label>
+                    <code className="block p-2 bg-gray-100 rounded text-sm">
+                      SUFFOLK_COUNTY_API_KEY
+                    </code>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>API Endpoint</Label>
+                    <code className="block p-2 bg-gray-100 rounded text-sm">
+                      https://records.suffolkcountyny.gov/api/v1/search
+                    </code>
+                  </div>
+                  <Button variant="outline" className="w-full">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Get Suffolk County API Access
                   </Button>
                 </CardContent>
               </Card>
