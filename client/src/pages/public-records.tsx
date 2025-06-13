@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Search, FileText, MapPin, DollarSign, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { Search, FileText, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Navbar from "@/components/navbar";
+import AnimatedBackground from "@/components/animated-background";
 
 interface PublicRecord {
   source: string;
@@ -26,13 +28,23 @@ interface PublicRecord {
 
 interface SearchResult {
   success: boolean;
-  county: string;
+  county?: string;
   clientName: string;
   searchPeriod: { startDate: string; endDate: string };
-  recordsFound: number;
-  records: PublicRecord[];
-  apiKeyConfigured: boolean;
-  sources: string[];
+  recordsFound?: number;
+  records?: PublicRecord[];
+  apiKeyConfigured?: boolean;
+  sources?: string[];
+  monitoring?: {
+    scanResults?: {
+      totalRecordsFound: number;
+      breachesDetected: number;
+      estimatedLostCommission: number;
+      breachRecords: PublicRecord[];
+      dataSource: string;
+    };
+    configuredCounties?: string[];
+  };
 }
 
 export default function PublicRecordsPage() {
@@ -41,22 +53,22 @@ export default function PublicRecordsPage() {
   const [endDate, setEndDate] = useState("");
   const [selectedCounty, setSelectedCounty] = useState("both");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const searchMutation = useMutation({
     mutationFn: async (searchData: { clientName: string; startDate: string; endDate: string; county: string }) => {
       if (searchData.county === "nassau") {
-        return apiRequest("/api/public-records/nassau", "POST", searchData);
+        return apiRequest("/api/public-records/nassau", "POST", searchData) as Promise<SearchResult>;
       } else if (searchData.county === "suffolk") {
-        return apiRequest("/api/public-records/suffolk", "POST", searchData);
+        return apiRequest("/api/public-records/suffolk", "POST", searchData) as Promise<SearchResult>;
       } else {
-        return apiRequest("/api/public-records/search", "POST", searchData);
+        return apiRequest("/api/public-records/search", "POST", searchData) as Promise<SearchResult>;
       }
     },
     onSuccess: (data) => {
+      const recordCount = data.recordsFound || data.monitoring?.scanResults?.totalRecordsFound || 0;
       toast({
         title: "Search completed",
-        description: `Found ${data.recordsFound || data.monitoring?.scanResults?.totalRecordsFound || 0} records`,
+        description: `Found ${recordCount} records`,
       });
     },
     onError: (error: any) => {
@@ -172,244 +184,248 @@ export default function PublicRecordsPage() {
     );
   };
 
-  const searchResult = searchMutation.data as SearchResult | any;
+  const searchResult = searchMutation.data;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Nassau & Suffolk County Public Records</h1>
-        <p className="text-gray-600">
-          Search public property records to monitor client transactions and protect your commissions
-        </p>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Search Form */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Search className="w-5 h-5" />
-                Search Records
-              </CardTitle>
-              <CardDescription>
-                Enter client information to search public property records
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Label htmlFor="clientName">Client Name *</Label>
-                <Input
-                  id="clientName"
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                  placeholder="John Smith"
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="county">County</Label>
-                <Select value={selectedCounty} onValueChange={setSelectedCounty}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="both">Both Counties</SelectItem>
-                    <SelectItem value="nassau">Nassau County Only</SelectItem>
-                    <SelectItem value="suffolk">Suffolk County Only</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="startDate">Start Date *</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="endDate">End Date *</Label>
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-
-              <Button 
-                onClick={handleSearch} 
-                disabled={searchMutation.isPending}
-                className="w-full"
-              >
-                {searchMutation.isPending ? "Searching..." : "Search Records"}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* API Status */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="text-sm">API Status</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Nassau County API</span>
-                {getStatusIcon(false)}
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span>Suffolk County API</span>
-                {getStatusIcon(false)}
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Configure API keys for direct county access
-              </p>
-            </CardContent>
-          </Card>
+    <div className="min-h-screen bg-gray-50">
+      <AnimatedBackground />
+      <Navbar />
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Nassau & Suffolk County Public Records</h1>
+          <p className="text-gray-600">
+            Search public property records to monitor client transactions and protect your commissions
+          </p>
         </div>
 
-        {/* Results */}
-        <div className="lg:col-span-2">
-          {searchResult && (
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Search Form */}
+          <div className="lg:col-span-1">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Search Results
+                  <Search className="w-5 h-5" />
+                  Search Records
                 </CardTitle>
                 <CardDescription>
-                  {searchResult.clientName} • {formatDate(searchResult.searchPeriod?.startDate)} to {formatDate(searchResult.searchPeriod?.endDate)}
+                  Enter client information to search public property records
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                {searchResult.monitoring ? (
-                  // Combined search results
-                  <Tabs defaultValue="overview" className="space-y-6">
-                    <TabsList>
-                      <TabsTrigger value="overview">Overview</TabsTrigger>
-                      <TabsTrigger value="records">Records</TabsTrigger>
-                      <TabsTrigger value="breaches">Potential Breaches</TabsTrigger>
-                    </TabsList>
+              <CardContent className="space-y-6">
+                <div>
+                  <Label htmlFor="clientName">Client Name *</Label>
+                  <Input
+                    id="clientName"
+                    value={clientName}
+                    onChange={(e) => setClientName(e.target.value)}
+                    placeholder="John Smith"
+                    className="mt-1"
+                  />
+                </div>
 
-                    <TabsContent value="overview">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <Card>
-                          <CardContent className="pt-6">
-                            <div className="text-2xl font-bold">
-                              {searchResult.monitoring.scanResults?.totalRecordsFound || 0}
-                            </div>
-                            <p className="text-xs text-gray-600">Total Records</p>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="pt-6">
-                            <div className="text-2xl font-bold text-red-600">
-                              {searchResult.monitoring.scanResults?.breachesDetected || 0}
-                            </div>
-                            <p className="text-xs text-gray-600">Potential Breaches</p>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="pt-6">
-                            <div className="text-2xl font-bold text-green-600">
-                              {formatCurrency(searchResult.monitoring.scanResults?.estimatedLostCommission || 0)}
-                            </div>
-                            <p className="text-xs text-gray-600">At Risk Commission</p>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="pt-6">
-                            <div className="text-2xl font-bold">
-                              {searchResult.monitoring.configuredCounties?.length || 0}
-                            </div>
-                            <p className="text-xs text-gray-600">Counties Monitored</p>
-                          </CardContent>
-                        </Card>
-                      </div>
+                <div>
+                  <Label htmlFor="county">County</Label>
+                  <Select value={selectedCounty} onValueChange={setSelectedCounty}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="both">Both Counties</SelectItem>
+                      <SelectItem value="nassau">Nassau County Only</SelectItem>
+                      <SelectItem value="suffolk">Suffolk County Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                      <div className="space-y-4">
-                        <div>
-                          <h3 className="font-semibold mb-2">Data Sources</h3>
-                          <p className="text-sm text-gray-600">{searchResult.monitoring.scanResults?.dataSource}</p>
+                <div>
+                  <Label htmlFor="startDate">Start Date *</Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="endDate">End Date *</Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+
+                <Button 
+                  onClick={handleSearch} 
+                  disabled={searchMutation.isPending}
+                  className="w-full"
+                >
+                  {searchMutation.isPending ? "Searching..." : "Search Records"}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* API Status */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="text-sm">API Status</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Nassau County API</span>
+                  {getStatusIcon(false)}
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span>Suffolk County API</span>
+                  {getStatusIcon(false)}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Configure API keys for direct county access
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Results */}
+          <div className="lg:col-span-2">
+            {searchResult && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Search Results
+                  </CardTitle>
+                  <CardDescription>
+                    {searchResult.clientName} • {formatDate(searchResult.searchPeriod?.startDate)} to {formatDate(searchResult.searchPeriod?.endDate)}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {searchResult.monitoring ? (
+                    // Combined search results
+                    <Tabs defaultValue="overview" className="space-y-6">
+                      <TabsList>
+                        <TabsTrigger value="overview">Overview</TabsTrigger>
+                        <TabsTrigger value="records">Records</TabsTrigger>
+                        <TabsTrigger value="breaches">Potential Breaches</TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="overview">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                          <Card>
+                            <CardContent className="pt-6">
+                              <div className="text-2xl font-bold">
+                                {searchResult.monitoring.scanResults?.totalRecordsFound || 0}
+                              </div>
+                              <p className="text-xs text-gray-600">Total Records</p>
+                            </CardContent>
+                          </Card>
+                          <Card>
+                            <CardContent className="pt-6">
+                              <div className="text-2xl font-bold text-red-600">
+                                {searchResult.monitoring.scanResults?.breachesDetected || 0}
+                              </div>
+                              <p className="text-xs text-gray-600">Potential Breaches</p>
+                            </CardContent>
+                          </Card>
+                          <Card>
+                            <CardContent className="pt-6">
+                              <div className="text-2xl font-bold text-green-600">
+                                {formatCurrency(searchResult.monitoring.scanResults?.estimatedLostCommission || 0)}
+                              </div>
+                              <p className="text-xs text-gray-600">At Risk Commission</p>
+                            </CardContent>
+                          </Card>
+                          <Card>
+                            <CardContent className="pt-6">
+                              <div className="text-2xl font-bold">
+                                {searchResult.monitoring.configuredCounties?.length || 0}
+                              </div>
+                              <p className="text-xs text-gray-600">Counties Monitored</p>
+                            </CardContent>
+                          </Card>
                         </div>
-                        
-                        <div>
-                          <h3 className="font-semibold mb-2">Monitoring Status</h3>
-                          <div className="space-y-1 text-sm">
-                            {searchResult.monitoring.configuredCounties?.map((county: string, index: number) => (
-                              <p key={index} className="text-gray-600">{county}</p>
-                            ))}
+
+                        <div className="space-y-4">
+                          <div>
+                            <h3 className="font-semibold mb-2">Data Sources</h3>
+                            <p className="text-sm text-gray-600">{searchResult.monitoring.scanResults?.dataSource}</p>
+                          </div>
+                          
+                          <div>
+                            <h3 className="font-semibold mb-2">Monitoring Status</h3>
+                            <div className="space-y-1 text-sm">
+                              {searchResult.monitoring.configuredCounties?.map((county: string, index: number) => (
+                                <p key={index} className="text-gray-600">{county}</p>
+                              ))}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </TabsContent>
+                      </TabsContent>
 
-                    <TabsContent value="records">
-                      {renderRecords(searchResult.monitoring.scanResults?.breachRecords || [])}
-                    </TabsContent>
+                      <TabsContent value="records">
+                        {renderRecords(searchResult.monitoring.scanResults?.breachRecords || [])}
+                      </TabsContent>
 
-                    <TabsContent value="breaches">
-                      {searchResult.monitoring.scanResults?.breachRecords?.length > 0 ? (
-                        <div className="space-y-4">
-                          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                            <h3 className="font-semibold text-red-800 mb-2">Commission Protection Alert</h3>
-                            <p className="text-sm text-red-700">
-                              Potential commission breaches detected. Review these transactions carefully.
+                      <TabsContent value="breaches">
+                        {searchResult.monitoring.scanResults?.breachRecords && searchResult.monitoring.scanResults.breachRecords.length > 0 ? (
+                          <div className="space-y-4">
+                            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                              <h3 className="font-semibold text-red-800 mb-2">Commission Protection Alert</h3>
+                              <p className="text-sm text-red-700">
+                                Potential commission breaches detected. Review these transactions carefully.
+                              </p>
+                            </div>
+                            {renderRecords(searchResult.monitoring.scanResults.breachRecords)}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-600" />
+                            <h3 className="font-semibold text-green-800 mb-2">No Breaches Detected</h3>
+                            <p className="text-sm text-green-700">
+                              All transactions appear to be in compliance with your representation agreements.
                             </p>
                           </div>
-                          {renderRecords(searchResult.monitoring.scanResults.breachRecords)}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8">
-                          <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-600" />
-                          <h3 className="font-semibold text-green-800 mb-2">No Breaches Detected</h3>
-                          <p className="text-sm text-green-700">
-                            All transactions appear to be in compliance with your representation agreements.
+                        )}
+                      </TabsContent>
+                    </Tabs>
+                  ) : (
+                    // Single county results
+                    <div>
+                      <div className="flex items-center justify-between mb-6">
+                        <div>
+                          <h3 className="font-semibold">
+                            {searchResult.recordsFound || 0} records found in {searchResult.county}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            Sources: {searchResult.sources?.join(", ") || "Multiple"}
                           </p>
                         </div>
-                      )}
-                    </TabsContent>
-                  </Tabs>
-                ) : (
-                  // Single county results
-                  <div>
-                    <div className="flex items-center justify-between mb-6">
-                      <div>
-                        <h3 className="font-semibold">
-                          {searchResult.recordsFound} records found in {searchResult.county}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          Sources: {searchResult.sources?.join(", ") || "Multiple"}
-                        </p>
+                        <Badge variant={searchResult.apiKeyConfigured ? "default" : "secondary"}>
+                          {searchResult.apiKeyConfigured ? "Official API" : "Public Search"}
+                        </Badge>
                       </div>
-                      <Badge variant={searchResult.apiKeyConfigured ? "default" : "secondary"}>
-                        {searchResult.apiKeyConfigured ? "Official API" : "Public Search"}
-                      </Badge>
+                      {renderRecords(searchResult.records || [])}
                     </div>
-                    {renderRecords(searchResult.records)}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
-          {!searchResult && !searchMutation.isPending && (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center py-8 text-gray-500">
-                  <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Enter search criteria to find public property records</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+            {!searchResult && !searchMutation.isPending && (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center py-8 text-gray-500">
+                    <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Enter search criteria to find public property records</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
     </div>
