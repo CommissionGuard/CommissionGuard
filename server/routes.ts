@@ -561,6 +561,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Nassau County Public Records API
+  app.post("/api/public-records/nassau", isAuthenticated, async (req, res) => {
+    try {
+      const { clientName, startDate, endDate } = req.body;
+      
+      if (!clientName || !startDate || !endDate) {
+        return res.status(400).json({ 
+          error: "Client name, start date, and end date are required" 
+        });
+      }
+
+      const nassauApiKey = process.env.NASSAU_COUNTY_API_KEY;
+      const records = await apiIntegrationService.searchNassauCountyRecords(
+        clientName, 
+        new Date(startDate), 
+        new Date(endDate), 
+        nassauApiKey
+      );
+
+      res.json({
+        success: true,
+        county: "Nassau County",
+        clientName,
+        searchPeriod: { startDate, endDate },
+        recordsFound: records.length,
+        records,
+        apiKeyConfigured: !!nassauApiKey,
+        sources: records.map(r => r.source).filter((v, i, a) => a.indexOf(v) === i)
+      });
+    } catch (error) {
+      console.error("Nassau County records error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Suffolk County Public Records API
+  app.post("/api/public-records/suffolk", isAuthenticated, async (req, res) => {
+    try {
+      const { clientName, startDate, endDate } = req.body;
+      
+      if (!clientName || !startDate || !endDate) {
+        return res.status(400).json({ 
+          error: "Client name, start date, and end date are required" 
+        });
+      }
+
+      const suffolkApiKey = process.env.SUFFOLK_COUNTY_API_KEY;
+      const records = await apiIntegrationService.searchSuffolkCountyRecords(
+        clientName, 
+        new Date(startDate), 
+        new Date(endDate), 
+        suffolkApiKey
+      );
+
+      res.json({
+        success: true,
+        county: "Suffolk County",
+        clientName,
+        searchPeriod: { startDate, endDate },
+        recordsFound: records.length,
+        records,
+        apiKeyConfigured: !!suffolkApiKey,
+        sources: records.map(r => r.source).filter((v, i, a) => a.indexOf(v) === i)
+      });
+    } catch (error) {
+      console.error("Suffolk County records error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Combined Nassau & Suffolk County Public Records Search
+  app.post("/api/public-records/search", isAuthenticated, async (req, res) => {
+    try {
+      const { clientName, startDate, endDate, agentId } = req.body;
+      
+      if (!clientName || !startDate || !endDate) {
+        return res.status(400).json({ 
+          error: "Client name, start date, and end date are required" 
+        });
+      }
+
+      const userAgentId = agentId || req.user.claims.sub;
+      
+      // Use the existing comprehensive monitoring function
+      const monitoring = await apiIntegrationService.monitorPublicRecords(
+        clientName, 
+        startDate, 
+        endDate, 
+        userAgentId
+      );
+
+      res.json({
+        success: true,
+        clientName,
+        searchPeriod: { startDate, endDate },
+        monitoring,
+        apiKeysConfigured: {
+          nassau: !!process.env.NASSAU_COUNTY_API_KEY,
+          suffolk: !!process.env.SUFFOLK_COUNTY_API_KEY
+        }
+      });
+    } catch (error) {
+      console.error("Combined public records search error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Nearby Properties API
   app.get("/api/properties/nearby", isAuthenticated, async (req, res) => {
     try {

@@ -145,7 +145,17 @@ The application uses a comprehensive schema supporting:
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- **June 13, 2025**: Enhanced Nassau & Suffolk County Public Records Integration
+  - Added comprehensive public records search APIs for both counties
+  - Implemented multiple fallback data sources for reliable coverage
+  - Created dedicated frontend interface for public records searches
+  - Added API routes: `/api/public-records/nassau`, `/api/public-records/suffolk`, `/api/public-records/search`
+  - Enhanced existing monitoring system with county-specific implementations
+
 ## Changelog
 
 Changelog:
 - June 13, 2025. Initial setup
+- June 13, 2025. Nassau & Suffolk County public records integration completed
