@@ -414,6 +414,24 @@ export const notificationReminders = pgTable("notification_reminders", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// SMS message tracking for routing client responses back to agents
+export const smsMessages = pgTable("sms_messages", {
+  id: serial("id").primaryKey(),
+  twilioMessageSid: varchar("twilio_message_sid").unique(), // Twilio's unique message ID
+  agentId: varchar("agent_id").notNull().references(() => users.id),
+  clientId: serial("client_id").references(() => clients.id),
+  showingId: serial("showing_id").references(() => showings.id),
+  fromPhone: varchar("from_phone").notNull(), // Phone number message was sent from
+  toPhone: varchar("to_phone").notNull(), // Phone number message was sent to
+  messageBody: text("message_body").notNull(),
+  direction: varchar("direction").notNull(), // "outbound" or "inbound"
+  status: varchar("status").notNull(), // "sent", "delivered", "failed", "received"
+  messageType: varchar("message_type").default("reminder"), // "reminder", "response", "general"
+  relatedReminderId: serial("related_reminder_id").references(() => notificationReminders.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Calendar integration settings
 export const calendarIntegrations = pgTable("calendar_integrations", {
   id: serial("id").primaryKey(),
@@ -450,10 +468,17 @@ export const calendarEvents = pgTable("calendar_events", {
 });
 
 export type NotificationReminder = typeof notificationReminders.$inferSelect;
+export type SmsMessage = typeof smsMessages.$inferSelect;
 export type CalendarIntegration = typeof calendarIntegrations.$inferSelect;
 export type CalendarEvent = typeof calendarEvents.$inferSelect;
 
 export const insertNotificationReminderSchema = createInsertSchema(notificationReminders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSmsMessageSchema = createInsertSchema(smsMessages).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -472,6 +497,7 @@ export const insertCalendarEventSchema = createInsertSchema(calendarEvents).omit
 });
 
 export type InsertNotificationReminder = z.infer<typeof insertNotificationReminderSchema>;
+export type InsertSmsMessage = z.infer<typeof insertSmsMessageSchema>;
 export type InsertCalendarIntegration = z.infer<typeof insertCalendarIntegrationSchema>;
 export type InsertCalendarEvent = z.infer<typeof insertCalendarEventSchema>;
 

@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import sgMail from "@sendgrid/mail";
 import twilio from "twilio";
 import { db } from "./db.js";
-import { notificationReminders, showings, clients, users } from "../shared/schema.js";
+import { notificationReminders, showings, clients, users, smsMessages } from "../shared/schema.js";
 import { eq, and, isNull, lt } from "drizzle-orm";
 
 // Initialize SendGrid (will need API key from user)
@@ -112,7 +112,14 @@ export class NotificationService {
       if (reminder.notificationMethod === "sms" || reminder.notificationMethod === "both") {
         if (client.phone && twilioClient && process.env.TWILIO_PHONE_NUMBER) {
           try {
-            await this.sendSMS(client.phone, content.sms);
+            await this.sendSMS(
+              client.phone, 
+              content.sms, 
+              reminder.agentId, 
+              reminder.clientId, 
+              reminder.showingId, 
+              reminder.id
+            );
             smsSent = true;
           } catch (smsError) {
             console.error("Failed to send SMS:", smsError);
@@ -212,7 +219,7 @@ export class NotificationService {
     await sgMail.send(msg);
   }
 
-  private async sendSMS(to: string, message: string) {
+  private async sendSMS(to: string, message: string, agentId?: string, clientId?: number, showingId?: number, relatedReminderId?: number) {
     if (!twilioClient) {
       throw new Error("Twilio client not configured");
     }
@@ -229,6 +236,23 @@ export class NotificationService {
       from: process.env.TWILIO_PHONE_NUMBER,
       to: formattedPhone,
     });
+    
+    // Track the SMS message for response routing
+    if (agentId) {
+      await db.insert(smsMessages).values({
+        twilioMessageSid: messageData.sid,
+        agentId,
+        clientId: clientId || null,
+        showingId: showingId || null,
+        fromPhone: process.env.TWILIO_PHONE_NUMBER,
+        toPhone: formattedPhone,
+        messageBody: message,
+        direction: "outbound",
+        status: messageData.status || "sent",
+        messageType: "reminder",
+        relatedReminderId: relatedReminderId || null,
+      });
+    }
     
     console.log(`SMS sent successfully to ${formattedPhone}, SID: ${messageData.sid}`);
     return messageData;
