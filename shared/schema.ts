@@ -269,9 +269,9 @@ export const dripCampaigns = pgTable("drip_campaigns", {
   targetAudience: varchar("target_audience").notNull(), // new_leads, warm_prospects, past_clients, etc.
   campaignType: varchar("campaign_type").notNull(), // welcome, nurture, market_updates, listing_alerts
   status: varchar("status").notNull().default("draft"), // draft, active, paused, completed
-  totalSteps: numeric("total_steps").default(0),
-  enrolledCount: numeric("enrolled_count").default(0),
-  completedCount: numeric("completed_count").default(0),
+  totalSteps: numeric("total_steps").default("0"),
+  enrolledCount: numeric("enrolled_count").default("0"),
+  completedCount: numeric("completed_count").default("0"),
   openRate: numeric("open_rate", { precision: 5, scale: 2 }),
   clickRate: numeric("click_rate", { precision: 5, scale: 2 }),
   responseRate: numeric("response_rate", { precision: 5, scale: 2 }),
@@ -299,13 +299,13 @@ export const campaignEnrollments = pgTable("campaign_enrollments", {
   campaignId: serial("campaign_id").notNull(),
   clientId: serial("client_id").notNull(),
   enrolledDate: timestamp("enrolled_date").defaultNow(),
-  currentStep: numeric("current_step").default(0),
+  currentStep: numeric("current_step").default("0"),
   status: varchar("status").notNull().default("active"), // active, completed, unsubscribed, paused
   lastMessageSent: timestamp("last_message_sent"),
   nextMessageDue: timestamp("next_message_due"),
-  totalMessagesReceived: numeric("total_messages_received").default(0),
-  totalMessagesOpened: numeric("total_messages_opened").default(0),
-  totalLinksClicked: numeric("total_links_clicked").default(0),
+  totalMessagesReceived: numeric("total_messages_received").default("0"),
+  totalMessagesOpened: numeric("total_messages_opened").default("0"),
+  totalLinksClicked: numeric("total_links_clicked").default("0"),
   hasResponded: boolean("has_responded").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

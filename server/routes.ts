@@ -2184,7 +2184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/notifications/reminders", isAuthenticatedOrDemo, async (req: any, res) => {
     try {
       const agentId = req.user.claims.sub;
-      const reminders = await storage.getNotificationRemindersByAgent(agentId);
+      const reminders = await storage.getNotificationRemindersByShowing(agentId);
       res.json(reminders);
     } catch (error: any) {
       console.error("Error fetching reminders:", error);
@@ -2195,7 +2195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/notifications/reminders/showing/:showingId", isAuthenticatedOrDemo, async (req: any, res) => {
     try {
       const showingId = parseInt(req.params.showingId);
-      const reminders = await storage.getRemindersByShowing(showingId);
+      const reminders = await storage.getNotificationRemindersByShowing(showingId);
       res.json(reminders);
     } catch (error: any) {
       console.error("Error fetching showing reminders:", error);
@@ -2206,7 +2206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/notifications/reminders/showing/:showingId", isAuthenticatedOrDemo, async (req: any, res) => {
     try {
       const showingId = parseInt(req.params.showingId);
-      await storage.cancelShowingReminders(showingId);
+      await notificationService.cancelShowingReminders(showingId);
       res.json({ message: "Reminders cancelled successfully" });
     } catch (error: any) {
       console.error("Error cancelling reminders:", error);
