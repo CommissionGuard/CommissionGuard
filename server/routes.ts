@@ -1462,11 +1462,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const agentId = req.user.claims.sub;
       
+      // Debug: Log the incoming request data
+      console.log("Raw request body:", JSON.stringify(req.body, null, 2));
+      
       // Convert date strings to Date objects
       const requestData = { ...req.body, agentId };
-      if (requestData.scheduledDate && typeof requestData.scheduledDate === 'string') {
-        requestData.scheduledDate = new Date(requestData.scheduledDate);
+      
+      // More thorough date conversion
+      if (requestData.scheduledDate) {
+        console.log("Converting scheduledDate:", requestData.scheduledDate, typeof requestData.scheduledDate);
+        if (typeof requestData.scheduledDate === 'string') {
+          requestData.scheduledDate = new Date(requestData.scheduledDate);
+        }
+        console.log("Converted scheduledDate:", requestData.scheduledDate);
       }
+      
       if (requestData.actualStartTime && typeof requestData.actualStartTime === 'string') {
         requestData.actualStartTime = new Date(requestData.actualStartTime);
       }
@@ -1474,11 +1484,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         requestData.actualEndTime = new Date(requestData.actualEndTime);
       }
       
+      console.log("Final request data before schema validation:", JSON.stringify(requestData, null, 2));
+      
       const showingData = insertShowingSchema.parse(requestData);
       const showing = await storage.createShowing(showingData);
       res.json(showing);
     } catch (error) {
       console.error("Error creating showing:", error);
+      if (error instanceof Error) {
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
       res.status(500).json({ message: "Failed to create showing" });
     }
   });
