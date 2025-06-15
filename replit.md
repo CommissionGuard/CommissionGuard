@@ -147,6 +147,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **June 15, 2025**: Enhanced Prospecting Dashboard with Real-Time Data
+  - Connected prospecting stats cards to real database queries instead of static numbers
+  - Active Prospects: Shows count of non-converted clients from client database
+  - Conversion Rate: Calculates percentage of converted vs total clients
+  - Follow-ups Due: Counts showings/meetings scheduled for today or overdue
+  - Pipeline Value: Sums estimated commission values from protection records
+  - Added dynamic styling with conditional colors and status indicators
+  - Enhanced card hover effects and loading states for better user experience
+
+- **June 15, 2025**: Dashboard Stats Cards Navigation Enhancement  
+  - Made all dashboard stats cards clickable with smooth animations
+  - Active Contracts → contracts page, Expiring Soon → filtered contracts view
+  - Potential Breaches → alerts page, Protected Commission → commission tracker page
+  - Created complete commission tracker page with summary stats and detailed records table
+  - Added URL parameter filtering for contract expiration dates (?filter=expiring)
+  - Fixed JavaScript initialization errors and improved data flow
+
 - **June 15, 2025**: Legal Support Button Integration
   - Connected all legal support buttons throughout the application to redirect to centralized support page
   - Updated contract modal "Contact Legal Support" button to properly navigate to support page with legal tab

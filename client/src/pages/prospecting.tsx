@@ -29,6 +29,7 @@ import {
 export default function Prospecting() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const queryClient = useQueryClient();
   const [searchCriteria, setSearchCriteria] = useState({
     location: "",
     priceRange: "",
@@ -49,6 +50,50 @@ export default function Prospecting() {
       return;
     }
   }, [isAuthenticated, isLoading, toast]);
+
+  // Fetch prospecting data
+  const { data: clients = [], isLoading: isLoadingClients } = useQuery({
+    queryKey: ["/api/clients"],
+    enabled: isAuthenticated,
+    staleTime: 60000,
+  });
+
+  const { data: showings = [], isLoading: isLoadingShowings } = useQuery({
+    queryKey: ["/api/showings"],
+    enabled: isAuthenticated,
+    staleTime: 60000,
+  });
+
+  const { data: commissionData = [], isLoading: isLoadingCommission } = useQuery({
+    queryKey: ["/api/commission-protection"],
+    enabled: isAuthenticated,
+    staleTime: 60000,
+  });
+
+  // Calculate prospecting stats
+  const activeProspects = clients.filter((client: any) => !client.isConverted).length;
+  const convertedClients = clients.filter((client: any) => client.isConverted).length;
+  const conversionRate = clients.length > 0 ? Math.round((convertedClients / clients.length) * 100) : 0;
+  
+  // Calculate follow-ups due (showings/meetings scheduled for today or overdue)
+  const today = new Date();
+  const followUpsDue = showings.filter((showing: any) => {
+    const showingDate = new Date(showing.scheduledDate);
+    return showingDate.toDateString() === today.toDateString() || showingDate < today;
+  }).length;
+
+  // Calculate pipeline value from commission protection records
+  const pipelineValue = commissionData.reduce((sum: number, item: any) => 
+    sum + (item.estimatedCommission || 0), 0);
+
+  const formatCurrency = (amount: number) => {
+    if (amount >= 1000000) {
+      return `$${(amount / 1000000).toFixed(1)}M`;
+    } else if (amount >= 1000) {
+      return `$${(amount / 1000).toFixed(0)}K`;
+    }
+    return `$${amount.toLocaleString()}`;
+  };
 
   if (isLoading) {
     return (
@@ -94,31 +139,35 @@ export default function Prospecting() {
 
         {/* Prospecting Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <Card className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">Active Prospects</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">24</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-1">
+                    {isLoadingClients ? "..." : activeProspects}
+                  </p>
                 </div>
                 <div className="bg-blue-100 rounded-full p-3">
                   <Users className="h-6 w-6 text-blue-600" />
                 </div>
               </div>
               <div className="flex items-center mt-4 text-sm">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                <span className="text-green-600 font-medium ml-1">+15%</span>
-                <span className="text-gray-600 ml-1">from last month</span>
+                <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+                <span className="text-blue-600 font-medium ml-1">Active</span>
+                <span className="text-gray-600 ml-1">prospects</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <Card className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">Conversion Rate</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">68%</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-1">
+                    {isLoadingClients ? "..." : `${conversionRate}%`}
+                  </p>
                 </div>
                 <div className="bg-green-100 rounded-full p-3">
                   <TrendingUp className="h-6 w-6 text-green-600" />
@@ -126,44 +175,52 @@ export default function Prospecting() {
               </div>
               <div className="flex items-center mt-4 text-sm">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                <span className="text-green-600 font-medium">Above average</span>
+                <span className="text-green-600 font-medium">
+                  {conversionRate >= 50 ? "Above average" : "Growing"}
+                </span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <Card className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">Follow-ups Due</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">8</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-1">
+                    {isLoadingShowings ? "..." : followUpsDue}
+                  </p>
                 </div>
-                <div className="bg-yellow-100 rounded-full p-3">
-                  <Clock className="h-6 w-6 text-yellow-600" />
+                <div className={`rounded-full p-3 ${followUpsDue > 0 ? 'bg-yellow-100' : 'bg-green-100'}`}>
+                  <Clock className={`h-6 w-6 ${followUpsDue > 0 ? 'text-yellow-600' : 'text-green-600'}`} />
                 </div>
               </div>
               <div className="flex items-center mt-4 text-sm">
-                <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
-                <span className="text-yellow-600 font-medium">Today</span>
+                <div className={`w-2 h-2 rounded-full animate-pulse ${followUpsDue > 0 ? 'bg-yellow-400' : 'bg-green-400'}`}></div>
+                <span className={`font-medium ml-1 ${followUpsDue > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
+                  {followUpsDue > 0 ? "Action needed" : "All caught up"}
+                </span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <Card className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">Pipeline Value</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">$2.4M</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-1">
+                    {isLoadingCommission ? "..." : formatCurrency(pipelineValue)}
+                  </p>
                 </div>
                 <div className="bg-purple-100 rounded-full p-3">
                   <DollarSign className="h-6 w-6 text-purple-600" />
                 </div>
               </div>
               <div className="flex items-center mt-4 text-sm">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                <span className="text-green-600 font-medium">+32%</span>
-                <span className="text-gray-600 ml-1">this quarter</span>
+                <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></div>
+                <span className="text-purple-600 font-medium">Protected</span>
+                <span className="text-gray-600 ml-1">commissions</span>
               </div>
             </CardContent>
           </Card>
