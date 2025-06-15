@@ -7,6 +7,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { useLocation } from "wouter";
 import Navbar from "@/components/navbar";
 import AnimatedBackground from "@/components/animated-background";
+import AiAssistantPanel from "@/components/ai-assistant-panel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

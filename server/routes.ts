@@ -14,8 +14,14 @@ import {
   insertShowingSchema,
   insertLocationTrackingSchema,
   insertPropertyVisitSchema,
-  insertCommissionProtectionSchema
+  insertCommissionProtectionSchema,
+  insertDripCampaignSchema,
+  insertCampaignStepSchema,
+  insertCampaignEnrollmentSchema,
+  insertClientCommunicationSchema,
+  insertAiConversationSchema
 } from "@shared/schema";
+import { aiCommunicationService } from "./aiCommunicationService";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
@@ -1971,6 +1977,179 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating demo showing data:", error);
       res.status(500).json({ message: "Failed to create demo showing data" });
+    }
+  });
+
+  // AI Communication & Drip Campaign routes
+  app.post("/api/drip-campaigns", isAuthenticated, async (req: any, res) => {
+    try {
+      const campaignData = {
+        agentId: req.user.id,
+        campaignType: req.body.campaignType,
+        targetAudience: req.body.targetAudience,
+        description: req.body.description
+      };
+      
+      const result = await aiCommunicationService.createDripCampaign(campaignData);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error creating drip campaign:", error);
+      res.status(500).json({ message: error.message || "Failed to create drip campaign" });
+    }
+  });
+
+  app.get("/api/drip-campaigns", isAuthenticated, async (req: any, res) => {
+    try {
+      const campaigns = await storage.getDripCampaignsByAgent(req.user.id);
+      res.json(campaigns);
+    } catch (error: any) {
+      console.error("Error fetching drip campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch drip campaigns" });
+    }
+  });
+
+  app.get("/api/drip-campaigns/:id/steps", isAuthenticated, async (req: any, res) => {
+    try {
+      const steps = await storage.getCampaignSteps(parseInt(req.params.id));
+      res.json(steps);
+    } catch (error: any) {
+      console.error("Error fetching campaign steps:", error);
+      res.status(500).json({ message: "Failed to fetch campaign steps" });
+    }
+  });
+
+  app.post("/api/ai/generate-message", isAuthenticated, async (req: any, res) => {
+    try {
+      const { messageType, clientId, context } = req.body;
+      
+      const client = await storage.getClient(clientId);
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+
+      const agent = await storage.getUser(req.user.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+
+      const message = await aiCommunicationService.generatePersonalizedMessage(
+        messageType,
+        client,
+        agent,
+        context
+      );
+
+      res.json(message);
+    } catch (error: any) {
+      console.error("Error generating AI message:", error);
+      res.status(500).json({ message: error.message || "Failed to generate message" });
+    }
+  });
+
+  app.post("/api/ai/analyze-inquiry", isAuthenticated, async (req: any, res) => {
+    try {
+      const { inquiryText, clientId } = req.body;
+      
+      let clientData = null;
+      if (clientId) {
+        clientData = await storage.getClient(clientId);
+      }
+
+      const analysis = await aiCommunicationService.analyzeInquiry(inquiryText, clientData);
+      res.json(analysis);
+    } catch (error: any) {
+      console.error("Error analyzing inquiry:", error);
+      res.status(500).json({ message: error.message || "Failed to analyze inquiry" });
+    }
+  });
+
+  app.post("/api/ai/follow-up-suggestions", isAuthenticated, async (req: any, res) => {
+    try {
+      const { clientId, context } = req.body;
+      
+      const client = await storage.getClient(clientId);
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+
+      const communications = await storage.getClientCommunications(clientId);
+      const suggestions = await aiCommunicationService.generateFollowUpSuggestions(
+        client,
+        communications,
+        context
+      );
+
+      res.json(suggestions);
+    } catch (error: any) {
+      console.error("Error generating follow-up suggestions:", error);
+      res.status(500).json({ message: error.message || "Failed to generate suggestions" });
+    }
+  });
+
+  app.post("/api/ai/conversations", isAuthenticated, async (req: any, res) => {
+    try {
+      const { conversationType, title, context, initialMessage } = req.body;
+      
+      const conversation = await aiCommunicationService.createAiConversation(
+        req.user.id,
+        conversationType,
+        title,
+        context,
+        initialMessage
+      );
+
+      res.json(conversation);
+    } catch (error: any) {
+      console.error("Error creating AI conversation:", error);
+      res.status(500).json({ message: error.message || "Failed to create conversation" });
+    }
+  });
+
+  app.post("/api/ai/conversations/:id/continue", isAuthenticated, async (req: any, res) => {
+    try {
+      const { message } = req.body;
+      const conversationId = parseInt(req.params.id);
+      
+      const result = await aiCommunicationService.continueAiConversation(conversationId, message);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error continuing AI conversation:", error);
+      res.status(500).json({ message: error.message || "Failed to continue conversation" });
+    }
+  });
+
+  app.get("/api/ai/conversations", isAuthenticated, async (req: any, res) => {
+    try {
+      const conversations = await storage.getAiConversationsByAgent(req.user.id);
+      res.json(conversations);
+    } catch (error: any) {
+      console.error("Error fetching AI conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
+  app.post("/api/client-communications", isAuthenticated, async (req: any, res) => {
+    try {
+      const communicationData = insertClientCommunicationSchema.parse({
+        ...req.body,
+        agentId: req.user.id
+      });
+      
+      const communication = await storage.createClientCommunication(communicationData);
+      res.json(communication);
+    } catch (error: any) {
+      console.error("Error creating client communication:", error);
+      res.status(500).json({ message: "Failed to create communication record" });
+    }
+  });
+
+  app.get("/api/client-communications/:clientId", isAuthenticated, async (req: any, res) => {
+    try {
+      const communications = await storage.getClientCommunications(parseInt(req.params.clientId));
+      res.json(communications);
+    } catch (error: any) {
+      console.error("Error fetching client communications:", error);
+      res.status(500).json({ message: "Failed to fetch communications" });
     }
   });
 
