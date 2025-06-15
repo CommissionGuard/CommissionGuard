@@ -31,6 +31,7 @@ import PublicRecordsMonitor from "@/pages/public-records-monitor";
 import PublicRecords from "@/pages/public-records";
 import Subscription from "@/pages/subscription";
 import Support from "@/pages/support";
+import CommissionTracker from "@/pages/commission-tracker";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -73,6 +74,7 @@ function Router() {
           <Route path="/rental-market" component={RentalMarket} />
           <Route path="/system-test" component={SystemTest} />
           <Route path="/showing-tracker" component={ShowingTracker} />
+          <Route path="/commission-tracker" component={CommissionTracker} />
           <Route path="/subscription" component={Subscription} />
           <Route path="/support" component={Support} />
           <Route path="/public-records" component={PublicRecordsMonitor} />

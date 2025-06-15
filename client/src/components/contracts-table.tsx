@@ -25,6 +25,13 @@ export default function ContractsTable({ filter }: ContractsTableProps) {
     refetchInterval: 60000, // Refresh every minute instead of 10 seconds
   });
 
+  const isExpiringSoon = (endDate: string) => {
+    const today = new Date();
+    const expiry = new Date(endDate);
+    const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
+  };
+
   // Filter contracts based on the filter prop
   const filteredContracts = useMemo(() => {
     if (!filter || !contracts.length) {
@@ -57,13 +64,6 @@ export default function ContractsTable({ filter }: ContractsTableProps) {
     return type === "buyer" 
       ? "bg-blue-100 text-primary" 
       : "bg-green-100 text-success";
-  };
-
-  const isExpiringSoon = (endDate: string) => {
-    const today = new Date();
-    const expiry = new Date(endDate);
-    const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
   };
 
   const getContractStatus = (contract: any) => {
