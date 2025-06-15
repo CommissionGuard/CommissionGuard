@@ -1472,7 +1472,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (requestData.scheduledDate) {
         console.log("Converting scheduledDate:", requestData.scheduledDate, typeof requestData.scheduledDate);
         if (typeof requestData.scheduledDate === 'string') {
-          requestData.scheduledDate = new Date(requestData.scheduledDate);
+          // Handle both ISO strings and datetime-local format
+          let dateToConvert = requestData.scheduledDate;
+          
+          // If it's a datetime-local format (YYYY-MM-DDTHH:mm), append seconds and timezone
+          if (dateToConvert.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
+            dateToConvert = dateToConvert + ':00.000Z';
+          }
+          
+          const parsedDate = new Date(dateToConvert);
+          // Validate the date is valid
+          if (isNaN(parsedDate.getTime())) {
+            throw new Error(`Invalid scheduledDate: ${requestData.scheduledDate}`);
+          }
+          requestData.scheduledDate = parsedDate;
         }
         console.log("Converted scheduledDate:", requestData.scheduledDate);
       }
