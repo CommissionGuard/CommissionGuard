@@ -16,9 +16,9 @@ export default function ContractsTable() {
   const { data: contracts = [], isLoading, error } = useQuery({
     queryKey: ["/api/contracts"],
     enabled: true, // Always try to fetch contracts
-    retry: 5,
-    staleTime: 30000,
-    refetchInterval: 10000, // Refresh every 10 seconds
+    retry: 3,
+    staleTime: 60000, // Consider data fresh for 1 minute
+    refetchInterval: 60000, // Refresh every minute instead of 10 seconds
   });
 
   const getStatusColor = (status: string) => {

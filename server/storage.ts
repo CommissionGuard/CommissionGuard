@@ -42,6 +42,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, gte, lte, count, sql } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -308,6 +309,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getContractsByAgent(agentId: string): Promise<ContractWithDetails[]> {
+    // First, get all contracts with client and agent details
     const contractsWithDetails = await db
       .select({
         id: contracts.id,
@@ -331,15 +333,47 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contracts.agentId, agentId))
       .orderBy(desc(contracts.createdAt));
 
-    // Get alerts for each contract separately and ensure proper typing
+    if (contractsWithDetails.length === 0) {
+      return [];
+    }
+
+    const contractIds = contractsWithDetails.map(c => c.id);
+
+    // Get all alerts for these contracts in one query
+    const allAlerts = await db
+      .select()
+      .from(alerts)
+      .where(inArray(alerts.contractId, contractIds));
+
+    // Get all signers for these contracts in one query
+    const allSigners = await db
+      .select()
+      .from(contractSigners)
+      .where(inArray(contractSigners.contractId, contractIds))
+      .orderBy(contractSigners.createdAt);
+
+    // Group alerts and signers by contract ID
+    const alertsByContract = new Map<number, typeof allAlerts>();
+    const signersByContract = new Map<number, typeof allSigners>();
+
+    allAlerts.forEach(alert => {
+      if (!alertsByContract.has(alert.contractId!)) {
+        alertsByContract.set(alert.contractId!, []);
+      }
+      alertsByContract.get(alert.contractId!)!.push(alert);
+    });
+
+    allSigners.forEach(signer => {
+      if (!signersByContract.has(signer.contractId)) {
+        signersByContract.set(signer.contractId, []);
+      }
+      signersByContract.get(signer.contractId)!.push(signer);
+    });
+
+    // Build the final result
     const result: ContractWithDetails[] = [];
     for (const contract of contractsWithDetails) {
       if (!contract.client || !contract.agent) continue;
-      
-      const contractAlerts = await db
-        .select()
-        .from(alerts)
-        .where(eq(alerts.contractId, contract.id));
       
       result.push({
         id: contract.id,
@@ -356,20 +390,9 @@ export class DatabaseStorage implements IStorage {
         propertyAddress: contract.propertyAddress,
         client: contract.client,
         agent: contract.agent,
-        alerts: contractAlerts,
-        signers: []
+        alerts: alertsByContract.get(contract.id) || [],
+        signers: signersByContract.get(contract.id) || []
       });
-    }
-
-    // Get signers for each contract
-    for (const contract of result) {
-      const signers = await db
-        .select()
-        .from(contractSigners)
-        .where(eq(contractSigners.contractId, contract.id))
-        .orderBy(contractSigners.createdAt);
-      
-      contract.signers = signers;
     }
 
     return result;
