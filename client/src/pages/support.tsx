@@ -26,6 +26,16 @@ import {
 export default function Support() {
   const { user } = useAuth();
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    // Check for URL parameters to determine which tab to open
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam && ['overview', 'legal', 'it', 'realestate'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, []);
 
   const supportTeams = {
     legal: {
@@ -161,7 +171,7 @@ export default function Support() {
           <p className="text-gray-600 mt-1">Get help from our specialized support teams</p>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="legal">Legal Support</TabsTrigger>
