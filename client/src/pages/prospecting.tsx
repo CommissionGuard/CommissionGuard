@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { useLocation } from "wouter";
 import Navbar from "@/components/navbar";
 import AnimatedBackground from "@/components/animated-background";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,11 +31,31 @@ export default function Prospecting() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [searchCriteria, setSearchCriteria] = useState({
     location: "",
     priceRange: "",
     propertyType: ""
   });
+
+  const handleCardClick = (cardTitle: string) => {
+    switch (cardTitle) {
+      case "Active Prospects":
+        setLocation("/clients");
+        break;
+      case "Conversion Rate":
+        setLocation("/clients");
+        break;
+      case "Follow-ups Due":
+        setLocation("/showing-tracker");
+        break;
+      case "Pipeline Value":
+        setLocation("/commission-tracker");
+        break;
+      default:
+        break;
+    }
+  };
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -139,7 +160,10 @@ export default function Prospecting() {
 
         {/* Prospecting Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
+          <Card 
+            className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+            onClick={() => handleCardClick("Active Prospects")}
+          >
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -160,7 +184,10 @@ export default function Prospecting() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
+          <Card 
+            className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+            onClick={() => handleCardClick("Conversion Rate")}
+          >
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -182,7 +209,10 @@ export default function Prospecting() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
+          <Card 
+            className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+            onClick={() => handleCardClick("Follow-ups Due")}
+          >
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -204,7 +234,10 @@ export default function Prospecting() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
+          <Card 
+            className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+            onClick={() => handleCardClick("Pipeline Value")}
+          >
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>

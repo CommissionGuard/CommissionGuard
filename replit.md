@@ -155,6 +155,8 @@ Preferred communication style: Simple, everyday language.
   - Pipeline Value: Sums estimated commission values from protection records
   - Added dynamic styling with conditional colors and status indicators
   - Enhanced card hover effects and loading states for better user experience
+  - Made all prospecting stats cards clickable with navigation functionality
+  - Active Prospects/Conversion Rate → clients page, Follow-ups Due → showing tracker, Pipeline Value → commission tracker
 
 - **June 15, 2025**: Dashboard Stats Cards Navigation Enhancement  
   - Made all dashboard stats cards clickable with smooth animations
