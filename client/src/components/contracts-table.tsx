@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ export default function ContractsTable({ filter }: ContractsTableProps) {
   const [selectedContract, setSelectedContract] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const { isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
 
   const { data: contracts = [], isLoading, error } = useQuery({
     queryKey: ["/api/contracts"],

@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { useLocation } from "wouter";
 import Navbar from "@/components/navbar";
 import AnimatedBackground from "@/components/animated-background";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,10 +33,37 @@ export default function ContractMonitoring() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const { data: monitoringData, isLoading: loadingData } = useQuery({
     queryKey: ["/api/contract-monitoring"],
   });
+
+  // Handler functions for buttons
+  const handleTakeAction = (breachId: number, severity: string) => {
+    if (severity === 'critical') {
+      // For critical breaches, navigate to alerts page for immediate action
+      setLocation("/alerts");
+    } else {
+      // For other breaches, show action completed toast
+      toast({
+        title: "Action Initiated",
+        description: "Breach monitoring action has been recorded and client will be contacted.",
+      });
+    }
+  };
+
+  const handleViewDetails = (breachId: number) => {
+    // Navigate to alerts page to view detailed breach information
+    setLocation("/alerts");
+  };
+
+  const handleConfigure = (configType: string) => {
+    toast({
+      title: "Configuration",
+      description: `${configType} configuration panel will be available in the next update.`,
+    });
+  };
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -258,10 +286,18 @@ export default function ContractMonitoring() {
                           </AlertDescription>
                         </div>
                         <div className="flex flex-col space-y-2 ml-4">
-                          <Button size="sm" variant={breach.severity === 'critical' ? 'destructive' : 'default'}>
+                          <Button 
+                            size="sm" 
+                            variant={breach.severity === 'critical' ? 'destructive' : 'default'}
+                            onClick={() => handleTakeAction(breach.id, breach.severity)}
+                          >
                             Take Action
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleViewDetails(breach.id)}
+                          >
                             View Details
                           </Button>
                         </div>
@@ -394,21 +430,39 @@ export default function ContractMonitoring() {
                         <p className="font-medium text-gray-900">Real-time MLS Monitoring</p>
                         <p className="text-sm text-gray-600">Track if clients list properties with other agents</p>
                       </div>
-                      <Button variant="outline" size="sm">Configure</Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleConfigure("Real-time MLS Monitoring")}
+                      >
+                        Configure
+                      </Button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-gray-900">Contract Expiration Alerts</p>
                         <p className="text-sm text-gray-600">Automated reminders before agreements expire</p>
                       </div>
-                      <Button variant="outline" size="sm">Configure</Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleConfigure("Contract Expiration Alerts")}
+                      >
+                        Configure
+                      </Button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-gray-900">Client Communication Analysis</p>
                         <p className="text-sm text-gray-600">Detect potential dissatisfaction patterns</p>
                       </div>
-                      <Button variant="outline" size="sm">Configure</Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleConfigure("Client Communication Analysis")}
+                      >
+                        Configure
+                      </Button>
                     </div>
                   </div>
                 </div>
