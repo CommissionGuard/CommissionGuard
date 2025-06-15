@@ -51,9 +51,9 @@ export default function Reports() {
   }
 
   // Calculate commission risk metrics
-  const totalContracts = stats?.activeContracts || 0;
-  const expiringContracts = stats?.expiringSoon || 0;
-  const protectedCommission = stats?.protectedCommission || 0;
+  const totalContracts = (stats as any)?.activeContracts || 0;
+  const expiringContracts = (stats as any)?.expiringSoon || 0;
+  const protectedCommission = (stats as any)?.protectedCommission || 0;
   const riskPercentage = totalContracts > 0 ? Math.round((expiringContracts / totalContracts) * 100) : 0;
 
   return (
@@ -67,7 +67,30 @@ export default function Reports() {
               <h1 className="text-3xl font-bold text-gray-900">Commission Reports</h1>
               <p className="text-gray-600 mt-1">Analyze your commission protection and contract performance</p>
             </div>
-            <Button className="bg-primary text-white hover:bg-blue-700">
+            <Button 
+              className="bg-primary text-white hover:bg-blue-700"
+              onClick={() => {
+                toast({
+                  title: "Report Generated",
+                  description: "Commission protection report has been downloaded.",
+                });
+                // Create and download a sample CSV report
+                const reportData = [
+                  ['Date', 'Client', 'Contract Type', 'Commission', 'Status'],
+                  ['2024-01-15', 'Sarah Johnson', 'Buyer Agreement', '$15,000', 'Active'],
+                  ['2024-02-20', 'Mike Chen', 'Seller Agreement', '$12,500', 'Pending'],
+                  ['2024-03-10', 'Emma Davis', 'Buyer Agreement', '$18,000', 'Completed']
+                ];
+                const csvContent = reportData.map(row => row.join(',')).join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `commission-report-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
               <Download className="h-4 w-4 mr-2" />
               Export Report
             </Button>

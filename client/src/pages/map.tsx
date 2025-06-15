@@ -94,8 +94,14 @@ export default function PropertyMap() {
       });
       return;
     }
+    
+    toast({
+      title: "Searching Properties",
+      description: `Searching for properties in ${searchLocation}...`,
+    });
+    
     // This will trigger the query
-    queryClient.invalidateQueries({ queryKey: ["/api/properties", searchLocation] });
+    queryClient.invalidateQueries({ queryKey: [`/api/properties?location=${encodeURIComponent(searchLocation)}`] });
   };
 
   const handleSavePin = (property: any) => {
