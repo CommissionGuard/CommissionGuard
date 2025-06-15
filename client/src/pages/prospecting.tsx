@@ -409,6 +409,14 @@ export default function Prospecting() {
 
           {/* Sidebar Tools */}
           <div className="space-y-6">
+            <AiAssistantPanel 
+              selectedClient={selectedClient}
+              onClientSelect={(clientId) => {
+                const client = clients?.find((c: any) => c.id === clientId);
+                setSelectedClient(client);
+              }}
+            />
+
             {/* Quick Actions */}
             <Card className="bg-white rounded-xl shadow-sm border border-gray-200">
               <CardHeader>
