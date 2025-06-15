@@ -107,7 +107,9 @@ export default function Navbar() {
                 <DropdownMenuItem onClick={() => setLocation("/subscription")}>
                   Subscription
                 </DropdownMenuItem>
-                <DropdownMenuItem>Support</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLocation("/support")}>
+                  Support
+                </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => window.location.href = "/api/logout"}
                   className="text-red-600"
