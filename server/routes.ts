@@ -1212,6 +1212,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Emergency admin promotion endpoint (remove after setup)
+  app.post("/api/promote-admin", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Promote current user to admin
+      const user = await storage.updateUserRole(userId, "admin");
+      
+      res.json({ 
+        message: "User promoted to admin successfully",
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      console.error("Error promoting user to admin:", error);
+      res.status(500).json({ message: "Failed to promote user to admin" });
+    }
+  });
+
   // Functionality testing endpoint
   app.get("/api/test/functionality", isAuthenticated, async (req: any, res) => {
     try {
