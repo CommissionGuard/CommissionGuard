@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/navbar";
@@ -8,6 +8,16 @@ import AddContractForm from "@/components/add-contract-form";
 export default function Contracts() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const [filter, setFilter] = useState<string | null>(null);
+
+  // Check for URL parameters on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterParam = urlParams.get('filter');
+    if (filterParam) {
+      setFilter(filterParam);
+    }
+  }, []);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -51,7 +61,7 @@ export default function Contracts() {
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           <div className="xl:col-span-2">
-            <ContractsTable />
+            <ContractsTable filter={filter} />
           </div>
           <div>
             <AddContractForm />

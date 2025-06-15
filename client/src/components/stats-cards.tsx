@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Clock, AlertTriangle, DollarSign } from "lucide-react";
 
@@ -6,6 +7,26 @@ export default function StatsCards() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["/api/dashboard/stats"],
   });
+  const [location, setLocation] = useLocation();
+
+  const handleCardClick = (cardTitle: string) => {
+    switch (cardTitle) {
+      case "Active Contracts":
+        setLocation("/contracts");
+        break;
+      case "Expiring Soon":
+        setLocation("/contracts?filter=expiring");
+        break;
+      case "Potential Breaches":
+        setLocation("/alerts");
+        break;
+      case "Protected Commission":
+        setLocation("/commission-tracker");
+        break;
+      default:
+        break;
+    }
+  };
 
   if (isLoading) {
     return (
@@ -69,8 +90,9 @@ export default function StatsCards() {
       {cards.map((card, index) => (
         <Card 
           key={card.title} 
-          className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group"
+          className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group cursor-pointer"
           style={{ animationDelay: `${index * 100}ms` }}
+          onClick={() => handleCardClick(card.title)}
         >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
