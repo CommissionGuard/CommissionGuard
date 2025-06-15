@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Eye } from "lucide-react";
 import ContractModal from "./contract-modal";
 
-export default function ContractsTable() {
+interface ContractsTableProps {
+  filter?: string | null;
+}
+
+export default function ContractsTable({ filter }: ContractsTableProps) {
   const [selectedContract, setSelectedContract] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const { isAuthenticated } = useAuth();
@@ -20,6 +24,19 @@ export default function ContractsTable() {
     staleTime: 60000, // Consider data fresh for 1 minute
     refetchInterval: 60000, // Refresh every minute instead of 10 seconds
   });
+
+  // Filter contracts based on the filter prop
+  const filteredContracts = useMemo(() => {
+    if (!filter || !contracts.length) {
+      return contracts;
+    }
+
+    if (filter === "expiring") {
+      return contracts.filter((contract: any) => isExpiringSoon(contract.endDate));
+    }
+
+    return contracts;
+  }, [contracts, filter]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -105,10 +122,17 @@ export default function ContractsTable() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          {!contracts || contracts.length === 0 ? (
+          {!filteredContracts || filteredContracts.length === 0 ? (
             <div className="text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Contracts Found</h3>
-              <p className="text-gray-600">Start by adding your first client and contract.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {filter === "expiring" ? "No Expiring Contracts" : "No Contracts Found"}
+              </h3>
+              <p className="text-gray-600">
+                {filter === "expiring" 
+                  ? "No contracts are expiring within the next 30 days." 
+                  : "Start by adding your first client and contract."
+                }
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -124,7 +148,7 @@ export default function ContractsTable() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {contracts.map((contract: any) => {
+                  {filteredContracts.map((contract: any) => {
                     const contractStatus = getContractStatus(contract);
                     const clientInitials = contract.client?.fullName
                       ?.split(" ")
