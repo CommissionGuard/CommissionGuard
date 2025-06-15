@@ -15,6 +15,9 @@ import {
   campaignEnrollments,
   clientCommunications,
   aiConversations,
+  notificationReminders,
+  calendarIntegrations,
+  calendarEvents,
   type User,
   type UpsertUser,
   type InsertClient,
@@ -47,6 +50,12 @@ import {
   type ClientCommunication,
   type InsertAiConversation,
   type AiConversation,
+  type InsertNotificationReminder,
+  type NotificationReminder,
+  type InsertCalendarIntegration,
+  type CalendarIntegration,
+  type InsertCalendarEvent,
+  type CalendarEvent,
   type ClientWithContracts,
   type ContractWithDetails,
   type AlertWithDetails,
@@ -56,7 +65,7 @@ import {
   type CommissionProtectionWithDetails,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, gte, lte, count, sql } from "drizzle-orm";
+import { eq, and, desc, asc, gte, lte, lt, count, sql } from "drizzle-orm";
 import { inArray } from "drizzle-orm";
 
 // Interface for storage operations

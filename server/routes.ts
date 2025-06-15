@@ -1512,6 +1512,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const showingData = insertShowingSchema.parse(requestData);
       const showing = await storage.createShowing(showingData);
+      
+      // Schedule automated reminders (24 hours and 1 hour before showing)
+      try {
+        await notificationService.scheduleShowingReminders(
+          showing.id, 
+          agentId, 
+          showing.clientId, 
+          showing.scheduledDate
+        );
+      } catch (error) {
+        console.error("Error scheduling reminders:", error);
+        // Don't fail the showing creation if reminder scheduling fails
+      }
+      
+      // Create calendar event in external calendars
+      try {
+        await calendarService.createCalendarEvent(showing.id, agentId);
+      } catch (error) {
+        console.error("Error creating calendar event:", error);
+        // Don't fail the showing creation if calendar sync fails
+      }
+      
       res.json(showing);
     } catch (error) {
       console.error("Error creating showing:", error);
@@ -2155,6 +2177,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error fetching client communications:", error);
       res.status(500).json({ message: "Failed to fetch communications" });
+    }
+  });
+
+  // Notification reminder routes
+  app.get("/api/notifications/reminders", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const reminders = await storage.getNotificationRemindersByAgent(agentId);
+      res.json(reminders);
+    } catch (error: any) {
+      console.error("Error fetching reminders:", error);
+      res.status(500).json({ message: "Failed to fetch reminders" });
+    }
+  });
+
+  app.get("/api/notifications/reminders/showing/:showingId", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const showingId = parseInt(req.params.showingId);
+      const reminders = await storage.getRemindersByShowing(showingId);
+      res.json(reminders);
+    } catch (error: any) {
+      console.error("Error fetching showing reminders:", error);
+      res.status(500).json({ message: "Failed to fetch showing reminders" });
+    }
+  });
+
+  app.delete("/api/notifications/reminders/showing/:showingId", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const showingId = parseInt(req.params.showingId);
+      await storage.cancelShowingReminders(showingId);
+      res.json({ message: "Reminders cancelled successfully" });
+    } catch (error: any) {
+      console.error("Error cancelling reminders:", error);
+      res.status(500).json({ message: "Failed to cancel reminders" });
+    }
+  });
+
+  // Calendar integration routes
+  app.post("/api/calendar/integrations", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const integrationData = insertCalendarIntegrationSchema.parse({ ...req.body, agentId });
+      const integration = await storage.createCalendarIntegration(integrationData);
+      res.json(integration);
+    } catch (error: any) {
+      console.error("Error creating calendar integration:", error);
+      res.status(500).json({ message: "Failed to create calendar integration" });
+    }
+  });
+
+  app.get("/api/calendar/integrations", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const integrations = await storage.getCalendarIntegrationsByAgent(agentId);
+      res.json(integrations);
+    } catch (error: any) {
+      console.error("Error fetching calendar integrations:", error);
+      res.status(500).json({ message: "Failed to fetch calendar integrations" });
+    }
+  });
+
+  app.put("/api/calendar/integrations/:id", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const integration = await storage.updateCalendarIntegration(id, updates);
+      res.json(integration);
+    } catch (error: any) {
+      console.error("Error updating calendar integration:", error);
+      res.status(500).json({ message: "Failed to update calendar integration" });
+    }
+  });
+
+  app.post("/api/calendar/google/setup", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const { authCode } = req.body;
+      const integration = await calendarService.setupGoogleCalendar(agentId, authCode);
+      res.json(integration);
+    } catch (error: any) {
+      console.error("Error setting up Google Calendar:", error);
+      res.status(500).json({ message: "Failed to setup Google Calendar integration" });
+    }
+  });
+
+  app.post("/api/calendar/outlook/setup", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const { accessToken, refreshToken } = req.body;
+      const integration = await calendarService.setupOutlookCalendar(agentId, accessToken, refreshToken);
+      res.json(integration);
+    } catch (error: any) {
+      console.error("Error setting up Outlook Calendar:", error);
+      res.status(500).json({ message: "Failed to setup Outlook Calendar integration" });
+    }
+  });
+
+  app.get("/api/calendar/events/showing/:showingId", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const showingId = parseInt(req.params.showingId);
+      const events = await storage.getCalendarEventsByShowing(showingId);
+      res.json(events);
+    } catch (error: any) {
+      console.error("Error fetching calendar events:", error);
+      res.status(500).json({ message: "Failed to fetch calendar events" });
+    }
+  });
+
+  // Notification processing endpoint (for scheduled tasks)
+  app.post("/api/notifications/process", async (req: any, res) => {
+    try {
+      await notificationService.processPendingReminders();
+      res.json({ message: "Processed pending reminders" });
+    } catch (error: any) {
+      console.error("Error processing reminders:", error);
+      res.status(500).json({ message: "Failed to process reminders" });
     }
   });
 
