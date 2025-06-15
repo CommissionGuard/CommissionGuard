@@ -330,7 +330,7 @@ export default function ShowingTracker() {
       propertyId: showing.propertyId,
       visitDate: new Date(showing.scheduledDate).toISOString(),
       visitType: "completed-showing",
-      duration: 60, // Default 60 minutes
+      duration: "60", // Default 60 minutes as string
       agentPresent: true,
       wasScheduled: true,
       showingId: showing.id,
@@ -357,7 +357,7 @@ export default function ShowingTracker() {
       propertyId: showing.propertyId,
       visitDate: new Date(showing.scheduledDate).toISOString(),
       visitType: "missed-showing",
-      duration: 0,
+      duration: "0",
       agentPresent: false,
       wasScheduled: true,
       showingId: showing.id,
