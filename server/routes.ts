@@ -1191,15 +1191,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/users/:userId/subscription", isAdmin, async (req: any, res) => {
+  // Additional admin routes for stats and payments
+  app.get("/api/admin/stats", isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const { userId } = req.params;
-      const updates = req.body;
-      await storage.updateUserSubscription(userId, updates);
-      res.json({ message: "User subscription updated successfully" });
+      const stats = await storage.getAdminStats();
+      res.json(stats);
     } catch (error) {
-      console.error("Error updating user subscription:", error);
-      res.status(500).json({ message: "Failed to update user subscription" });
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ message: "Failed to fetch admin stats" });
+    }
+  });
+
+  app.get("/api/admin/payments", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const payments = await storage.getAllPayments();
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+      res.status(500).json({ message: "Failed to fetch payments" });
     }
   });
 

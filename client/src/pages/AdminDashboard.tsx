@@ -35,16 +35,19 @@ export default function AdminDashboard() {
     endDate: ""
   });
 
-  const { data: users = [], isLoading } = useQuery({
+  const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
   });
 
   const updateRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
-      return apiRequest(`/api/admin/users/${userId}/role`, {
+      const response = await fetch(`/api/admin/users/${userId}/role`, {
         method: "PATCH",
-        body: { role }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role })
       });
+      if (!response.ok) throw new Error("Failed to update role");
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
@@ -64,10 +67,13 @@ export default function AdminDashboard() {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ userId, active }: { userId: string; active: boolean }) => {
-      return apiRequest(`/api/admin/users/${userId}/status`, {
+      const response = await fetch(`/api/admin/users/${userId}/status`, {
         method: "PATCH",
-        body: { active }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active })
       });
+      if (!response.ok) throw new Error("Failed to update status");
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
@@ -87,10 +93,13 @@ export default function AdminDashboard() {
 
   const updateSubscriptionMutation = useMutation({
     mutationFn: async ({ userId, data }: { userId: string; data: any }) => {
-      return apiRequest(`/api/admin/users/${userId}/subscription`, {
+      const response = await fetch(`/api/admin/users/${userId}/subscription`, {
         method: "PATCH",
-        body: data
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
       });
+      if (!response.ok) throw new Error("Failed to update subscription");
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
