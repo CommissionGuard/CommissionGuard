@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -10,10 +11,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import ProfileSettingsModal from "./profile-settings-modal";
 
 export default function Navbar() {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
   
   const { data: unreadCount } = useQuery({
     queryKey: ["/api/alerts/unread/count"],
@@ -98,7 +101,9 @@ export default function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>Profile Settings</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowProfileSettings(true)}>
+                  Profile Settings
+                </DropdownMenuItem>
                 <DropdownMenuItem>Subscription</DropdownMenuItem>
                 <DropdownMenuItem>Support</DropdownMenuItem>
                 <DropdownMenuItem 
@@ -112,6 +117,11 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+      
+      <ProfileSettingsModal 
+        open={showProfileSettings} 
+        onOpenChange={setShowProfileSettings} 
+      />
     </nav>
   );
 }

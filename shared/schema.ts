@@ -34,8 +34,10 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  phone: varchar("phone"),
   role: varchar("role").notNull().default("agent"), // agent, broker, admin
   licenseNumber: varchar("license_number"),
+  brokerage: varchar("brokerage"),
   isActive: boolean("is_active").default(true),
   lastLoginAt: timestamp("last_login_at"),
   brokerageId: varchar("brokerage_id"),
