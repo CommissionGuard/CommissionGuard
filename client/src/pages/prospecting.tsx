@@ -33,6 +33,7 @@ export default function Prospecting() {
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const [selectedClient, setSelectedClient] = useState<any>(null);
 
   // Handler functions for prospecting buttons
   const handleGenerateLeads = () => {
@@ -114,20 +115,20 @@ export default function Prospecting() {
   });
 
   // Calculate prospecting stats
-  const activeProspects = clients.filter((client: any) => !client.isConverted).length;
-  const convertedClients = clients.filter((client: any) => client.isConverted).length;
-  const conversionRate = clients.length > 0 ? Math.round((convertedClients / clients.length) * 100) : 0;
+  const activeProspects = Array.isArray(clients) ? clients.filter((client: any) => !client.isConverted).length : 0;
+  const convertedClients = Array.isArray(clients) ? clients.filter((client: any) => client.isConverted).length : 0;
+  const conversionRate = Array.isArray(clients) && clients.length > 0 ? Math.round((convertedClients / clients.length) * 100) : 0;
   
   // Calculate follow-ups due (showings/meetings scheduled for today or overdue)
   const today = new Date();
-  const followUpsDue = showings.filter((showing: any) => {
+  const followUpsDue = Array.isArray(showings) ? showings.filter((showing: any) => {
     const showingDate = new Date(showing.scheduledDate);
     return showingDate.toDateString() === today.toDateString() || showingDate < today;
-  }).length;
+  }).length : 0;
 
   // Calculate pipeline value from commission protection records
-  const pipelineValue = commissionData.reduce((sum: number, item: any) => 
-    sum + (item.estimatedCommission || 0), 0);
+  const pipelineValue = Array.isArray(commissionData) ? 
+    commissionData.reduce((sum: number, item: any) => sum + (item.estimatedCommission || 0), 0) : 0;
 
   const formatCurrency = (amount: number) => {
     if (amount >= 1000000) {
@@ -412,7 +413,7 @@ export default function Prospecting() {
             <AiAssistantPanel 
               selectedClient={selectedClient}
               onClientSelect={(clientId) => {
-                const client = clients?.find((c: any) => c.id === clientId);
+                const client = Array.isArray(clients) ? clients.find((c: any) => c.id === clientId) : null;
                 setSelectedClient(client);
               }}
             />

@@ -299,7 +299,7 @@ export default function AiAssistantPanel({ selectedClient, onClientSelect }: AiA
                   <div className="h-16 bg-gray-200 rounded"></div>
                   <div className="h-16 bg-gray-200 rounded"></div>
                 </div>
-              ) : campaigns.length > 0 ? (
+              ) : Array.isArray(campaigns) && campaigns.length > 0 ? (
                 <div className="space-y-2">
                   {campaigns.map((campaign: any) => (
                     <div key={campaign.id} className="border border-gray-200 rounded-lg p-3">
