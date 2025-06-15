@@ -260,6 +260,142 @@ export const buyerPreApprovals = pgTable("buyer_pre_approvals", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// AI Communication & Campaign tables
+export const dripCampaigns = pgTable("drip_campaigns", {
+  id: serial("id").primaryKey(),
+  agentId: varchar("agent_id").notNull(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  targetAudience: varchar("target_audience").notNull(), // new_leads, warm_prospects, past_clients, etc.
+  campaignType: varchar("campaign_type").notNull(), // welcome, nurture, market_updates, listing_alerts
+  status: varchar("status").notNull().default("draft"), // draft, active, paused, completed
+  totalSteps: numeric("total_steps").default(0),
+  enrolledCount: numeric("enrolled_count").default(0),
+  completedCount: numeric("completed_count").default(0),
+  openRate: numeric("open_rate", { precision: 5, scale: 2 }),
+  clickRate: numeric("click_rate", { precision: 5, scale: 2 }),
+  responseRate: numeric("response_rate", { precision: 5, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const campaignSteps = pgTable("campaign_steps", {
+  id: serial("id").primaryKey(),
+  campaignId: serial("campaign_id").notNull(),
+  stepNumber: numeric("step_number").notNull(),
+  title: varchar("title").notNull(),
+  messageType: varchar("message_type").notNull(), // email, sms, call_reminder
+  delayDays: numeric("delay_days").notNull(), // Days after previous step or enrollment
+  subject: varchar("subject"), // For emails
+  content: text("content").notNull(),
+  aiGenerated: boolean("ai_generated").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const campaignEnrollments = pgTable("campaign_enrollments", {
+  id: serial("id").primaryKey(),
+  campaignId: serial("campaign_id").notNull(),
+  clientId: serial("client_id").notNull(),
+  enrolledDate: timestamp("enrolled_date").defaultNow(),
+  currentStep: numeric("current_step").default(0),
+  status: varchar("status").notNull().default("active"), // active, completed, unsubscribed, paused
+  lastMessageSent: timestamp("last_message_sent"),
+  nextMessageDue: timestamp("next_message_due"),
+  totalMessagesReceived: numeric("total_messages_received").default(0),
+  totalMessagesOpened: numeric("total_messages_opened").default(0),
+  totalLinksClicked: numeric("total_links_clicked").default(0),
+  hasResponded: boolean("has_responded").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const clientCommunications = pgTable("client_communications", {
+  id: serial("id").primaryKey(),
+  agentId: varchar("agent_id").notNull(),
+  clientId: serial("client_id").notNull(),
+  campaignId: serial("campaign_id"), // If part of a campaign
+  stepId: serial("step_id"), // If part of a campaign step
+  communicationType: varchar("communication_type").notNull(), // email, sms, call, meeting, manual
+  direction: varchar("direction").notNull(), // outbound, inbound
+  subject: varchar("subject"),
+  content: text("content"),
+  aiGenerated: boolean("ai_generated").default(false),
+  aiPrompt: text("ai_prompt"), // The prompt used to generate AI content
+  scheduledDate: timestamp("scheduled_date"),
+  sentDate: timestamp("sent_date"),
+  deliveredDate: timestamp("delivered_date"),
+  openedDate: timestamp("opened_date"),
+  clickedDate: timestamp("clicked_date"),
+  respondedDate: timestamp("responded_date"),
+  responseContent: text("response_content"),
+  status: varchar("status").notNull().default("draft"), // draft, scheduled, sent, delivered, opened, clicked, responded, failed
+  priority: varchar("priority").default("normal"), // low, normal, high, urgent
+  tags: jsonb("tags"), // Array of tags for categorization
+  metadata: jsonb("metadata"), // Additional data like email headers, sms delivery receipts
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const aiConversations = pgTable("ai_conversations", {
+  id: serial("id").primaryKey(),
+  agentId: varchar("agent_id").notNull(),
+  clientId: serial("client_id"), // Optional - for client-specific conversations
+  conversationType: varchar("conversation_type").notNull(), // campaign_creation, message_drafting, inquiry_response, market_analysis
+  title: varchar("title"),
+  context: jsonb("context"), // Context data for the AI conversation
+  messages: jsonb("messages").notNull(), // Array of conversation messages
+  isActive: boolean("is_active").default(true),
+  lastMessageAt: timestamp("last_message_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert schemas for new AI communication tables
+export const insertDripCampaignSchema = createInsertSchema(dripCampaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCampaignStepSchema = createInsertSchema(campaignSteps).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCampaignEnrollmentSchema = createInsertSchema(campaignEnrollments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertClientCommunicationSchema = createInsertSchema(clientCommunications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAiConversationSchema = createInsertSchema(aiConversations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Types for AI communication
+export type InsertDripCampaign = z.infer<typeof insertDripCampaignSchema>;
+export type InsertCampaignStep = z.infer<typeof insertCampaignStepSchema>;
+export type InsertCampaignEnrollment = z.infer<typeof insertCampaignEnrollmentSchema>;
+export type InsertClientCommunication = z.infer<typeof insertClientCommunicationSchema>;
+export type InsertAiConversation = z.infer<typeof insertAiConversationSchema>;
+
+export type DripCampaign = typeof dripCampaigns.$inferSelect;
+export type CampaignStep = typeof campaignSteps.$inferSelect;
+export type CampaignEnrollment = typeof campaignEnrollments.$inferSelect;
+export type ClientCommunication = typeof clientCommunications.$inferSelect;
+export type AiConversation = typeof aiConversations.$inferSelect;
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   clients: many(clients),
@@ -270,6 +406,55 @@ export const usersRelations = relations(users, ({ many }) => ({
   locationTracking: many(locationTracking),
   propertyVisits: many(propertyVisits),
   commissionProtection: many(commissionProtection),
+  dripCampaigns: many(dripCampaigns),
+  clientCommunications: many(clientCommunications),
+  aiConversations: many(aiConversations),
+}));
+
+export const dripCampaignsRelations = relations(dripCampaigns, ({ one, many }) => ({
+  agent: one(users, {
+    fields: [dripCampaigns.agentId],
+    references: [users.id],
+  }),
+  steps: many(campaignSteps),
+  enrollments: many(campaignEnrollments),
+}));
+
+export const campaignStepsRelations = relations(campaignSteps, ({ one }) => ({
+  campaign: one(dripCampaigns, {
+    fields: [campaignSteps.campaignId],
+    references: [dripCampaigns.id],
+  }),
+}));
+
+export const campaignEnrollmentsRelations = relations(campaignEnrollments, ({ one }) => ({
+  campaign: one(dripCampaigns, {
+    fields: [campaignEnrollments.campaignId],
+    references: [dripCampaigns.id],
+  }),
+  client: one(clients, {
+    fields: [campaignEnrollments.clientId],
+    references: [clients.id],
+  }),
+}));
+
+export const clientCommunicationsRelations = relations(clientCommunications, ({ one }) => ({
+  agent: one(users, {
+    fields: [clientCommunications.agentId],
+    references: [users.id],
+  }),
+  client: one(clients, {
+    fields: [clientCommunications.clientId],
+    references: [clients.id],
+  }),
+  campaign: one(dripCampaigns, {
+    fields: [clientCommunications.campaignId],
+    references: [dripCampaigns.id],
+  }),
+  step: one(campaignSteps, {
+    fields: [clientCommunications.stepId],
+    references: [campaignSteps.id],
+  }),
 }));
 
 export const clientsRelations = relations(clients, ({ one, many }) => ({

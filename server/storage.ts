@@ -10,6 +10,11 @@ import {
   locationTracking,
   propertyVisits,
   commissionProtection,
+  dripCampaigns,
+  campaignSteps,
+  campaignEnrollments,
+  clientCommunications,
+  aiConversations,
   type User,
   type UpsertUser,
   type InsertClient,
@@ -32,6 +37,16 @@ import {
   type PropertyVisit,
   type InsertCommissionProtection,
   type CommissionProtection,
+  type InsertDripCampaign,
+  type DripCampaign,
+  type InsertCampaignStep,
+  type CampaignStep,
+  type InsertCampaignEnrollment,
+  type CampaignEnrollment,
+  type InsertClientCommunication,
+  type ClientCommunication,
+  type InsertAiConversation,
+  type AiConversation,
   type ClientWithContracts,
   type ContractWithDetails,
   type AlertWithDetails,
@@ -147,6 +162,33 @@ export interface IStorage {
   getCommissionProtectionByProperty(propertyId: number): Promise<CommissionProtectionWithDetails[]>;
   updateCommissionProtection(id: number, updates: Partial<InsertCommissionProtection>): Promise<CommissionProtection>;
   getExpiringProtections(agentId: string, daysAhead: number): Promise<CommissionProtectionWithDetails[]>;
+  
+  // AI Communication & Campaign operations
+  createDripCampaign(campaign: InsertDripCampaign): Promise<DripCampaign>;
+  getDripCampaignsByAgent(agentId: string): Promise<DripCampaign[]>;
+  getDripCampaign(id: number): Promise<DripCampaign | undefined>;
+  updateDripCampaign(id: number, updates: Partial<InsertDripCampaign>): Promise<DripCampaign>;
+  deleteDripCampaign(id: number): Promise<void>;
+  
+  createCampaignStep(step: InsertCampaignStep): Promise<CampaignStep>;
+  getCampaignSteps(campaignId: number): Promise<CampaignStep[]>;
+  updateCampaignStep(id: number, updates: Partial<InsertCampaignStep>): Promise<CampaignStep>;
+  deleteCampaignStep(id: number): Promise<void>;
+  
+  createCampaignEnrollment(enrollment: InsertCampaignEnrollment): Promise<CampaignEnrollment>;
+  getCampaignEnrollments(campaignId: number): Promise<CampaignEnrollment[]>;
+  getClientEnrollments(clientId: number): Promise<CampaignEnrollment[]>;
+  updateCampaignEnrollment(id: number, updates: Partial<InsertCampaignEnrollment>): Promise<CampaignEnrollment>;
+  
+  createClientCommunication(communication: InsertClientCommunication): Promise<ClientCommunication>;
+  getClientCommunications(clientId: number): Promise<ClientCommunication[]>;
+  getAgentCommunications(agentId: string): Promise<ClientCommunication[]>;
+  updateClientCommunication(id: number, updates: Partial<InsertClientCommunication>): Promise<ClientCommunication>;
+  
+  createAiConversation(conversation: InsertAiConversation): Promise<AiConversation>;
+  getAiConversation(id: number): Promise<AiConversation | undefined>;
+  getAiConversationsByAgent(agentId: string): Promise<AiConversation[]>;
+  updateAiConversation(id: number, updates: Partial<InsertAiConversation>): Promise<AiConversation>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1071,6 +1113,103 @@ export class DatabaseStorage implements IStorage {
       client: row.clients!,
       property: row.properties!
     }));
+  }
+
+  // AI Communication & Campaign operations
+  async createDripCampaign(campaign: InsertDripCampaign): Promise<DripCampaign> {
+    const [newCampaign] = await db.insert(dripCampaigns).values(campaign).returning();
+    return newCampaign;
+  }
+
+  async getDripCampaignsByAgent(agentId: string): Promise<DripCampaign[]> {
+    return await db.select().from(dripCampaigns).where(eq(dripCampaigns.agentId, agentId)).orderBy(desc(dripCampaigns.createdAt));
+  }
+
+  async getDripCampaign(id: number): Promise<DripCampaign | undefined> {
+    const [campaign] = await db.select().from(dripCampaigns).where(eq(dripCampaigns.id, id));
+    return campaign;
+  }
+
+  async updateDripCampaign(id: number, updates: Partial<InsertDripCampaign>): Promise<DripCampaign> {
+    const [campaign] = await db.update(dripCampaigns).set(updates).where(eq(dripCampaigns.id, id)).returning();
+    return campaign;
+  }
+
+  async deleteDripCampaign(id: number): Promise<void> {
+    await db.delete(dripCampaigns).where(eq(dripCampaigns.id, id));
+  }
+
+  async createCampaignStep(step: InsertCampaignStep): Promise<CampaignStep> {
+    const [newStep] = await db.insert(campaignSteps).values(step).returning();
+    return newStep;
+  }
+
+  async getCampaignSteps(campaignId: number): Promise<CampaignStep[]> {
+    return await db.select().from(campaignSteps).where(eq(campaignSteps.campaignId, campaignId)).orderBy(asc(campaignSteps.stepNumber));
+  }
+
+  async updateCampaignStep(id: number, updates: Partial<InsertCampaignStep>): Promise<CampaignStep> {
+    const [step] = await db.update(campaignSteps).set(updates).where(eq(campaignSteps.id, id)).returning();
+    return step;
+  }
+
+  async deleteCampaignStep(id: number): Promise<void> {
+    await db.delete(campaignSteps).where(eq(campaignSteps.id, id));
+  }
+
+  async createCampaignEnrollment(enrollment: InsertCampaignEnrollment): Promise<CampaignEnrollment> {
+    const [newEnrollment] = await db.insert(campaignEnrollments).values(enrollment).returning();
+    return newEnrollment;
+  }
+
+  async getCampaignEnrollments(campaignId: number): Promise<CampaignEnrollment[]> {
+    return await db.select().from(campaignEnrollments).where(eq(campaignEnrollments.campaignId, campaignId)).orderBy(desc(campaignEnrollments.enrolledDate));
+  }
+
+  async getClientEnrollments(clientId: number): Promise<CampaignEnrollment[]> {
+    return await db.select().from(campaignEnrollments).where(eq(campaignEnrollments.clientId, clientId)).orderBy(desc(campaignEnrollments.enrolledDate));
+  }
+
+  async updateCampaignEnrollment(id: number, updates: Partial<InsertCampaignEnrollment>): Promise<CampaignEnrollment> {
+    const [enrollment] = await db.update(campaignEnrollments).set(updates).where(eq(campaignEnrollments.id, id)).returning();
+    return enrollment;
+  }
+
+  async createClientCommunication(communication: InsertClientCommunication): Promise<ClientCommunication> {
+    const [newCommunication] = await db.insert(clientCommunications).values(communication).returning();
+    return newCommunication;
+  }
+
+  async getClientCommunications(clientId: number): Promise<ClientCommunication[]> {
+    return await db.select().from(clientCommunications).where(eq(clientCommunications.clientId, clientId)).orderBy(desc(clientCommunications.createdAt));
+  }
+
+  async getAgentCommunications(agentId: string): Promise<ClientCommunication[]> {
+    return await db.select().from(clientCommunications).where(eq(clientCommunications.agentId, agentId)).orderBy(desc(clientCommunications.createdAt));
+  }
+
+  async updateClientCommunication(id: number, updates: Partial<InsertClientCommunication>): Promise<ClientCommunication> {
+    const [communication] = await db.update(clientCommunications).set(updates).where(eq(clientCommunications.id, id)).returning();
+    return communication;
+  }
+
+  async createAiConversation(conversation: InsertAiConversation): Promise<AiConversation> {
+    const [newConversation] = await db.insert(aiConversations).values(conversation).returning();
+    return newConversation;
+  }
+
+  async getAiConversation(id: number): Promise<AiConversation | undefined> {
+    const [conversation] = await db.select().from(aiConversations).where(eq(aiConversations.id, id));
+    return conversation;
+  }
+
+  async getAiConversationsByAgent(agentId: string): Promise<AiConversation[]> {
+    return await db.select().from(aiConversations).where(eq(aiConversations.agentId, agentId)).orderBy(desc(aiConversations.lastMessageAt));
+  }
+
+  async updateAiConversation(id: number, updates: Partial<InsertAiConversation>): Promise<AiConversation> {
+    const [conversation] = await db.update(aiConversations).set(updates).where(eq(aiConversations.id, id)).returning();
+    return conversation;
   }
 }
 
