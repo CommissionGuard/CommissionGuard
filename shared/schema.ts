@@ -35,6 +35,9 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   role: varchar("role").notNull().default("agent"), // agent, broker, admin
+  licenseNumber: varchar("license_number"),
+  isActive: boolean("is_active").default(true),
+  lastLoginAt: timestamp("last_login_at"),
   brokerageId: varchar("brokerage_id"),
   subscriptionStatus: varchar("subscription_status").notNull().default("trial"), // trial, active, expired, cancelled
   subscriptionPlan: varchar("subscription_plan").default("basic"), // basic, premium, enterprise

@@ -50,6 +50,13 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   
+  // Admin operations
+  getAllUsers(): Promise<User[]>;
+  updateUserRole(userId: string, role: string): Promise<User>;
+  deactivateUser(userId: string): Promise<void>;
+  activateUser(userId: string): Promise<void>;
+  updateUserSubscription(userId: string, subscriptionData: any): Promise<User>;
+  
   // Client operations
   createClient(client: InsertClient): Promise<Client>;
   getClient(id: number): Promise<Client | undefined>;
@@ -102,7 +109,6 @@ export interface IStorage {
   }>;
   getAllUsersWithSubscriptions(): Promise<any[]>;
   getAllPayments(): Promise<any[]>;
-  updateUserSubscription(userId: string, updates: any): Promise<void>;
   
   // Property operations
   createProperty(property: InsertProperty): Promise<Property>;
@@ -151,14 +157,74 @@ export class DatabaseStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values({
+        ...userData,
+        lastLoginAt: new Date(),
+      })
       .onConflictDoUpdate({
         target: users.id,
         set: {
           ...userData,
+          lastLoginAt: new Date(),
           updatedAt: new Date(),
         },
       })
+      .returning();
+    return user;
+  }
+
+  // Admin operations
+  async getAllUsers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .orderBy(desc(users.createdAt));
+  }
+
+  async updateUserRole(userId: string, role: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        role: role as any,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async deactivateUser(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        isActive: false,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async activateUser(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        isActive: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserSubscription(userId: string, subscriptionData: any): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        subscriptionStatus: subscriptionData.status,
+        subscriptionPlan: subscriptionData.plan,
+        subscriptionStartDate: subscriptionData.startDate ? new Date(subscriptionData.startDate) : undefined,
+        subscriptionEndDate: subscriptionData.endDate ? new Date(subscriptionData.endDate) : undefined,
+        lastPaymentDate: subscriptionData.lastPaymentDate ? new Date(subscriptionData.lastPaymentDate) : undefined,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
       .returning();
     return user;
   }
@@ -623,22 +689,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateUserSubscription(userId: string, updates: any): Promise<void> {
-    try {
-      await db
-        .update(users)
-        .set({
-          subscriptionStatus: updates.subscriptionStatus,
-          subscriptionPlan: updates.subscriptionPlan,
-          subscriptionEndDate: updates.subscriptionEndDate,
-          updatedAt: new Date()
-        })
-        .where(eq(users.id, userId));
-    } catch (error) {
-      console.error("Error updating user subscription:", error);
-      throw error;
-    }
-  }
+
 
   // Property operations
   async createProperty(property: InsertProperty): Promise<Property> {
