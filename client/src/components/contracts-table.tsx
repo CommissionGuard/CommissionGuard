@@ -118,7 +118,11 @@ export default function ContractsTable({ filter }: ContractsTableProps) {
         <CardHeader className="border-b border-gray-200">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl font-semibold text-gray-900">Active Contracts</CardTitle>
-            <Button variant="link" className="text-primary font-medium hover:underline">
+            <Button 
+              variant="link" 
+              className="text-primary font-medium hover:underline"
+              onClick={() => setLocation("/contracts")}
+            >
               View All
             </Button>
           </div>

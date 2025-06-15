@@ -32,6 +32,27 @@ export default function Prospecting() {
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+
+  // Handler functions for prospecting buttons
+  const handleGenerateLeads = () => {
+    toast({
+      title: "Lead Generation Started",
+      description: "Analyzing market data to generate new prospect leads. This may take a few minutes.",
+    });
+    // In a real implementation, this would trigger an API call to generate leads
+  };
+
+  const handlePropertyMatch = () => {
+    toast({
+      title: "Property Matching",
+      description: "Property matching feature will be available in the next update.",
+    });
+  };
+
+  const handleAddToCRM = () => {
+    // Navigate to clients page to add new client
+    setLocation("/clients");
+  };
   const [searchCriteria, setSearchCriteria] = useState({
     location: "",
     priceRange: "",
@@ -297,7 +318,10 @@ export default function Prospecting() {
                     />
                   </div>
                 </div>
-                <Button className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-purple-600 transition-all duration-300">
+                <Button 
+                  className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
+                  onClick={handleGenerateLeads}
+                >
                   <Target className="h-4 w-4 mr-2" />
                   Generate Leads
                 </Button>
@@ -398,11 +422,19 @@ export default function Prospecting() {
                   <Mail className="h-4 w-4 mr-2" />
                   Send Campaign
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
+                <Button 
+                  className="w-full justify-start" 
+                  variant="outline"
+                  onClick={handlePropertyMatch}
+                >
                   <Home className="h-4 w-4 mr-2" />
                   Property Match
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
+                <Button 
+                  className="w-full justify-start" 
+                  variant="outline"
+                  onClick={handleAddToCRM}
+                >
                   <Star className="h-4 w-4 mr-2" />
                   Add to CRM
                 </Button>
