@@ -2,8 +2,8 @@ import OpenAI from "openai";
 import sgMail from "@sendgrid/mail";
 import twilio from "twilio";
 import { db } from "./db.js";
-import { notificationReminders, showings, clients, users, smsMessages } from "../shared/schema.js";
-import { eq, and, isNull, lt } from "drizzle-orm";
+import { notificationReminders, showings, clients, users } from "../shared/schema.js";
+import { eq, and, isNull, lt, sql } from "drizzle-orm";
 
 // Initialize SendGrid (will need API key from user)
 if (process.env.SENDGRID_API_KEY) {
@@ -237,21 +237,24 @@ export class NotificationService {
       to: formattedPhone,
     });
     
-    // Track the SMS message for response routing
+    // Track the SMS message for response routing using SQL
     if (agentId) {
-      await db.insert(smsMessages).values({
-        twilioMessageSid: messageData.sid,
-        agentId,
-        clientId: clientId || null,
-        showingId: showingId || null,
-        fromPhone: process.env.TWILIO_PHONE_NUMBER,
-        toPhone: formattedPhone,
-        messageBody: message,
-        direction: "outbound",
-        status: messageData.status || "sent",
-        messageType: "reminder",
-        relatedReminderId: relatedReminderId || null,
-      });
+      try {
+        await db.execute(sql`
+          INSERT INTO sms_messages (
+            twilio_message_sid, agent_id, client_id, showing_id, 
+            from_phone, to_phone, message_body, direction, 
+            status, message_type, related_reminder_id
+          ) VALUES (
+            ${messageData.sid}, ${agentId}, ${clientId || null}, ${showingId || null},
+            ${process.env.TWILIO_PHONE_NUMBER}, ${formattedPhone}, ${message}, 
+            'outbound', ${messageData.status || "sent"}, 'reminder', ${relatedReminderId || null}
+          )
+        `);
+      } catch (trackingError) {
+        console.error("Failed to track SMS message:", trackingError);
+        // Continue anyway - don't fail the SMS send
+      }
     }
     
     console.log(`SMS sent successfully to ${formattedPhone}, SID: ${messageData.sid}`);
@@ -303,6 +306,214 @@ export class NotificationService {
 
   async testSMS(phoneNumber: string, message: string) {
     return await this.sendSMS(phoneNumber, message);
+  }
+
+  // Handle incoming SMS responses from clients
+  async handleIncomingSMS(fromPhone: string, messageBody: string, twilioMessageSid: string) {
+    try {
+      // Format the phone number to match our database format
+      const formattedPhone = this.formatPhoneNumber(fromPhone);
+      
+      // Find the client and agent associated with this phone number
+      const clientAgent = await this.findClientByPhone(formattedPhone);
+      
+      if (!clientAgent) {
+        console.log(`No client found for phone number: ${formattedPhone}`);
+        return {
+          success: false,
+          message: "Client not found",
+          shouldReply: false
+        };
+      }
+
+      // Record the incoming SMS using SQL
+      await db.execute(sql`
+        INSERT INTO sms_messages (
+          twilio_message_sid, agent_id, client_id, showing_id,
+          from_phone, to_phone, message_body, direction,
+          status, message_type, related_reminder_id
+        ) VALUES (
+          ${twilioMessageSid}, ${clientAgent.agentId}, ${clientAgent.clientId}, NULL,
+          ${formattedPhone}, ${process.env.TWILIO_PHONE_NUMBER || ""}, ${messageBody},
+          'inbound', 'received', 'response', NULL
+        )
+      `);
+
+      // Analyze the message for context and generate agent notification
+      const response = await this.processClientResponse(messageBody, clientAgent);
+      
+      // Notify the agent about the client response
+      await this.notifyAgent(clientAgent, messageBody, response);
+
+      return {
+        success: true,
+        message: "Response processed and agent notified",
+        shouldReply: response.shouldAutoReply,
+        autoReply: response.autoReply
+      };
+
+    } catch (error) {
+      console.error("Error handling incoming SMS:", error);
+      return {
+        success: false,
+        message: "Error processing SMS",
+        shouldReply: false
+      };
+    }
+  }
+
+  // Find client and their agent by phone number
+  private async findClientByPhone(phoneNumber: string) {
+    const client = await db
+      .select({
+        clientId: clients.id,
+        clientName: clients.name,
+        agentId: clients.agentId,
+        agentEmail: users.email,
+        agentFirstName: users.firstName,
+        agentLastName: users.lastName,
+        agentPhone: users.phone,
+      })
+      .from(clients)
+      .leftJoin(users, eq(clients.agentId, users.id))
+      .where(eq(clients.phone, phoneNumber))
+      .limit(1);
+
+    return client[0] || null;
+  }
+
+  // Process client response using AI to understand context and intent
+  private async processClientResponse(messageBody: string, clientAgent: any) {
+    if (!process.env.OPENAI_API_KEY) {
+      return {
+        category: "general",
+        intent: "unknown",
+        urgency: "normal",
+        shouldAutoReply: false,
+        autoReply: null,
+        summary: messageBody
+      };
+    }
+
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are analyzing client responses to real estate showing reminders. Categorize the message and determine appropriate responses.
+
+Categories: confirmation, cancellation, reschedule, question, complaint, general
+Intent: wants_to_confirm, wants_to_cancel, wants_to_reschedule, has_question, expressing_concern, general_response
+Urgency: low, normal, high, urgent
+
+Return JSON with: category, intent, urgency, shouldAutoReply (boolean), autoReply (string or null), summary (brief summary for agent)`
+          },
+          {
+            role: "user",
+            content: `Client message: "${messageBody}"
+            
+Client: ${clientAgent.clientName}
+Agent: ${clientAgent.agentFirstName} ${clientAgent.agentLastName}`
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 300
+      });
+
+      const result = completion.choices[0]?.message?.content;
+      if (result) {
+        return JSON.parse(result);
+      }
+    } catch (error) {
+      console.error("Error analyzing client response:", error);
+    }
+
+    // Fallback response
+    return {
+      category: "general",
+      intent: "unknown",
+      urgency: "normal",
+      shouldAutoReply: false,
+      autoReply: null,
+      summary: messageBody
+    };
+  }
+
+  // Notify agent about client response via email
+  private async notifyAgent(clientAgent: any, originalMessage: string, analysis: any) {
+    if (!clientAgent.agentEmail || !process.env.SENDGRID_API_KEY) {
+      console.log("Cannot notify agent - missing email or SendGrid config");
+      return;
+    }
+
+    const urgencyEmoji = {
+      low: "🟢",
+      normal: "🟡", 
+      high: "🟠",
+      urgent: "🔴"
+    };
+
+    const subject = `${urgencyEmoji[analysis.urgency]} Client Response: ${clientAgent.clientName}`;
+    
+    const htmlContent = `
+      <h3>Client Response Received</h3>
+      <p><strong>Client:</strong> ${clientAgent.clientName}</p>
+      <p><strong>Category:</strong> ${analysis.category}</p>
+      <p><strong>Intent:</strong> ${analysis.intent}</p>
+      <p><strong>Urgency:</strong> ${analysis.urgency}</p>
+      
+      <h4>Original Message:</h4>
+      <p style="background: #f5f5f5; padding: 10px; border-radius: 5px;">"${originalMessage}"</p>
+      
+      <h4>AI Summary:</h4>
+      <p>${analysis.summary}</p>
+      
+      ${analysis.shouldAutoReply ? `
+        <h4>Auto-Reply Sent:</h4>
+        <p style="background: #e8f5e8; padding: 10px; border-radius: 5px;">"${analysis.autoReply}"</p>
+      ` : ''}
+      
+      <p><em>Reply to this email or contact the client directly to follow up.</em></p>
+    `;
+
+    try {
+      await sgMail.send({
+        to: clientAgent.agentEmail,
+        from: process.env.FROM_EMAIL || "noreply@commissionguard.com",
+        subject,
+        html: htmlContent,
+        text: `Client Response from ${clientAgent.clientName}: "${originalMessage}". Category: ${analysis.category}, Urgency: ${analysis.urgency}. ${analysis.summary}`
+      });
+      
+      console.log(`Agent notification sent to ${clientAgent.agentEmail}`);
+    } catch (error) {
+      console.error("Failed to send agent notification:", error);
+    }
+  }
+
+  // Send auto-reply to client if appropriate
+  async sendAutoReply(toPhone: string, message: string, agentId: string, clientId: number) {
+    try {
+      return await this.sendSMS(toPhone, message, agentId, clientId);
+    } catch (error) {
+      console.error("Failed to send auto-reply:", error);
+      throw error;
+    }
+  }
+
+  // Get SMS conversation history for a client
+  async getSMSHistory(clientId: number, agentId: string) {
+    return await db
+      .select()
+      .from(smsMessages)
+      .where(
+        and(
+          eq(smsMessages.clientId, clientId),
+          eq(smsMessages.agentId, agentId)
+        )
+      )
+      .orderBy(smsMessages.createdAt);
   }
 }
 

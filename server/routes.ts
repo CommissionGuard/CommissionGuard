@@ -2322,6 +2322,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Twilio webhook for incoming SMS responses
+  app.post("/api/webhooks/twilio/sms", async (req: any, res) => {
+    try {
+      const { From, Body, MessageSid } = req.body;
+      
+      if (!From || !Body || !MessageSid) {
+        console.log("Invalid Twilio webhook payload:", req.body);
+        return res.status(400).send("Invalid payload");
+      }
+
+      console.log(`Received SMS from ${From}: "${Body}" (SID: ${MessageSid})`);
+
+      // Process the incoming SMS response
+      const result = await notificationService.handleIncomingSMS(From, Body, MessageSid);
+      
+      // Send auto-reply if appropriate
+      if (result.shouldReply && result.autoReply) {
+        const clientAgent = await notificationService.findClientByPhone(From);
+        if (clientAgent) {
+          await notificationService.sendAutoReply(
+            From, 
+            result.autoReply, 
+            clientAgent.agentId, 
+            clientAgent.clientId
+          );
+        }
+      }
+
+      // Respond to Twilio with TwiML (empty response means no action)
+      res.set('Content-Type', 'text/xml');
+      res.send(`<?xml version="1.0" encoding="UTF-8"?><Response></Response>`);
+      
+    } catch (error: any) {
+      console.error("Error processing Twilio webhook:", error);
+      res.status(500).send("Internal server error");
+    }
+  });
+
+  // Get SMS conversation history for a client
+  app.get("/api/notifications/sms-history/:clientId", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const agentId = req.user?.id;
+      
+      if (!agentId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const history = await notificationService.getSMSHistory(clientId, agentId);
+      res.json(history);
+    } catch (error: any) {
+      console.error("Error fetching SMS history:", error);
+      res.status(500).json({ message: "Failed to fetch SMS history" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
