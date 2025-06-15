@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import sgMail from "@sendgrid/mail";
+import twilio from "twilio";
 import { db } from "./db.js";
 import { notificationReminders, showings, clients, users } from "../shared/schema.js";
 import { eq, and, isNull, lt } from "drizzle-orm";
@@ -7,6 +8,12 @@ import { eq, and, isNull, lt } from "drizzle-orm";
 // Initialize SendGrid (will need API key from user)
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
+
+// Initialize Twilio client
+let twilioClient: twilio.Twilio | null = null;
+if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+  twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 }
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -101,12 +108,22 @@ export class NotificationService {
         }
       }
       
-      // Send SMS if method includes SMS (placeholder - would need SMS service)
+      // Send SMS if method includes SMS
       if (reminder.notificationMethod === "sms" || reminder.notificationMethod === "both") {
-        if (client.phone) {
-          // SMS sending would go here with Twilio or similar service
-          console.log("SMS would be sent to:", client.phone, content.sms);
-          smsSent = true;
+        if (client.phone && twilioClient && process.env.TWILIO_PHONE_NUMBER) {
+          try {
+            await this.sendSMS(client.phone, content.sms);
+            smsSent = true;
+          } catch (smsError) {
+            console.error("Failed to send SMS:", smsError);
+            // Continue with other operations even if SMS fails
+          }
+        } else {
+          console.log("SMS not sent - missing Twilio config or client phone:", {
+            hasPhone: !!client.phone,
+            hasTwilioClient: !!twilioClient,
+            hasTwilioPhone: !!process.env.TWILIO_PHONE_NUMBER
+          });
         }
       }
       
@@ -194,6 +211,51 @@ export class NotificationService {
     
     await sgMail.send(msg);
   }
+
+  private async sendSMS(to: string, message: string) {
+    if (!twilioClient) {
+      throw new Error("Twilio client not configured");
+    }
+    
+    if (!process.env.TWILIO_PHONE_NUMBER) {
+      throw new Error("Twilio phone number not configured");
+    }
+
+    // Format phone number to E.164 format if needed
+    const formattedPhone = this.formatPhoneNumber(to);
+    
+    const messageData = await twilioClient.messages.create({
+      body: message,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: formattedPhone,
+    });
+    
+    console.log(`SMS sent successfully to ${formattedPhone}, SID: ${messageData.sid}`);
+    return messageData;
+  }
+
+  private formatPhoneNumber(phone: string): string {
+    // Remove all non-digit characters
+    const digits = phone.replace(/\D/g, '');
+    
+    // If it's a US number without country code, add +1
+    if (digits.length === 10) {
+      return `+1${digits}`;
+    }
+    
+    // If it already has country code but no +, add it
+    if (digits.length === 11 && digits.startsWith('1')) {
+      return `+${digits}`;
+    }
+    
+    // If it's already formatted correctly, return as is
+    if (phone.startsWith('+')) {
+      return phone;
+    }
+    
+    // Default: assume it needs +1 prefix
+    return `+1${digits}`;
+  }
   
   async cancelShowingReminders(showingId: number) {
     // Mark all pending reminders for this showing as cancelled
@@ -213,6 +275,10 @@ export class NotificationService {
       .select()
       .from(notificationReminders)
       .where(eq(notificationReminders.showingId, showingId));
+  }
+
+  async testSMS(phoneNumber: string, message: string) {
+    return await this.sendSMS(phoneNumber, message);
   }
 }
 

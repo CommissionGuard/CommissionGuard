@@ -2296,6 +2296,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test SMS endpoint
+  app.post("/api/notifications/test-sms", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const { phoneNumber, message } = req.body;
+      
+      if (!phoneNumber || !message) {
+        return res.status(400).json({ message: "Phone number and message are required" });
+      }
+
+      // Test the SMS sending functionality
+      const result = await notificationService.testSMS(phoneNumber, message);
+      res.json({ 
+        message: "SMS sent successfully",
+        sid: result.sid,
+        status: result.status
+      });
+    } catch (error: any) {
+      console.error("Error sending test SMS:", error);
+      res.status(500).json({ 
+        message: "Failed to send SMS",
+        error: error.message,
+        details: error.code || "Unknown error"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
