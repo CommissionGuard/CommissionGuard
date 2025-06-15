@@ -166,6 +166,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Subscription routes
+  app.get("/api/subscription/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const subscriptionData = {
+        plan: user.subscriptionPlan || "trial",
+        status: user.subscriptionStatus || "trial",
+        startDate: user.subscriptionStartDate,
+        endDate: user.subscriptionEndDate,
+        lastPaymentDate: user.lastPaymentDate,
+        paymentHistory: [
+          // Mock payment history for demo - in production this would come from Stripe
+          {
+            id: "pay_123",
+            amount: user.subscriptionPlan === "professional" ? 59 : user.subscriptionPlan === "enterprise" ? 149 : 29,
+            status: "succeeded",
+            date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+          },
+          {
+            id: "pay_124",
+            amount: user.subscriptionPlan === "professional" ? 59 : user.subscriptionPlan === "enterprise" ? 149 : 29,
+            status: "succeeded",
+            date: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000), // 60 days ago
+          }
+        ]
+      };
+
+      res.json(subscriptionData);
+    } catch (error) {
+      console.error("Error fetching subscription status:", error);
+      res.status(500).json({ message: "Failed to fetch subscription status" });
+    }
+  });
+
+  app.post("/api/subscription/upgrade", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { planId } = req.body;
+      
+      // Validate plan ID
+      const validPlans = ["basic", "professional", "enterprise"];
+      if (!validPlans.includes(planId)) {
+        return res.status(400).json({ message: "Invalid plan ID" });
+      }
+
+      // In a real implementation, this would integrate with Stripe
+      // For now, we'll simulate the upgrade process
+      const planPrices = {
+        basic: 29,
+        professional: 59,
+        enterprise: 149
+      };
+
+      // Update user subscription
+      const subscriptionData = {
+        status: "active",
+        plan: planId,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        lastPaymentDate: new Date(),
+      };
+
+      await storage.updateUserSubscription(userId, subscriptionData);
+
+      // In production, return Stripe checkout URL
+      res.json({ 
+        success: true,
+        message: "Subscription upgraded successfully",
+        // paymentUrl: "https://checkout.stripe.com/..." // Would be returned from Stripe
+      });
+    } catch (error) {
+      console.error("Error upgrading subscription:", error);
+      res.status(500).json({ message: "Failed to upgrade subscription" });
+    }
+  });
+
+  app.post("/api/subscription/cancel", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // In a real implementation, this would cancel the Stripe subscription
+      const subscriptionData = {
+        status: "cancelled",
+        endDate: new Date(), // Immediate cancellation for demo
+      };
+
+      await storage.updateUserSubscription(userId, subscriptionData);
+
+      res.json({ 
+        success: true,
+        message: "Subscription cancelled successfully"
+      });
+    } catch (error) {
+      console.error("Error cancelling subscription:", error);
+      res.status(500).json({ message: "Failed to cancel subscription" });
+    }
+  });
+
   // Client routes
   app.post("/api/clients", isAuthenticated, async (req: any, res) => {
     try {

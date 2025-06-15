@@ -29,6 +29,7 @@ import SystemTest from "@/pages/system-test";
 import ShowingTracker from "@/pages/showing-tracker";
 import PublicRecordsMonitor from "@/pages/public-records-monitor";
 import PublicRecords from "@/pages/public-records";
+import Subscription from "@/pages/subscription";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -71,6 +72,7 @@ function Router() {
           <Route path="/rental-market" component={RentalMarket} />
           <Route path="/system-test" component={SystemTest} />
           <Route path="/showing-tracker" component={ShowingTracker} />
+          <Route path="/subscription" component={Subscription} />
           <Route path="/public-records" component={PublicRecordsMonitor} />
           <Route path="/public-records-search" component={PublicRecords} />
           <Route path="*" component={NotFound} />

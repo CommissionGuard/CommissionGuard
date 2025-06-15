@@ -104,7 +104,9 @@ export default function Navbar() {
                 <DropdownMenuItem onClick={() => setShowProfileSettings(true)}>
                   Profile Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem>Subscription</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLocation("/subscription")}>
+                  Subscription
+                </DropdownMenuItem>
                 <DropdownMenuItem>Support</DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => window.location.href = "/api/logout"}
