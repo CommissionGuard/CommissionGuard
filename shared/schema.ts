@@ -396,6 +396,85 @@ export type CampaignEnrollment = typeof campaignEnrollments.$inferSelect;
 export type ClientCommunication = typeof clientCommunications.$inferSelect;
 export type AiConversation = typeof aiConversations.$inferSelect;
 
+// Notification reminders table
+export const notificationReminders = pgTable("notification_reminders", {
+  id: serial("id").primaryKey(),
+  showingId: serial("showing_id").references(() => showings.id).notNull(),
+  agentId: text("agent_id").references(() => users.id).notNull(),
+  clientId: serial("client_id").references(() => clients.id).notNull(),
+  reminderType: text("reminder_type").notNull(), // "24_hour", "1_hour"
+  notificationMethod: text("notification_method").notNull(), // "email", "sms", "both"
+  scheduledFor: timestamp("scheduled_for").notNull(),
+  sentAt: timestamp("sent_at"),
+  status: text("status").default("pending").notNull(), // "pending", "sent", "failed"
+  emailContent: text("email_content"),
+  smsContent: text("sms_content"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Calendar integration settings
+export const calendarIntegrations = pgTable("calendar_integrations", {
+  id: serial("id").primaryKey(),
+  agentId: text("agent_id").references(() => users.id).notNull(),
+  provider: text("provider").notNull(), // "google", "outlook"
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token"),
+  tokenExpiry: timestamp("token_expiry"),
+  calendarId: text("calendar_id"),
+  isActive: boolean("is_active").default(true),
+  syncSettings: jsonb("sync_settings"), // JSON object for sync preferences
+  lastSyncAt: timestamp("last_sync_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Calendar events tracking
+export const calendarEvents = pgTable("calendar_events", {
+  id: serial("id").primaryKey(),
+  showingId: serial("showing_id").references(() => showings.id).notNull(),
+  agentId: text("agent_id").references(() => users.id).notNull(),
+  integrationId: serial("integration_id").references(() => calendarIntegrations.id).notNull(),
+  externalEventId: text("external_event_id").notNull(),
+  provider: text("provider").notNull(),
+  eventTitle: text("event_title").notNull(),
+  eventDescription: text("event_description"),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  location: text("location"),
+  syncStatus: text("sync_status").default("synced").notNull(), // "synced", "pending", "failed"
+  lastSyncAt: timestamp("last_sync_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type NotificationReminder = typeof notificationReminders.$inferSelect;
+export type CalendarIntegration = typeof calendarIntegrations.$inferSelect;
+export type CalendarEvent = typeof calendarEvents.$inferSelect;
+
+export const insertNotificationReminderSchema = createInsertSchema(notificationReminders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCalendarIntegrationSchema = createInsertSchema(calendarIntegrations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCalendarEventSchema = createInsertSchema(calendarEvents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertNotificationReminder = z.infer<typeof insertNotificationReminderSchema>;
+export type InsertCalendarIntegration = z.infer<typeof insertCalendarIntegrationSchema>;
+export type InsertCalendarEvent = z.infer<typeof insertCalendarEventSchema>;
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   clients: many(clients),

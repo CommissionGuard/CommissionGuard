@@ -1211,6 +1211,93 @@ export class DatabaseStorage implements IStorage {
     const [conversation] = await db.update(aiConversations).set(updates).where(eq(aiConversations.id, id)).returning();
     return conversation;
   }
+
+  // Notification reminders storage methods
+  async createNotificationReminder(data: InsertNotificationReminder): Promise<NotificationReminder> {
+    const [reminder] = await db.insert(notificationReminders).values(data).returning();
+    return reminder;
+  }
+
+  async getNotificationRemindersByShowing(showingId: number): Promise<NotificationReminder[]> {
+    return await db.select().from(notificationReminders).where(eq(notificationReminders.showingId, showingId));
+  }
+
+  async getPendingNotificationReminders(): Promise<NotificationReminder[]> {
+    const now = new Date();
+    return await db.select().from(notificationReminders)
+      .where(and(
+        eq(notificationReminders.status, "pending"),
+        lt(notificationReminders.scheduledFor, now)
+      ));
+  }
+
+  async updateNotificationReminder(id: number, updates: Partial<InsertNotificationReminder>): Promise<NotificationReminder> {
+    const [reminder] = await db.update(notificationReminders).set(updates).where(eq(notificationReminders.id, id)).returning();
+    return reminder;
+  }
+
+  async cancelShowingReminders(showingId: number): Promise<void> {
+    await db.update(notificationReminders)
+      .set({ status: "cancelled" })
+      .where(and(
+        eq(notificationReminders.showingId, showingId),
+        eq(notificationReminders.status, "pending")
+      ));
+  }
+
+  // Calendar integration storage methods
+  async createCalendarIntegration(data: InsertCalendarIntegration): Promise<CalendarIntegration> {
+    const [integration] = await db.insert(calendarIntegrations).values(data).returning();
+    return integration;
+  }
+
+  async getCalendarIntegrationsByAgent(agentId: string): Promise<CalendarIntegration[]> {
+    return await db.select().from(calendarIntegrations).where(eq(calendarIntegrations.agentId, agentId));
+  }
+
+  async getActiveCalendarIntegrations(agentId: string): Promise<CalendarIntegration[]> {
+    return await db.select().from(calendarIntegrations)
+      .where(and(
+        eq(calendarIntegrations.agentId, agentId),
+        eq(calendarIntegrations.isActive, true)
+      ));
+  }
+
+  async updateCalendarIntegration(id: number, updates: Partial<InsertCalendarIntegration>): Promise<CalendarIntegration> {
+    const [integration] = await db.update(calendarIntegrations).set(updates).where(eq(calendarIntegrations.id, id)).returning();
+    return integration;
+  }
+
+  async deleteCalendarIntegration(id: number): Promise<void> {
+    await db.delete(calendarIntegrations).where(eq(calendarIntegrations.id, id));
+  }
+
+  // Calendar events storage methods
+  async createCalendarEvent(data: InsertCalendarEvent): Promise<CalendarEvent> {
+    const [event] = await db.insert(calendarEvents).values(data).returning();
+    return event;
+  }
+
+  async getCalendarEventsByShowing(showingId: number): Promise<CalendarEvent[]> {
+    return await db.select().from(calendarEvents).where(eq(calendarEvents.showingId, showingId));
+  }
+
+  async getCalendarEventsByAgent(agentId: string): Promise<CalendarEvent[]> {
+    return await db.select().from(calendarEvents).where(eq(calendarEvents.agentId, agentId));
+  }
+
+  async updateCalendarEvent(id: number, updates: Partial<InsertCalendarEvent>): Promise<CalendarEvent> {
+    const [event] = await db.update(calendarEvents).set(updates).where(eq(calendarEvents.id, id)).returning();
+    return event;
+  }
+
+  async deleteCalendarEvent(id: number): Promise<void> {
+    await db.delete(calendarEvents).where(eq(calendarEvents.id, id));
+  }
+
+  async deleteCalendarEventsByShowing(showingId: number): Promise<void> {
+    await db.delete(calendarEvents).where(eq(calendarEvents.showingId, showingId));
+  }
 }
 
 export const storage = new DatabaseStorage();

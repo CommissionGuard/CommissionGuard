@@ -19,9 +19,14 @@ import {
   insertCampaignStepSchema,
   insertCampaignEnrollmentSchema,
   insertClientCommunicationSchema,
-  insertAiConversationSchema
+  insertAiConversationSchema,
+  insertNotificationReminderSchema,
+  insertCalendarIntegrationSchema,
+  insertCalendarEventSchema
 } from "@shared/schema";
 import { aiCommunicationService } from "./aiCommunicationService";
+import { notificationService } from "./notificationService";
+import { calendarService } from "./calendarService";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
