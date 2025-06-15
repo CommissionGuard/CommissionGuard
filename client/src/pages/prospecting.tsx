@@ -411,7 +411,7 @@ export default function Prospecting() {
           {/* Sidebar Tools */}
           <div className="space-y-6">
             <AiAssistantPanel 
-              selectedClient={selectedClient}
+              selectedClient={selectedClient || null}
               onClientSelect={(clientId) => {
                 const client = Array.isArray(clients) ? clients.find((c: any) => c.id === clientId) : null;
                 setSelectedClient(client);
