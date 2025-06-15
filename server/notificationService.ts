@@ -363,11 +363,11 @@ export class NotificationService {
   }
 
   // Find client and their agent by phone number
-  private async findClientByPhone(phoneNumber: string) {
+  async findClientByPhone(phoneNumber: string) {
     const client = await db
       .select({
         clientId: clients.id,
-        clientName: clients.name,
+        clientName: clients.firstName,
         agentId: clients.agentId,
         agentEmail: users.email,
         agentFirstName: users.firstName,
@@ -502,18 +502,14 @@ Agent: ${clientAgent.agentFirstName} ${clientAgent.agentLastName}`
     }
   }
 
-  // Get SMS conversation history for a client
+  // Get SMS conversation history for a client using SQL
   async getSMSHistory(clientId: number, agentId: string) {
-    return await db
-      .select()
-      .from(smsMessages)
-      .where(
-        and(
-          eq(smsMessages.clientId, clientId),
-          eq(smsMessages.agentId, agentId)
-        )
-      )
-      .orderBy(smsMessages.createdAt);
+    const result = await db.execute(sql`
+      SELECT * FROM sms_messages 
+      WHERE client_id = ${clientId} AND agent_id = ${agentId}
+      ORDER BY created_at ASC
+    `);
+    return result.rows;
   }
 }
 

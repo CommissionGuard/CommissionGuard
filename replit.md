@@ -147,6 +147,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **June 15, 2025**: Twilio SMS Integration with Intelligent Response Routing
+  - Successfully integrated Twilio SMS service for automated showing reminders
+  - Implemented 24-hour and 1-hour advance notifications for scheduled showings
+  - Created comprehensive SMS message tracking system with database storage
+  - Built intelligent response routing that identifies which agent a client belongs to
+  - Added Twilio webhook endpoint to capture and process incoming SMS responses
+  - Implemented AI-powered analysis of client SMS responses for context understanding
+  - Created bidirectional SMS communication with proper agent-client relationship tracking
+  - Added SMS conversation history API for viewing client communication threads
+  - Integrated auto-reply functionality for common client responses
+  - System requires TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER environment variables
+
 - **June 15, 2025**: Complete Showing Tracker with Automated Missed Showing Detection
   - Successfully fixed showing creation - agents can now schedule showings with datetime picker
   - Implemented automated showing status tracking that detects missed appointments after 2 hours
