@@ -147,6 +147,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **June 15, 2025**: Legal Support Button Integration
+  - Connected all legal support buttons throughout the application to redirect to centralized support page
+  - Updated contract modal "Contact Legal Support" button to properly navigate to support page with legal tab
+  - Added URL parameter handling to automatically open specific support tabs via navigation
+  - Enhanced legal support page buttons (Attorney Consultation, Document Review, Dispute Assistance) with proper redirection
+  - Maintained existing AI legal analysis functionality while centralizing human support access
+
 - **June 15, 2025**: Comprehensive Support System Implementation
   - Created multi-tier support center with Legal, IT, and Real Estate support sections
   - Integrated Frontline Realty as exclusive partner for real estate consultation services

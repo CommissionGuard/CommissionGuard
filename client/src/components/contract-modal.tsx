@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ interface ContractModalProps {
 
 export default function ContractModal({ contract, isOpen, onClose }: ContractModalProps) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [location, setLocation] = useLocation();
 
   if (!contract) return null;
 
@@ -177,7 +179,13 @@ export default function ContractModal({ contract, isOpen, onClose }: ContractMod
             Close
           </Button>
           {contract.alerts?.some((alert: any) => alert.type === "breach") && (
-            <Button className="bg-accent text-white hover:bg-red-600">
+            <Button 
+              className="bg-accent text-white hover:bg-red-600"
+              onClick={() => {
+                onClose();
+                setLocation("/support?tab=legal");
+              }}
+            >
               Contact Legal Support
             </Button>
           )}
