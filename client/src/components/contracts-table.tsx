@@ -19,6 +19,13 @@ export default function ContractsTable({ filter }: ContractsTableProps) {
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
 
+  const isExpiringSoon = (endDate: string) => {
+    const today = new Date();
+    const expiry = new Date(endDate);
+    const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
+  };
+
   const { data: contracts = [], isLoading, error } = useQuery({
     queryKey: ["/api/contracts"],
     enabled: true, // Always try to fetch contracts
@@ -26,13 +33,6 @@ export default function ContractsTable({ filter }: ContractsTableProps) {
     staleTime: 60000, // Consider data fresh for 1 minute
     refetchInterval: 60000, // Refresh every minute instead of 10 seconds
   });
-
-  const isExpiringSoon = (endDate: string) => {
-    const today = new Date();
-    const expiry = new Date(endDate);
-    const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
-  };
 
   // Filter contracts based on the filter prop
   const filteredContracts = useMemo(() => {
@@ -45,7 +45,7 @@ export default function ContractsTable({ filter }: ContractsTableProps) {
     }
 
     return contracts;
-  }, [contracts, filter]);
+  }, [contracts, filter, isExpiringSoon]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
