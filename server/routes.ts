@@ -1461,7 +1461,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/showings", isAuthenticatedOrDemo, async (req: any, res) => {
     try {
       const agentId = req.user.claims.sub;
-      const showingData = insertShowingSchema.parse({ ...req.body, agentId });
+      
+      // Convert date strings to Date objects
+      const requestData = { ...req.body, agentId };
+      if (requestData.scheduledDate && typeof requestData.scheduledDate === 'string') {
+        requestData.scheduledDate = new Date(requestData.scheduledDate);
+      }
+      if (requestData.actualStartTime && typeof requestData.actualStartTime === 'string') {
+        requestData.actualStartTime = new Date(requestData.actualStartTime);
+      }
+      if (requestData.actualEndTime && typeof requestData.actualEndTime === 'string') {
+        requestData.actualEndTime = new Date(requestData.actualEndTime);
+      }
+      
+      const showingData = insertShowingSchema.parse(requestData);
       const showing = await storage.createShowing(showingData);
       res.json(showing);
     } catch (error) {
@@ -1544,7 +1557,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/property-visits", isAuthenticatedOrDemo, async (req: any, res) => {
     try {
       const agentId = req.user.claims.sub;
-      const visitData = insertPropertyVisitSchema.parse({ ...req.body, agentId });
+      
+      // Convert date strings to Date objects
+      const requestData = { ...req.body, agentId };
+      if (requestData.visitDate && typeof requestData.visitDate === 'string') {
+        requestData.visitDate = new Date(requestData.visitDate);
+      }
+      
+      const visitData = insertPropertyVisitSchema.parse(requestData);
       const visit = await storage.createPropertyVisit(visitData);
       res.json(visit);
     } catch (error) {
@@ -1590,7 +1610,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/commission-protection", isAuthenticatedOrDemo, async (req: any, res) => {
     try {
       const agentId = req.user.claims.sub;
-      const protectionData = insertCommissionProtectionSchema.parse({ ...req.body, agentId });
+      
+      // Convert date strings to Date objects
+      const requestData = { ...req.body, agentId };
+      if (requestData.protectionDate && typeof requestData.protectionDate === 'string') {
+        requestData.protectionDate = new Date(requestData.protectionDate);
+      }
+      if (requestData.expirationDate && typeof requestData.expirationDate === 'string') {
+        requestData.expirationDate = new Date(requestData.expirationDate);
+      }
+      
+      const protectionData = insertCommissionProtectionSchema.parse(requestData);
       const protection = await storage.createCommissionProtection(protectionData);
       res.json(protection);
     } catch (error) {
