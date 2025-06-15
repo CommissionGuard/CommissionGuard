@@ -1543,14 +1543,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               propertyId: showing.propertyId,
               visitDate: scheduledDate,
               visitType: "missed-showing",
-              duration: 0,
-              agentPresent: false,
+              duration: "0",
+              agentPresent: true, // Agent was present, client missed
               wasScheduled: true,
               showingId: showing.id,
               discoveryMethod: "auto-detected",
               riskLevel: "high",
               followUpRequired: true,
-              notes: "Automatically detected missed showing - client did not attend scheduled appointment"
+              notes: "Automatically detected missed showing - agent was present but client did not attend scheduled appointment"
             });
           }
         }

@@ -358,13 +358,13 @@ export default function ShowingTracker() {
       visitDate: new Date(showing.scheduledDate).toISOString(),
       visitType: "missed-showing",
       duration: "0",
-      agentPresent: false,
+      agentPresent: true, // Agent was present but client didn't show
       wasScheduled: true,
       showingId: showing.id,
       discoveryMethod: "agent-reported",
       riskLevel: "high",
       followUpRequired: true,
-      notes: "Client missed scheduled showing - follow-up required",
+      notes: "Client missed scheduled showing - agent was present but client did not show up",
     };
 
     createPropertyVisitMutation.mutate(visitData);
