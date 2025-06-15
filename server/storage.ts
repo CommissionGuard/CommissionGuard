@@ -50,6 +50,7 @@ export interface IStorage {
   // (IMPORTANT) these user operations are mandatory for Replit Auth.
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUserProfile(id: string, updates: Partial<User>): Promise<User>;
   
   // Admin operations
   getAllUsers(): Promise<User[]>;
@@ -223,6 +224,18 @@ export class DatabaseStorage implements IStorage {
         subscriptionStartDate: subscriptionData.startDate ? new Date(subscriptionData.startDate) : undefined,
         subscriptionEndDate: subscriptionData.endDate ? new Date(subscriptionData.endDate) : undefined,
         lastPaymentDate: subscriptionData.lastPaymentDate ? new Date(subscriptionData.lastPaymentDate) : undefined,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUserProfile(userId: string, updates: Partial<User>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        ...updates,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))

@@ -144,6 +144,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Profile routes
+  app.patch("/api/profile", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const updateData = {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        phone: req.body.phone,
+        licenseNumber: req.body.licenseNumber,
+        brokerage: req.body.brokerage,
+        updatedAt: new Date(),
+      };
+
+      const user = await storage.updateUserProfile(userId, updateData);
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // Client routes
   app.post("/api/clients", isAuthenticated, async (req: any, res) => {
     try {
