@@ -52,18 +52,12 @@ interface Showing {
   client: {
     id: number;
     fullName: string;
-    email: string;
-    phone: string;
   };
   property: {
     id: number;
     address: string;
     city: string;
-    state: string;
     price: number;
-    bedrooms: number;
-    bathrooms: number;
-    squareFeet: number;
   };
 }
 
@@ -74,9 +68,10 @@ interface PropertyVisit {
   propertyId: number;
   visitDate: string;
   visitType: string;
-  duration?: number;
+  duration?: string;
   agentPresent: boolean;
   wasScheduled: boolean;
+  showingId?: number;
   discoveryMethod: string;
   riskLevel: string;
   followUpRequired: boolean;
@@ -121,101 +116,179 @@ export default function ShowingTracker() {
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [selectedShowing, setSelectedShowing] = useState<Showing | null>(null);
+  const [showNewShowingDialog, setShowNewShowingDialog] = useState(false);
   const [newShowing, setNewShowing] = useState({
-    clientId: "",
-    propertyAddress: "",
-    scheduledDate: "",
-    showingType: "scheduled",
-    notes: ""
+    clientId: 0,
+    propertyId: 0,
+    scheduledDate: '',
+    showingType: 'in-person',
+    agentNotes: ''
   });
 
-  // Fetch showings data
-  const { data: showings = [], isLoading: showingsLoading } = useQuery({
-    queryKey: ["/api/showings"],
-    enabled: isAuthenticated,
-  });
+  // Redirect to home if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+  }, [isAuthenticated, isLoading, toast]);
 
-  // Fetch property visits data
-  const { data: propertyVisits = [], isLoading: visitsLoading } = useQuery({
-    queryKey: ["/api/property-visits"],
-    enabled: isAuthenticated,
-  });
-
-  // Fetch unauthorized visits
-  const { data: unauthorizedVisits = [], isLoading: unauthorizedLoading } = useQuery({
-    queryKey: ["/api/property-visits/unauthorized"],
-    enabled: isAuthenticated,
-  });
-
-  // Fetch commission protections
-  const { data: commissionProtections = [], isLoading: protectionsLoading } = useQuery({
-    queryKey: ["/api/commission-protection"],
-    enabled: isAuthenticated,
-  });
-
-  // Fetch clients for dropdown
-  const { data: clients = [] } = useQuery({
+  // Queries
+  const { data: clients = [], isLoading: isLoadingClients } = useQuery({
     queryKey: ["/api/clients"],
     enabled: isAuthenticated,
   });
 
-  // Create new showing mutation
+  const { data: showings = [], isLoading: isLoadingShowings, refetch: refetchShowings } = useQuery({
+    queryKey: ["/api/showings"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: propertyVisits = [], isLoading: isLoadingVisits, refetch: refetchVisits } = useQuery({
+    queryKey: ["/api/property-visits"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: unauthorizedVisits = [], isLoading: isLoadingUnauthorized, refetch: refetchUnauthorized } = useQuery({
+    queryKey: ["/api/property-visits/unauthorized"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: commissionProtections = [], isLoading: isLoadingCommission, refetch: refetchCommission } = useQuery({
+    queryKey: ["/api/commission-protection"],
+    enabled: isAuthenticated,
+  });
+
+  // Mutations
   const createShowingMutation = useMutation({
-    mutationFn: async (showingData: any) => {
-      return await apiRequest("POST", "/api/showings", showingData);
+    mutationFn: async (data: any) => {
+      return apiRequest("/api/showings", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/showings"] });
       toast({
         title: "Success",
-        description: "Showing scheduled successfully with commission protection enabled",
+        description: "Showing scheduled successfully",
       });
+      setShowNewShowingDialog(false);
       setNewShowing({
-        clientId: "",
-        propertyAddress: "",
-        scheduledDate: "",
-        showingType: "scheduled",
-        notes: ""
+        clientId: 0,
+        propertyId: 0,
+        scheduledDate: '',
+        showingType: 'in-person',
+        agentNotes: ''
       });
+      refetchShowings();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "Session expired. Please log in again.",
-          variant: "destructive",
-        });
+        window.location.href = "/api/login";
         return;
       }
       toast({
         title: "Error",
-        description: "Failed to schedule showing. Please try again.",
+        description: error.message || "Failed to schedule showing",
         variant: "destructive",
       });
     },
   });
 
-  // Create commission protection mutation
-  const createProtectionMutation = useMutation({
-    mutationFn: async (protectionData: any) => {
-      return await apiRequest("POST", "/api/commission-protection", protectionData);
+  const trackRouteMutation = useMutation({
+    mutationFn: async (showingId: number) => {
+      return apiRequest(`/api/showings/${showingId}/track-route`, {
+        method: "POST",
+        body: JSON.stringify({}),
+      });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/commission-protection"] });
       toast({
-        title: "Commission Protected",
-        description: "Property showing now has commission protection in place",
+        title: "Success",
+        description: "Route tracked and showing marked as completed",
+      });
+      refetchShowings();
+      refetchVisits();
+      refetchCommission();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to track route",
+        variant: "destructive",
       });
     },
   });
 
+  const markMissedMutation = useMutation({
+    mutationFn: async (showingId: number) => {
+      return apiRequest(`/api/showings/${showingId}/mark-missed`, {
+        method: "POST",
+        body: JSON.stringify({}),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Showing marked as missed",
+      });
+      refetchShowings();
+      refetchVisits();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to mark showing as missed",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreateShowing = () => {
+    if (!newShowing.clientId || !newShowing.propertyId || !newShowing.scheduledDate) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createShowingMutation.mutate({
+      clientId: Number(newShowing.clientId),
+      propertyId: Number(newShowing.propertyId),
+      scheduledDate: new Date(newShowing.scheduledDate).toISOString(),
+      showingType: newShowing.showingType,
+      agentNotes: newShowing.agentNotes,
+      status: 'scheduled'
+    });
+  };
+
+  const formatDateTime = (dateString: string) => {
+    return format(new Date(dateString), "MMM d, yyyy 'at' h:mm a");
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusStyles = {
+      scheduled: "bg-blue-100 text-blue-800",
+      completed: "bg-green-100 text-green-800",
+      missed: "bg-red-100 text-red-800",
+      cancelled: "bg-gray-100 text-gray-800"
+    };
+    return statusStyles[status as keyof typeof statusStyles] || "bg-gray-100 text-gray-800";
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-          <p className="mt-4 text-gray-600">Loading showing tracker...</p>
-        </div>
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -224,296 +297,117 @@ export default function ShowingTracker() {
     return null;
   }
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      scheduled: { color: "bg-blue-100 text-blue-800", icon: Calendar },
-      "in-progress": { color: "bg-yellow-100 text-yellow-800", icon: Clock },
-      completed: { color: "bg-green-100 text-green-800", icon: CheckCircle },
-      cancelled: { color: "bg-red-100 text-red-800", icon: XCircle },
-      "no-show": { color: "bg-gray-100 text-gray-800", icon: XCircle },
-    };
-    
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.scheduled;
-    const Icon = config.icon;
-    
-    return (
-      <Badge className={`${config.color} border`}>
-        <Icon className="h-3 w-3 mr-1" />
-        {status.replace("-", " ").toUpperCase()}
-      </Badge>
-    );
-  };
-
-  const getRiskLevelBadge = (riskLevel: string) => {
-    const riskConfig = {
-      low: "bg-green-100 text-green-800 border-green-200",
-      medium: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      high: "bg-red-100 text-red-800 border-red-200",
-    };
-    
-    return (
-      <Badge className={`${riskConfig[riskLevel as keyof typeof riskConfig]} border`}>
-        {riskLevel.toUpperCase()} RISK
-      </Badge>
-    );
-  };
-
-  const handleScheduleShowing = () => {
-    if (!newShowing.clientId || !newShowing.propertyAddress || !newShowing.scheduledDate) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields to schedule a showing.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // For demo purposes, create a mock property if address is provided
-    const showingData = {
-      clientId: parseInt(newShowing.clientId),
-      propertyId: 1, // Mock property ID
-      scheduledDate: new Date(newShowing.scheduledDate).toISOString(),
-      showingType: newShowing.showingType,
-      status: "scheduled",
-      agentPresent: true,
-      commissionProtected: true,
-      agentNotes: newShowing.notes,
-    };
-
-    createShowingMutation.mutate(showingData);
-  };
-
-  const protectCommission = (clientId: number, propertyId: number, showingId: number) => {
-    const protectionData = {
-      clientId,
-      propertyId,
-      protectionType: "showing",
-      protectionDate: new Date().toISOString(),
-      expirationDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days
-      evidenceType: "gps-tracking",
-      evidenceData: { showingId },
-      status: "active",
-      notes: "Commission protection automatically established for scheduled showing",
-    };
-
-    createProtectionMutation.mutate(protectionData);
-  };
-
-  // Update showing status mutation
-  const updateShowingMutation = useMutation({
-    mutationFn: async ({ showingId, updates }: { showingId: number; updates: any }) => {
-      return await apiRequest("PATCH", `/api/showings/${showingId}`, updates);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/showings"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/property-visits"] });
-      toast({
-        title: "Showing Updated",
-        description: "Showing status has been updated successfully",
-      });
-    },
-  });
-
-  const trackRoute = (showing: any) => {
-    // Mark showing as completed and create property visit
-    const updates = {
-      status: "completed",
-      actualStartTime: new Date(showing.scheduledDate).toISOString(),
-      actualEndTime: new Date(Date.now()).toISOString(),
-    };
-
-    updateShowingMutation.mutate({ showingId: showing.id, updates });
-
-    // Create corresponding property visit
-    const visitData = {
-      clientId: showing.clientId,
-      propertyId: showing.propertyId,
-      visitDate: new Date(showing.scheduledDate).toISOString(),
-      visitType: "completed-showing",
-      duration: "60", // Default 60 minutes as string
-      agentPresent: true,
-      wasScheduled: true,
-      showingId: showing.id,
-      discoveryMethod: "agent-confirmed",
-      riskLevel: "low",
-      followUpRequired: false,
-      notes: "Property showing completed and tracked by agent",
-    };
-
-    createPropertyVisitMutation.mutate(visitData);
-  };
-
-  const markMissed = (showing: any) => {
-    // Mark showing as no-show
-    const updates = {
-      status: "no-show",
-    };
-
-    updateShowingMutation.mutate({ showingId: showing.id, updates });
-
-    // Create property visit for missed showing
-    const visitData = {
-      clientId: showing.clientId,
-      propertyId: showing.propertyId,
-      visitDate: new Date(showing.scheduledDate).toISOString(),
-      visitType: "missed-showing",
-      duration: "0",
-      agentPresent: true, // Agent was present but client didn't show
-      wasScheduled: true,
-      showingId: showing.id,
-      discoveryMethod: "agent-reported",
-      riskLevel: "high",
-      followUpRequired: true,
-      notes: "Client missed scheduled showing - agent was present but client did not show up",
-    };
-
-    createPropertyVisitMutation.mutate(visitData);
-  };
-
-  // Create property visit mutation
-  const createPropertyVisitMutation = useMutation({
-    mutationFn: async (visitData: any) => {
-      return await apiRequest("POST", "/api/property-visits", visitData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/property-visits"] });
-      toast({
-        title: "Visit Recorded",
-        description: "Property visit has been recorded successfully",
-      });
-    },
-  });
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                <Eye className="h-8 w-8 text-primary mr-3" />
-                Property Showing Tracker
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Monitor client activities and protect your commissions with comprehensive showing tracking
-              </p>
-            </div>
-            
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="bg-primary text-white hover:bg-blue-700">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Schedule Showing
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Schedule New Showing</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="client">Client</Label>
-                    <Select value={newShowing.clientId} onValueChange={(value) => setNewShowing({...newShowing, clientId: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select client" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients.map((client: any) => (
-                          <SelectItem key={client.id} value={client.id.toString()}>
-                            {client.fullName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="property">Property Address</Label>
-                    <Input
-                      id="property"
-                      value={newShowing.propertyAddress}
-                      onChange={(e) => setNewShowing({...newShowing, propertyAddress: e.target.value})}
-                      placeholder="Enter property address"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="date">Scheduled Date & Time</Label>
-                    <Input
-                      id="date"
-                      type="datetime-local"
-                      value={newShowing.scheduledDate}
-                      onChange={(e) => setNewShowing({...newShowing, scheduledDate: e.target.value})}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="type">Showing Type</Label>
-                    <Select value={newShowing.showingType} onValueChange={(value) => setNewShowing({...newShowing, showingType: value})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="scheduled">Scheduled Tour</SelectItem>
-                        <SelectItem value="walk-in">Walk-in Showing</SelectItem>
-                        <SelectItem value="drive-by">Drive-by Preview</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="notes">Agent Notes</Label>
-                    <Textarea
-                      id="notes"
-                      value={newShowing.notes}
-                      onChange={(e) => setNewShowing({...newShowing, notes: e.target.value})}
-                      placeholder="Add any special instructions or notes..."
-                    />
-                  </div>
-                  
-                  <Button 
-                    onClick={handleScheduleShowing}
-                    disabled={createShowingMutation.isPending}
-                    className="w-full"
-                  >
-                    {createShowingMutation.isPending ? "Scheduling..." : "Schedule Showing"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Showing Tracker</h1>
+            <p className="text-gray-600 mt-2">Track property showings and protect your commissions</p>
           </div>
+          <Dialog open={showNewShowingDialog} onOpenChange={setShowNewShowingDialog}>
+            <DialogTrigger asChild>
+              <Button className="bg-primary hover:bg-primary/90">
+                <Calendar className="h-4 w-4 mr-2" />
+                Schedule Showing
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Schedule New Showing</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="client">Client</Label>
+                  <Select onValueChange={(value) => setNewShowing({...newShowing, clientId: Number(value)})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select client" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.isArray(clients) && clients.map((client: any) => (
+                        <SelectItem key={client.id} value={client.id.toString()}>
+                          {client.fullName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="property">Property ID</Label>
+                  <Input
+                    id="property"
+                    type="number"
+                    placeholder="Property ID"
+                    value={newShowing.propertyId || ''}
+                    onChange={(e) => setNewShowing({...newShowing, propertyId: Number(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="date">Date & Time</Label>
+                  <Input
+                    id="date"
+                    type="datetime-local"
+                    value={newShowing.scheduledDate}
+                    onChange={(e) => setNewShowing({...newShowing, scheduledDate: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="type">Showing Type</Label>
+                  <Select onValueChange={(value) => setNewShowing({...newShowing, showingType: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="in-person">In-Person</SelectItem>
+                      <SelectItem value="virtual">Virtual</SelectItem>
+                      <SelectItem value="drive-by">Drive-by</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="notes">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    placeholder="Additional notes..."
+                    value={newShowing.agentNotes}
+                    onChange={(e) => setNewShowing({...newShowing, agentNotes: e.target.value})}
+                  />
+                </div>
+                <Button 
+                  onClick={handleCreateShowing} 
+                  className="w-full"
+                  disabled={createShowingMutation.isPending}
+                >
+                  {createShowingMutation.isPending ? "Scheduling..." : "Schedule Showing"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
-        <Tabs defaultValue="showings" className="space-y-6">
+        <Tabs defaultValue="showings" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="showings">Scheduled Showings</TabsTrigger>
-            <TabsTrigger value="tracking">Property Visits</TabsTrigger>
-            <TabsTrigger value="unauthorized">Risk Monitoring</TabsTrigger>
+            <TabsTrigger value="visits">Property Visits</TabsTrigger>
+            <TabsTrigger value="unauthorized">Unauthorized Visits</TabsTrigger>
             <TabsTrigger value="protection">Commission Protection</TabsTrigger>
           </TabsList>
 
-          {/* Scheduled Showings */}
-          <TabsContent value="showings">
+          <TabsContent value="showings" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Calendar className="h-5 w-5 text-primary mr-2" />
-                  Scheduled Property Showings
+                  <Calendar className="h-5 w-5 mr-2" />
+                  Scheduled Showings
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {showingsLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                    <p className="mt-2 text-gray-600">Loading showings...</p>
-                  </div>
-                ) : showings.length === 0 ? (
+                {!Array.isArray(showings) || showings.length === 0 ? (
                   <div className="text-center py-8">
                     <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No Showings Scheduled</h3>
-                    <p className="text-gray-600">Schedule your first property showing to start tracking client activity.</p>
+                    <p className="text-gray-600">Schedule your first showing to start tracking.</p>
                   </div>
                 ) : (
                   <Table>
@@ -522,8 +416,8 @@ export default function ShowingTracker() {
                         <TableHead>Date & Time</TableHead>
                         <TableHead>Client</TableHead>
                         <TableHead>Property</TableHead>
+                        <TableHead>Type</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Commission Protection</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -531,55 +425,33 @@ export default function ShowingTracker() {
                       {showings.map((showing: Showing) => (
                         <TableRow key={showing.id}>
                           <TableCell>
-                            <div className="flex items-center">
-                              <Clock className="h-4 w-4 text-gray-400 mr-2" />
-                              {format(new Date(showing.scheduledDate), "MMM d, yyyy 'at' h:mm a")}
-                            </div>
+                            {formatDateTime(showing.scheduledDate)}
                           </TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{showing.client?.fullName}</p>
-                              <p className="text-sm text-gray-600">{showing.client?.phone}</p>
-                            </div>
-                          </TableCell>
+                          <TableCell>{showing.client?.fullName}</TableCell>
                           <TableCell>
                             <div>
                               <p className="font-medium">{showing.property?.address}</p>
-                              <p className="text-sm text-gray-600">
-                                {showing.property?.city}, {showing.property?.state} • ${showing.property?.price?.toLocaleString()}
-                              </p>
+                              <p className="text-sm text-gray-600">${showing.property?.price?.toLocaleString()}</p>
                             </div>
                           </TableCell>
                           <TableCell>
-                            {getStatusBadge(showing.status)}
+                            <Badge variant="outline">
+                              {showing.showingType.toUpperCase()}
+                            </Badge>
                           </TableCell>
                           <TableCell>
-                            {showing.commissionProtected ? (
-                              <Badge className="bg-green-100 text-green-800 border-green-200">
-                                <Shield className="h-3 w-3 mr-1" />
-                                Protected
-                              </Badge>
-                            ) : (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => protectCommission(showing.clientId, showing.propertyId, showing.id)}
-                                className="text-red-600 border-red-200 hover:bg-red-50"
-                              >
-                                <Shield className="h-3 w-3 mr-1" />
-                                Protect
-                              </Button>
-                            )}
+                            <Badge className={getStatusBadge(showing.status)}>
+                              {showing.status.toUpperCase()}
+                            </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
-                              {showing.status === "scheduled" && (
+                            <div className="flex space-x-2">
+                              {showing.status === 'scheduled' && (
                                 <>
                                   <Button 
                                     size="sm" 
-                                    variant="outline"
-                                    onClick={() => trackRoute(showing)}
-                                    className="text-green-600 border-green-200 hover:bg-green-50"
+                                    onClick={() => trackRouteMutation.mutate(showing.id)}
+                                    disabled={trackRouteMutation.isPending}
                                   >
                                     <Route className="h-3 w-3 mr-1" />
                                     Track Route
@@ -587,25 +459,13 @@ export default function ShowingTracker() {
                                   <Button 
                                     size="sm" 
                                     variant="outline"
-                                    onClick={() => markMissed(showing)}
-                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                    onClick={() => markMissedMutation.mutate(showing.id)}
+                                    disabled={markMissedMutation.isPending}
                                   >
                                     <XCircle className="h-3 w-3 mr-1" />
                                     Mark Missed
                                   </Button>
                                 </>
-                              )}
-                              {showing.status === "completed" && (
-                                <Badge className="bg-green-100 text-green-800">
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  Completed
-                                </Badge>
-                              )}
-                              {showing.status === "no-show" && (
-                                <Badge className="bg-red-100 text-red-800">
-                                  <XCircle className="h-3 w-3 mr-1" />
-                                  Missed
-                                </Badge>
                               )}
                             </div>
                           </TableCell>
@@ -618,26 +478,20 @@ export default function ShowingTracker() {
             </Card>
           </TabsContent>
 
-          {/* Property Visits Tracking */}
-          <TabsContent value="tracking">
+          <TabsContent value="visits" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <MapPin className="h-5 w-5 text-primary mr-2" />
-                  All Property Visits
+                  <Eye className="h-5 w-5 mr-2" />
+                  Property Visits
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {visitsLoading ? (
+                {!Array.isArray(propertyVisits) || propertyVisits.length === 0 ? (
                   <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                    <p className="mt-2 text-gray-600">Loading visit history...</p>
-                  </div>
-                ) : propertyVisits.length === 0 ? (
-                  <div className="text-center py-8">
-                    <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <Eye className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No Property Visits Recorded</h3>
-                    <p className="text-gray-600">Visit tracking will appear here once clients view properties.</p>
+                    <p className="text-gray-600">Complete showings to automatically track visits.</p>
                   </div>
                 ) : (
                   <Table>
@@ -647,15 +501,15 @@ export default function ShowingTracker() {
                         <TableHead>Client</TableHead>
                         <TableHead>Property</TableHead>
                         <TableHead>Type</TableHead>
-                        <TableHead>Agent Present</TableHead>
                         <TableHead>Risk Level</TableHead>
+                        <TableHead>Follow-up</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {propertyVisits.map((visit: PropertyVisit) => (
                         <TableRow key={visit.id}>
                           <TableCell>
-                            {format(new Date(visit.visitDate), "MMM d, yyyy 'at' h:mm a")}
+                            {format(new Date(visit.visitDate), "MMM d, yyyy")}
                           </TableCell>
                           <TableCell>{visit.client?.fullName}</TableCell>
                           <TableCell>
@@ -666,24 +520,20 @@ export default function ShowingTracker() {
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline">
-                              {visit.visitType.replace("-", " ").toUpperCase()}
+                              {visit.visitType.toUpperCase()}
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            {visit.agentPresent ? (
-                              <Badge className="bg-green-100 text-green-800">
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Yes
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-red-100 text-red-800">
-                                <XCircle className="h-3 w-3 mr-1" />
-                                No
-                              </Badge>
-                            )}
+                            <Badge className={visit.riskLevel === "high" ? "bg-red-100 text-red-800" : visit.riskLevel === "medium" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}>
+                              {visit.riskLevel.toUpperCase()}
+                            </Badge>
                           </TableCell>
                           <TableCell>
-                            {getRiskLevelBadge(visit.riskLevel)}
+                            {visit.followUpRequired ? (
+                              <Badge className="bg-orange-100 text-orange-800">Required</Badge>
+                            ) : (
+                              <Badge className="bg-gray-100 text-gray-800">None</Badge>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -694,107 +544,80 @@ export default function ShowingTracker() {
             </Card>
           </TabsContent>
 
-          {/* Risk Monitoring */}
-          <TabsContent value="unauthorized">
+          <TabsContent value="unauthorized" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
-                  Unauthorized Property Visits
+                  <AlertTriangle className="h-5 w-5 mr-2" />
+                  Unauthorized Visits
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {unauthorizedLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                    <p className="mt-2 text-gray-600">Scanning for unauthorized visits...</p>
-                  </div>
-                ) : unauthorizedVisits.length === 0 ? (
+                {!Array.isArray(unauthorizedVisits) || unauthorizedVisits.length === 0 ? (
                   <div className="text-center py-8">
                     <Shield className="h-12 w-12 text-green-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No Unauthorized Visits Detected</h3>
-                    <p className="text-gray-600">All client property visits appear to be properly supervised.</p>
+                    <p className="text-gray-600">Your client relationships are secure.</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <div className="flex items-center">
-                        <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
-                        <h3 className="font-medium text-red-900">Commission Protection Alert</h3>
-                      </div>
-                      <p className="text-red-700 text-sm mt-1">
-                        {unauthorizedVisits.length} unauthorized property visit(s) detected. Review and take action to protect your commissions.
-                      </p>
-                    </div>
-                    
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Visit Date</TableHead>
-                          <TableHead>Client</TableHead>
-                          <TableHead>Property</TableHead>
-                          <TableHead>Discovery Method</TableHead>
-                          <TableHead>Risk Level</TableHead>
-                          <TableHead>Actions</TableHead>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Discovery Date</TableHead>
+                        <TableHead>Client</TableHead>
+                        <TableHead>Property</TableHead>
+                        <TableHead>Discovery Method</TableHead>
+                        <TableHead>Risk Level</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {unauthorizedVisits.map((visit: PropertyVisit) => (
+                        <TableRow key={visit.id}>
+                          <TableCell>
+                            {format(new Date(visit.visitDate), "MMM d, yyyy")}
+                          </TableCell>
+                          <TableCell>{visit.client?.fullName}</TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{visit.property?.address}</p>
+                              <p className="text-sm text-gray-600">${visit.property?.price?.toLocaleString()}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {visit.discoveryMethod.replace("-", " ").toUpperCase()}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className="bg-red-100 text-red-800">
+                              {visit.riskLevel.toUpperCase()}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className="bg-yellow-100 text-yellow-800">
+                              REQUIRES ACTION
+                            </Badge>
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {unauthorizedVisits.map((visit: PropertyVisit) => (
-                          <TableRow key={visit.id} className="bg-red-50">
-                            <TableCell>
-                              {format(new Date(visit.visitDate), "MMM d, yyyy 'at' h:mm a")}
-                            </TableCell>
-                            <TableCell>{visit.client?.fullName}</TableCell>
-                            <TableCell>
-                              <div>
-                                <p className="font-medium">{visit.property?.address}</p>
-                                <p className="text-sm text-gray-600">${visit.property?.price?.toLocaleString()}</p>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline">
-                                {visit.discoveryMethod?.replace("-", " ").toUpperCase()}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              {getRiskLevelBadge(visit.riskLevel)}
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                size="sm"
-                                onClick={() => protectCommission(visit.clientId, visit.propertyId, 0)}
-                                className="bg-red-600 text-white hover:bg-red-700"
-                              >
-                                <Shield className="h-3 w-3 mr-1" />
-                                Protect Commission
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                      ))}
+                    </TableBody>
+                  </Table>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Commission Protection */}
-          <TabsContent value="protection">
+          <TabsContent value="protection" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Shield className="h-5 w-5 text-green-500 mr-2" />
-                  Commission Protection Status
+                  <Shield className="h-5 w-5 mr-2" />
+                  Commission Protection Records
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {protectionsLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                    <p className="mt-2 text-gray-600">Loading protection status...</p>
-                  </div>
-                ) : commissionProtections.length === 0 ? (
+                {!Array.isArray(commissionProtections) || commissionProtections.length === 0 ? (
                   <div className="text-center py-8">
                     <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No Commission Protections Active</h3>
