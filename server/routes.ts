@@ -1516,7 +1516,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const agentId = req.user.claims.sub;
       const showings = await storage.getShowingsByAgent(agentId);
-      res.json(showings);
+      
+      // Auto-update showing statuses based on scheduled dates
+      const now = new Date();
+      const updatedShowings = [];
+      
+      for (const showing of showings) {
+        let updatedShowing = showing;
+        const scheduledDate = new Date(showing.scheduledDate);
+        
+        // If showing is past scheduled time and still "scheduled", mark as missed
+        if (showing.status === "scheduled" && scheduledDate < now) {
+          const timePassed = now.getTime() - scheduledDate.getTime();
+          const hoursPassedMillis = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+          
+          if (timePassed > hoursPassedMillis) {
+            // Auto-mark as no-show if more than 2 hours past scheduled time
+            updatedShowing = await storage.updateShowing(showing.id, { 
+              status: "no-show" 
+            });
+            
+            // Create property visit record for missed showing
+            await storage.createPropertyVisit({
+              agentId,
+              clientId: showing.clientId,
+              propertyId: showing.propertyId,
+              visitDate: scheduledDate,
+              visitType: "missed-showing",
+              duration: 0,
+              agentPresent: false,
+              wasScheduled: true,
+              showingId: showing.id,
+              discoveryMethod: "auto-detected",
+              riskLevel: "high",
+              followUpRequired: true,
+              notes: "Automatically detected missed showing - client did not attend scheduled appointment"
+            });
+          }
+        }
+        
+        updatedShowings.push(updatedShowing);
+      }
+      
+      res.json(updatedShowings);
     } catch (error) {
       console.error("Error fetching showings:", error);
       res.status(500).json({ message: "Failed to fetch showings" });
@@ -1537,7 +1579,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/showings/:id", isAuthenticatedOrDemo, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const updates = req.body;
+      const updates = { ...req.body };
+      
+      // Convert date strings to Date objects if present
+      if (updates.actualStartTime && typeof updates.actualStartTime === 'string') {
+        updates.actualStartTime = new Date(updates.actualStartTime);
+      }
+      if (updates.actualEndTime && typeof updates.actualEndTime === 'string') {
+        updates.actualEndTime = new Date(updates.actualEndTime);
+      }
+      if (updates.scheduledDate && typeof updates.scheduledDate === 'string') {
+        updates.scheduledDate = new Date(updates.scheduledDate);
+      }
+      
+      const showing = await storage.updateShowing(id, updates);
+      res.json(showing);
+    } catch (error) {
+      console.error("Error updating showing:", error);
+      res.status(500).json({ message: "Failed to update showing" });
+    }
+  });
+
+  app.patch("/api/showings/:id", isAuthenticatedOrDemo, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = { ...req.body };
+      
+      // Convert date strings to Date objects if present
+      if (updates.actualStartTime && typeof updates.actualStartTime === 'string') {
+        updates.actualStartTime = new Date(updates.actualStartTime);
+      }
+      if (updates.actualEndTime && typeof updates.actualEndTime === 'string') {
+        updates.actualEndTime = new Date(updates.actualEndTime);
+      }
+      if (updates.scheduledDate && typeof updates.scheduledDate === 'string') {
+        updates.scheduledDate = new Date(updates.scheduledDate);
+      }
+      
       const showing = await storage.updateShowing(id, updates);
       res.json(showing);
     } catch (error) {

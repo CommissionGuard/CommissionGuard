@@ -299,6 +299,91 @@ export default function ShowingTracker() {
     createProtectionMutation.mutate(protectionData);
   };
 
+  // Update showing status mutation
+  const updateShowingMutation = useMutation({
+    mutationFn: async ({ showingId, updates }: { showingId: number; updates: any }) => {
+      return await apiRequest("PATCH", `/api/showings/${showingId}`, updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/showings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/property-visits"] });
+      toast({
+        title: "Showing Updated",
+        description: "Showing status has been updated successfully",
+      });
+    },
+  });
+
+  const trackRoute = (showing: any) => {
+    // Mark showing as completed and create property visit
+    const updates = {
+      status: "completed",
+      actualStartTime: new Date(showing.scheduledDate).toISOString(),
+      actualEndTime: new Date(Date.now()).toISOString(),
+    };
+
+    updateShowingMutation.mutate({ showingId: showing.id, updates });
+
+    // Create corresponding property visit
+    const visitData = {
+      clientId: showing.clientId,
+      propertyId: showing.propertyId,
+      visitDate: new Date(showing.scheduledDate).toISOString(),
+      visitType: "completed-showing",
+      duration: 60, // Default 60 minutes
+      agentPresent: true,
+      wasScheduled: true,
+      showingId: showing.id,
+      discoveryMethod: "agent-confirmed",
+      riskLevel: "low",
+      followUpRequired: false,
+      notes: "Property showing completed and tracked by agent",
+    };
+
+    createPropertyVisitMutation.mutate(visitData);
+  };
+
+  const markMissed = (showing: any) => {
+    // Mark showing as no-show
+    const updates = {
+      status: "no-show",
+    };
+
+    updateShowingMutation.mutate({ showingId: showing.id, updates });
+
+    // Create property visit for missed showing
+    const visitData = {
+      clientId: showing.clientId,
+      propertyId: showing.propertyId,
+      visitDate: new Date(showing.scheduledDate).toISOString(),
+      visitType: "missed-showing",
+      duration: 0,
+      agentPresent: false,
+      wasScheduled: true,
+      showingId: showing.id,
+      discoveryMethod: "agent-reported",
+      riskLevel: "high",
+      followUpRequired: true,
+      notes: "Client missed scheduled showing - follow-up required",
+    };
+
+    createPropertyVisitMutation.mutate(visitData);
+  };
+
+  // Create property visit mutation
+  const createPropertyVisitMutation = useMutation({
+    mutationFn: async (visitData: any) => {
+      return await apiRequest("POST", "/api/property-visits", visitData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/property-visits"] });
+      toast({
+        title: "Visit Recorded",
+        description: "Property visit has been recorded successfully",
+      });
+    },
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -487,10 +572,42 @@ export default function ShowingTracker() {
                             )}
                           </TableCell>
                           <TableCell>
-                            <Button size="sm" variant="outline">
-                              <Route className="h-3 w-3 mr-1" />
-                              Track Route
-                            </Button>
+                            <div className="flex gap-2">
+                              {showing.status === "scheduled" && (
+                                <>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => trackRoute(showing)}
+                                    className="text-green-600 border-green-200 hover:bg-green-50"
+                                  >
+                                    <Route className="h-3 w-3 mr-1" />
+                                    Track Route
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => markMissed(showing)}
+                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                  >
+                                    <XCircle className="h-3 w-3 mr-1" />
+                                    Mark Missed
+                                  </Button>
+                                </>
+                              )}
+                              {showing.status === "completed" && (
+                                <Badge className="bg-green-100 text-green-800">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Completed
+                                </Badge>
+                              )}
+                              {showing.status === "no-show" && (
+                                <Badge className="bg-red-100 text-red-800">
+                                  <XCircle className="h-3 w-3 mr-1" />
+                                  Missed
+                                </Badge>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}

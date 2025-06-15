@@ -147,14 +147,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 15, 2025**: Complete UI Button Connectivity and API Date Validation Fixes
+- **June 15, 2025**: Complete Showing Tracker with Automated Missed Showing Detection
+  - Successfully fixed showing creation - agents can now schedule showings with datetime picker
+  - Implemented automated showing status tracking that detects missed appointments after 2 hours
+  - Added "Track Route" button to mark showings as completed and create property visit records
+  - Added "Mark Missed" button for manual marking of no-show appointments
+  - Automated property visit creation for both completed and missed showings
+  - Auto-detection creates high-risk property visits for missed showings requiring follow-up
+  - Enhanced showing table with dynamic action buttons based on status (scheduled/completed/missed)
+  - Fixed all API date validation issues across showing, property visit, and commission protection endpoints
   - Connected all 9 previously disconnected UI buttons across the application
-  - Contract Monitoring: Fixed Take Action, View Details, and Configure buttons with proper navigation and feedback
-  - Contracts Table: Connected View All button to navigate to contracts page
-  - Prospecting: Fixed Generate Leads, Property Match, and Add to CRM buttons with appropriate actions
-  - Resolved API date validation errors in showing, property visit, and commission protection endpoints
-  - All date string inputs are now properly converted to Date objects before schema validation
-  - Fixed showing creation functionality - users can now successfully schedule showings
   - Enhanced user experience with consistent button functionality and navigation patterns
 
 - **June 15, 2025**: Enhanced Prospecting Dashboard with Real-Time Data
