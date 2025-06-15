@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import Navbar from "@/components/navbar";
@@ -30,6 +31,7 @@ import {
 export default function LegalSupport() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const [location, setLocation] = useLocation();
   const [documentText, setDocumentText] = useState("");
   const [documentType, setDocumentType] = useState("");
   const [analysisResult, setAnalysisResult] = useState<any>(null);
@@ -482,7 +484,11 @@ Date: _______________        Date: _______________`
                       <FileText className="h-4 w-4 mr-2" />
                       Generate Report
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => setLocation("/support?tab=legal")}
+                    >
                       <Users className="h-4 w-4 mr-2" />
                       Consult Attorney
                     </Button>
@@ -606,7 +612,11 @@ Date: _______________        Date: _______________`
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start h-auto p-4">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start h-auto p-4"
+                      onClick={() => setLocation("/support?tab=legal")}
+                    >
                       <div className="flex items-start space-x-3">
                         <Scale className="h-5 w-5 text-indigo-600 mt-0.5" />
                         <div className="text-left">
@@ -615,7 +625,11 @@ Date: _______________        Date: _______________`
                         </div>
                       </div>
                     </Button>
-                    <Button variant="outline" className="w-full justify-start h-auto p-4">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start h-auto p-4"
+                      onClick={() => setLocation("/support?tab=legal")}
+                    >
                       <div className="flex items-start space-x-3">
                         <FileText className="h-5 w-5 text-blue-600 mt-0.5" />
                         <div className="text-left">
@@ -624,7 +638,11 @@ Date: _______________        Date: _______________`
                         </div>
                       </div>
                     </Button>
-                    <Button variant="outline" className="w-full justify-start h-auto p-4">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start h-auto p-4"
+                      onClick={() => setLocation("/support?tab=legal")}
+                    >
                       <div className="flex items-start space-x-3">
                         <Gavel className="h-5 w-5 text-red-600 mt-0.5" />
                         <div className="text-left">
