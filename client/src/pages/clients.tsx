@@ -169,7 +169,12 @@ export default function Clients() {
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
-                              <h3 className="text-lg font-semibold text-gray-900">{client.fullName}</h3>
+                              <button 
+                                className="text-lg font-semibold text-gray-900 hover:text-primary transition-colors cursor-pointer text-left"
+                                onClick={() => setLocation(`/clients/${client.id}`)}
+                              >
+                                {client.fullName}
+                              </button>
                               <div className="flex items-center space-x-4 mt-1">
                                 <div className="flex items-center text-sm text-gray-600">
                                   <Mail className="h-4 w-4 mr-1" />

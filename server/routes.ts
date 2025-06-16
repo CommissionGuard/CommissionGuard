@@ -325,6 +325,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Client-specific showings
+  app.get("/api/showings/client/:clientId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { clientId } = req.params;
+      const agentId = req.user.claims.sub;
+      
+      // Verify client belongs to agent
+      const client = await storage.getClient(parseInt(clientId));
+      if (!client || client.agentId !== agentId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const showings = await storage.getShowingsByClient(parseInt(clientId));
+      res.json(showings);
+    } catch (error) {
+      console.error("Error fetching client showings:", error);
+      res.status(500).json({ message: "Failed to fetch showings" });
+    }
+  });
+
+  // Client-specific property visits
+  app.get("/api/property-visits/client/:clientId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { clientId } = req.params;
+      const agentId = req.user.claims.sub;
+      
+      // Verify client belongs to agent
+      const client = await storage.getClient(parseInt(clientId));
+      if (!client || client.agentId !== agentId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const visits = await storage.getPropertyVisitsByClient(parseInt(clientId));
+      res.json(visits);
+    } catch (error) {
+      console.error("Error fetching client property visits:", error);
+      res.status(500).json({ message: "Failed to fetch property visits" });
+    }
+  });
+
+  // Client-specific SMS history
+  app.get("/api/sms/history/:clientId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { clientId } = req.params;
+      const agentId = req.user.claims.sub;
+      
+      // Verify client belongs to agent
+      const client = await storage.getClient(parseInt(clientId));
+      if (!client || client.agentId !== agentId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const smsHistory = await notificationService.getSMSHistory(parseInt(clientId), agentId);
+      res.json(smsHistory);
+    } catch (error) {
+      console.error("Error fetching SMS history:", error);
+      res.status(500).json({ message: "Failed to fetch SMS history" });
+    }
+  });
+
   // Contract routes
   app.post("/api/contracts", isAuthenticated, upload.single("contractFile"), async (req: any, res) => {
     try {
