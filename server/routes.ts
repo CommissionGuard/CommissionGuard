@@ -28,6 +28,7 @@ import {
 import { aiCommunicationService } from "./aiCommunicationService";
 import { notificationService } from "./notificationService";
 import { calendarService } from "./calendarService";
+import { aiSupportService } from "./aiSupportService";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
@@ -2771,6 +2772,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error fetching SMS history:", error);
       res.status(500).json({ message: "Failed to fetch SMS history" });
+    }
+  });
+
+  // AI Support Chat routes
+  app.post("/api/ai/support-chat", isAuthenticated, async (req: any, res) => {
+    try {
+      const { message, conversationHistory } = req.body;
+      
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ message: "Invalid message format" });
+      }
+
+      const response = await aiSupportService.generateSupportResponse(
+        message.trim(),
+        conversationHistory || []
+      );
+
+      res.json({ response });
+    } catch (error: any) {
+      console.error("Error generating AI support response:", error);
+      res.status(500).json({ 
+        message: "I'm having trouble responding right now. Please try again or contact our support team.",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+      });
+    }
+  });
+
+  app.post("/api/ai/support-suggestions", isAuthenticated, async (req: any, res) => {
+    try {
+      const { userQuery } = req.body;
+      
+      if (!userQuery || typeof userQuery !== 'string') {
+        return res.status(400).json({ message: "Invalid query format" });
+      }
+
+      const suggestions = await aiSupportService.generateQuickSuggestions(userQuery.trim());
+      res.json({ suggestions });
+    } catch (error: any) {
+      console.error("Error generating suggestions:", error);
+      res.status(500).json({ 
+        suggestions: [
+          "How do I set up contract alerts?",
+          "What evidence should I collect for protection?",
+          "How does public records monitoring work?"
+        ]
+      });
+    }
+  });
+
+  app.post("/api/ai/analyze-intent", isAuthenticated, async (req: any, res) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ message: "Invalid message format" });
+      }
+
+      const analysis = await aiSupportService.analyzeUserIntent(message.trim());
+      res.json(analysis);
+    } catch (error: any) {
+      console.error("Error analyzing user intent:", error);
+      res.status(500).json({
+        category: "general",
+        urgency: "medium",
+        suggestedActions: ["Review your contracts", "Check platform alerts", "Contact support if needed"]
+      });
     }
   });
 
