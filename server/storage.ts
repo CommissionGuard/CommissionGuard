@@ -1454,8 +1454,8 @@ export class DatabaseStorage implements IStorage {
   // Admin methods for enhanced admin interface
   async getAllUsers(): Promise<User[]> {
     try {
-      const users = await db.select().from(schema.users);
-      return users;
+      const usersData = await db.select().from(users);
+      return usersData;
     } catch (error) {
       console.error("Error fetching all users:", error);
       return [];
@@ -1464,8 +1464,8 @@ export class DatabaseStorage implements IStorage {
 
   async getAllContracts(): Promise<Contract[]> {
     try {
-      const contracts = await db.select().from(schema.contracts);
-      return contracts;
+      const contractsData = await db.select().from(contracts);
+      return contractsData;
     } catch (error) {
       console.error("Error fetching all contracts:", error);
       return [];
@@ -1474,8 +1474,8 @@ export class DatabaseStorage implements IStorage {
 
   async getAllShowings(): Promise<Showing[]> {
     try {
-      const showings = await db.select().from(schema.showings);
-      return showings;
+      const showingsData = await db.select().from(showings);
+      return showingsData;
     } catch (error) {
       console.error("Error fetching all showings:", error);
       return [];
@@ -1484,7 +1484,7 @@ export class DatabaseStorage implements IStorage {
 
   async getAllCommissionProtection(): Promise<CommissionProtection[]> {
     try {
-      const protectionRecords = await db.select().from(schema.commissionProtection);
+      const protectionRecords = await db.select().from(commissionProtection);
       return protectionRecords;
     } catch (error) {
       console.error("Error fetching all commission protection records:", error);
