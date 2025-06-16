@@ -41,92 +41,100 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-4">
-            <div 
-              className="flex items-center space-x-3 cursor-pointer"
-              onClick={() => setLocation("/")}
-            >
-              <img src={logoIcon} alt="Commission Guard" className="h-8 w-8" />
-              <div className="flex flex-col">
-                <span className="text-lg font-bold text-gray-900 leading-tight">Commission</span>
-                <span className="text-lg font-bold text-primary leading-tight">GUARD</span>
+    <>
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        {/* Top brand bar */}
+        <div className="bg-gradient-to-r from-primary to-primary/90 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-12">
+              <div 
+                className="flex items-center space-x-2 cursor-pointer"
+                onClick={() => setLocation("/")}
+              >
+                <img src={logoIcon} alt="Commission Guard" className="h-6 w-6" />
+                <span className="text-sm font-bold">Commission GUARD</span>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <button 
+                  className="relative p-1.5 text-white/80 hover:text-white transition-colors"
+                  onClick={() => setLocation("/alerts")}
+                >
+                  <Bell className="h-4 w-4" />
+                  {(unreadCount as any)?.count > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-xs">
+                      {(unreadCount as any).count > 9 ? '9+' : (unreadCount as any).count}
+                    </span>
+                  )}
+                </button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="flex items-center space-x-2 p-1 text-white hover:bg-white/10">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage 
+                          src={user?.profileImageUrl || undefined} 
+                          alt={`${user?.firstName} ${user?.lastName}`} 
+                        />
+                        <AvatarFallback className="text-xs bg-white/20 text-white border-0">{userInitials}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs font-medium hidden sm:block">
+                        {user?.firstName && user?.lastName 
+                          ? `${user.firstName} ${user.lastName}`
+                          : user?.email || 'User'
+                        }
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setShowProfileSettings(true)}>
+                      Profile Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setLocation("/subscription")}>
+                      Subscription
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setLocation("/support")}>
+                      Support
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => window.location.href = "/api/logout"}
+                      className="text-red-600"
+                    >
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>
-          
-          <div className="hidden md:flex items-center space-x-6">
-            {navItems.map((item) => (
-              <button
-                key={item.path}
-                onClick={() => setLocation(item.path)}
-                className={`font-medium pb-1 transition-colors ${
-                  location === item.path
-                    ? "text-primary border-b-2 border-primary"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <button className="relative p-2 text-gray-600 hover:text-gray-900">
-              <Bell className="h-5 w-5" />
-              {(unreadCount as any)?.count > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {(unreadCount as any).count > 9 ? '9+' : (unreadCount as any).count}
-                </span>
-              )}
-            </button>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2 p-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage 
-                      src={user?.profileImageUrl || undefined} 
-                      alt={`${user?.firstName} ${user?.lastName}`} 
-                    />
-                    <AvatarFallback>{userInitials}</AvatarFallback>
-                  </Avatar>
-                  <span className="text-gray-700 font-medium hidden sm:block">
-                    {user?.firstName && user?.lastName 
-                      ? `${user.firstName} ${user.lastName}`
-                      : user?.email || 'User'
-                    }
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setShowProfileSettings(true)}>
-                  Profile Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocation("/subscription")}>
-                  Subscription
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocation("/support")}>
-                  Support
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => window.location.href = "/api/logout"}
-                  className="text-red-600"
-                >
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </div>
+
+        {/* Navigation tabs */}
+        <nav className="bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex space-x-8 overflow-x-auto scrollbar-hide">
+              {navItems.map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => setLocation(item.path)}
+                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    location === item.path
+                      ? "border-primary text-primary"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </nav>
       </div>
       
       <ProfileSettingsModal 
         open={showProfileSettings} 
         onOpenChange={setShowProfileSettings} 
       />
-    </nav>
+    </>
   );
 }
