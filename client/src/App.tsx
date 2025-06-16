@@ -17,6 +17,7 @@ import ShowingTracker from "@/pages/showing-tracker";
 import CommissionTracker from "@/pages/commission-tracker";
 import PropertyAnalyzer from "@/pages/property-analyzer";
 import AdminDashboard from "@/pages/admin-dashboard";
+import EnhancedAdminDashboard from "@/pages/enhanced-admin-dashboard";
 import PublicRecordsMonitor from "@/pages/public-records-monitor";
 import PublicRecords from "@/pages/public-records";
 import Subscription from "@/pages/subscription";
@@ -53,6 +54,7 @@ function Router() {
           <Route path="/commission-tracker" component={CommissionTracker} />
           <Route path="/property-analyzer" component={PropertyAnalyzer} />
           <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin-enhanced" component={EnhancedAdminDashboard} />
           <Route path="/subscription" component={Subscription} />
           <Route path="/support" component={Support} />
           <Route path="/public-records" component={PublicRecordsMonitor} />
