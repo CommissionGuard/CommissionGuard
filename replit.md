@@ -2,7 +2,7 @@
 
 ## Overview
 
-Commission Guard is a comprehensive real estate commission protection platform designed for agents and brokers to monitor representation agreements, track client interactions, and prevent commission breaches. The application provides AI-powered contract analysis, property research capabilities, and automated monitoring of public records to protect real estate professionals' commissions.
+Commission Guard is a specialized real estate commission protection platform designed exclusively for agents and brokers to prevent commission breaches from client ghosting and unauthorized transactions. The application focuses specifically on protecting commissions when clients abandon their exclusive contracted agent and purchase with someone else. The system provides AI-powered contract analysis, comprehensive showing tracking with ShowingTime integration, and automated public records monitoring to detect and prevent commission breaches.
 
 ## System Architecture
 
@@ -146,6 +146,15 @@ The application uses a comprehensive schema supporting:
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+
+- **June 16, 2025**: App Refocused on Commission Protection and Breach Prevention
+  - Removed prospecting functionality to specialize exclusively on commission protection
+  - Streamlined navigation to focus on core breach prevention features
+  - Updated app description to emphasize protection from client ghosting and unauthorized transactions
+  - Consolidated navigation menu with commission-focused features only
+  - Maintained essential features: clients, contracts, showing tracker, commission protection, alerts, public records monitoring
+  - Enhanced system focus on detecting when clients abandon exclusive agents and buy with competitors
+  - Unified Showing Tracker now includes integrated ShowingTime functionality for comprehensive tracking
 
 - **June 16, 2025**: Unified Showing Tracker with ShowingTime Integration
   - Successfully consolidated ShowingTime functionality into the main Showing Tracker interface

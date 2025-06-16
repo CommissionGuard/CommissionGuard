@@ -32,14 +32,11 @@ export default function Navbar() {
     { path: "/clients", label: "Clients" },
     { path: "/contracts", label: "Contracts" },
     { path: "/showing-tracker", label: "Showing Tracker" },
-    { path: "/prospecting", label: "Prospecting" },
-    { path: "/deal-pipeline", label: "Deal Pipeline" },
-    { path: "/property-analyzer", label: "Market Analyzer" },
+    { path: "/commission-tracker", label: "Commission Protection" },
     { path: "/alerts", label: "Alerts" },
-    { path: "/live-map", label: "Interactive Map" },
-    { path: "/api-integrations", label: "API Integrations" },
+    { path: "/public-records", label: "Public Records Monitor" },
+    { path: "/property-analyzer", label: "Market Analyzer" },
     { path: "/reports", label: "Reports" },
-    { path: "/business-overview", label: "Overview" },
   ];
 
   return (

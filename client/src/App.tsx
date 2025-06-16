@@ -13,27 +13,14 @@ import Contracts from "@/pages/contracts";
 import Alerts from "@/pages/alerts";
 import Reports from "@/pages/reports";
 import LegalSupport from "@/pages/legal-support";
-import PropertyMap from "@/pages/map";
-import LiveMap from "@/pages/live-map";
-import Prospecting from "@/pages/prospecting";
-import ApiIntegrations from "@/pages/api-integrations";
-import PropertyResearch from "@/pages/property-research";
-import PropertyAnalyzer from "@/pages/property-analyzer";
-import DealPipeline from "@/pages/deal-pipeline";
-import BusinessOverview from "@/pages/business-overview";
-import AIContractAnalysis from "@/pages/ai-contract-analysis";
-import ApiTest from "@/pages/api-test";
-import AdminDashboard from "@/pages/admin-dashboard";
-import FunctionalityTest from "@/pages/functionality-test";
-import RentalMarket from "@/pages/rental-market";
-import SystemTest from "@/pages/system-test";
 import ShowingTracker from "@/pages/showing-tracker";
+import CommissionTracker from "@/pages/commission-tracker";
+import PropertyAnalyzer from "@/pages/property-analyzer";
+import AdminDashboard from "@/pages/admin-dashboard";
 import PublicRecordsMonitor from "@/pages/public-records-monitor";
 import PublicRecords from "@/pages/public-records";
 import Subscription from "@/pages/subscription";
 import Support from "@/pages/support";
-import CommissionTracker from "@/pages/commission-tracker";
-import ShowingTimeIntegration from "@/pages/showingtime-integration";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -62,23 +49,10 @@ function Router() {
           <Route path="/alerts" component={Alerts} />
           <Route path="/reports" component={Reports} />
           <Route path="/legal-support" component={LegalSupport} />
-          <Route path="/map" component={PropertyMap} />
-          <Route path="/live-map" component={LiveMap} />
-          <Route path="/prospecting" component={Prospecting} />
-          <Route path="/api-integrations" component={ApiIntegrations} />
-          <Route path="/property-research" component={PropertyResearch} />
-          <Route path="/property-analyzer" component={PropertyAnalyzer} />
-          <Route path="/deal-pipeline" component={DealPipeline} />
-          <Route path="/business-overview" component={BusinessOverview} />
-          <Route path="/ai-contract-analysis" component={AIContractAnalysis} />
-          <Route path="/api-test" component={ApiTest} />
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/functionality-test" component={FunctionalityTest} />
-          <Route path="/rental-market" component={RentalMarket} />
-          <Route path="/system-test" component={SystemTest} />
           <Route path="/showing-tracker" component={ShowingTracker} />
-          <Route path="/showingtime-integration" component={ShowingTimeIntegration} />
           <Route path="/commission-tracker" component={CommissionTracker} />
+          <Route path="/property-analyzer" component={PropertyAnalyzer} />
+          <Route path="/admin" component={AdminDashboard} />
           <Route path="/subscription" component={Subscription} />
           <Route path="/support" component={Support} />
           <Route path="/public-records" component={PublicRecordsMonitor} />
