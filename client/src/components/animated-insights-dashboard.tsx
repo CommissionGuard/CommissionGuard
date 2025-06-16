@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   TrendingUp,
   TrendingDown,
@@ -192,15 +193,28 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
                     
                     <span className="font-medium text-gray-900">{activity.title}</span>
                     
-                    <Badge 
-                      variant={
-                        activity.priority === 'high' ? 'destructive' : 
-                        activity.priority === 'medium' ? 'default' : 'secondary'
-                      }
-                      className="text-xs"
-                    >
-                      {activity.priority}
-                    </Badge>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge 
+                            variant={
+                              activity.priority === 'high' ? 'destructive' : 
+                              activity.priority === 'medium' ? 'default' : 'secondary'
+                            }
+                            className="text-xs cursor-help"
+                          >
+                            {activity.priority}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>
+                            {activity.priority === 'high' && 'Urgent attention required - immediate action needed to prevent commission loss'}
+                            {activity.priority === 'medium' && 'Important notification - review and take action within 24 hours'}
+                            {activity.priority === 'low' && 'General information - review when convenient for awareness'}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   
                   <p className="text-sm text-gray-600 mb-2">{activity.description}</p>
