@@ -21,6 +21,7 @@ import ContractReminders from "@/pages/contract-reminders";
 import PropertyAnalyzer from "@/pages/property-analyzer";
 import AdminDashboard from "@/pages/admin-dashboard";
 import EnhancedAdminDashboard from "@/pages/enhanced-admin-dashboard";
+import BreachManagement from "@/pages/breach-management";
 import PublicRecordsMonitor from "@/pages/public-records-monitor";
 import PublicRecords from "@/pages/public-records";
 import Subscription from "@/pages/subscription";
@@ -54,6 +55,7 @@ function Router() {
         <Route path="/property-analyzer" component={isAuthenticated ? PropertyAnalyzer : Landing} />
         <Route path="/admin" component={isAuthenticated ? AdminDashboard : Landing} />
         <Route path="/admin-enhanced" component={isAuthenticated ? EnhancedAdminDashboard : Landing} />
+        <Route path="/breach-management" component={isAuthenticated ? BreachManagement : Landing} />
         <Route path="/subscription" component={isAuthenticated ? Subscription : Landing} />
         <Route path="/support" component={isAuthenticated ? Support : Landing} />
         <Route path="/public-records" component={isAuthenticated ? PublicRecordsMonitor : Landing} />

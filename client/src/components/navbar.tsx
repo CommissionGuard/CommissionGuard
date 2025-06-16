@@ -38,6 +38,7 @@ export default function Navbar() {
     { path: "/public-records", label: "Public Records Monitor" },
     { path: "/property-analyzer", label: "Market Analyzer" },
     { path: "/reports", label: "Reports" },
+    ...(user?.role === 'admin' ? [{ path: "/breach-management", label: "Breach Management" }] : []),
   ];
 
   return (
