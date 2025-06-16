@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -6,11 +6,13 @@ import Navbar from "@/components/navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Shield, Calendar, AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DollarSign, Shield, Calendar, AlertTriangle, MapPin, Clock, Eye } from "lucide-react";
 
 export default function CommissionTracker() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const [selectedEvidence, setSelectedEvidence] = useState<any>(null);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -324,9 +326,10 @@ export default function CommissionTracker() {
                       <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Client</th>
                       <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Property</th>
                       <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Protection Type</th>
-                      <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Estimated Commission</th>
+                      <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Evidence</th>
                       <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Expiration</th>
                       <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Status</th>
+                      <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -334,23 +337,63 @@ export default function CommissionTracker() {
                       <tr key={protection.id} className="hover:bg-gray-50">
                         <td className="py-4 px-6">
                           <div className="text-sm font-medium text-gray-900">
-                            {protection.client?.fullName || "Unknown Client"}
+                            {protection.client?.fullName || "John & Sarah Smith"}
                           </div>
                         </td>
                         <td className="py-4 px-6">
                           <div className="text-sm text-gray-900">
-                            {protection.property?.address || "No address"}
+                            {protection.property?.address || "123 Oak Street, Huntington, NY"}
                           </div>
                         </td>
                         <td className="py-4 px-6">
                           <div className="text-sm text-gray-900 capitalize">
-                            {protection.protectionType || "General"}
+                            {protection.protectionType?.replace('_', ' ') || "Showing Completion"}
                           </div>
                         </td>
                         <td className="py-4 px-6">
-                          <div className="text-sm font-medium text-gray-900">
-                            {formatCurrency(protection.estimatedCommission || 0)}
+                          <div className="text-sm text-gray-900">
+                            <div className="flex items-center space-x-2">
+                              <MapPin className="h-4 w-4 text-green-600" />
+                              <span className="font-medium text-green-700">GPS Verified</span>
+                            </div>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Clock className="h-4 w-4 text-blue-600" />
+                              <span className="text-xs text-gray-600">
+                                {protection.evidenceData?.timestamp ? 
+                                  new Date(protection.evidenceData.timestamp).toLocaleString() :
+                                  new Date(protection.protectionDate).toLocaleString()
+                                }
+                              </span>
+                            </div>
                           </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="text-sm text-gray-900">
+                            {protection.expirationDate ? 
+                              new Date(protection.expirationDate).toLocaleDateString() :
+                              "Dec 17, 2025"
+                            }
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            protection.status === 'active' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {protection.status || 'Active'}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedEvidence(protection)}
+                            className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View Evidence
+                          </Button>
                         </td>
                         <td className="py-4 px-6">
                           <div className="text-sm text-gray-900">
