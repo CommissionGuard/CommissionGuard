@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ChatMessage {
   id: string;
@@ -28,6 +29,8 @@ export default function AISupportChat({ isOpen, onToggle }: AISupportChatProps) 
     }
   ]);
   const [currentMessage, setCurrentMessage] = useState("");
+  const [isHovered, setIsHovered] = useState(false);
+  const [isStayOpen, setIsStayOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
@@ -104,34 +107,130 @@ export default function AISupportChat({ isOpen, onToggle }: AISupportChatProps) 
     setCurrentMessage(question);
   };
 
-  if (!isOpen) {
+  const handleToggleClick = () => {
+    if (isOpen) {
+      onToggle();
+      setIsStayOpen(false);
+    } else {
+      onToggle();
+      setIsStayOpen(true);
+    }
+  };
+
+  const showPreview = isHovered && !isOpen && !isStayOpen;
+  const showFullChat = isOpen || isStayOpen;
+
+  if (!showFullChat && !showPreview) {
     return (
-      <Button
-        onClick={onToggle}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 z-50"
-        size="icon"
+      <div 
+        className="fixed bottom-6 right-6 z-50"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        <MessageCircle className="h-6 w-6" />
-      </Button>
+        <Button
+          onClick={handleToggleClick}
+          className="h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90"
+          size="icon"
+        >
+          <MessageCircle className="h-6 w-6" />
+        </Button>
+      </div>
     );
   }
 
   return (
-    <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 bg-primary text-white rounded-t-lg flex-shrink-0">
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-          <Bot className="h-5 w-5" />
-          Commission Guard AI
-        </CardTitle>
+    <div 
+      className="fixed bottom-6 right-6 z-50"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Chat Button */}
+      <motion.div
+        className="absolute bottom-0 right-0"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
         <Button
-          variant="ghost"
+          onClick={handleToggleClick}
+          className="h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90"
           size="icon"
-          onClick={onToggle}
-          className="text-white hover:bg-white/20 h-8 w-8"
         >
-          <X className="h-4 w-4" />
+          <MessageCircle className="h-6 w-6" />
         </Button>
-      </CardHeader>
+      </motion.div>
+
+      <AnimatePresence>
+
+        {/* Preview on Hover */}
+        {showPreview && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ duration: 0.2 }}
+            className="absolute bottom-16 right-0 w-80"
+          >
+            <Card className="shadow-xl border-2 border-primary/20">
+              <CardHeader className="pb-3 bg-primary text-white rounded-t-lg">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Bot className="h-4 w-4" />
+                  Commission Guard AI
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">
+                    Hi! I can help you with commission protection strategies, contract questions, and platform guidance.
+                  </p>
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-gray-500">Quick questions:</p>
+                    {suggestedQuestions.slice(0, 2).map((question, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          handleSuggestedQuestion(question);
+                          handleToggleClick();
+                        }}
+                        className="block w-full text-left text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-1 rounded transition-colors"
+                      >
+                        • {question}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">Click the button to start chatting</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Full Chat */}
+        {showFullChat && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className="absolute bottom-16 right-0 w-96"
+          >
+            <Card className="h-[600px] shadow-2xl flex flex-col overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 bg-primary text-white rounded-t-lg flex-shrink-0">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  <Bot className="h-5 w-5" />
+                  Commission Guard AI
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    onToggle();
+                    setIsStayOpen(false);
+                  }}
+                  className="text-white hover:bg-white/20 h-8 w-8"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardHeader>
 
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
         <div className="flex-1 overflow-y-auto p-4" style={{ maxHeight: "400px" }}>
@@ -221,6 +320,10 @@ export default function AISupportChat({ isOpen, onToggle }: AISupportChatProps) 
           </div>
         </div>
       </CardContent>
-    </Card>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
