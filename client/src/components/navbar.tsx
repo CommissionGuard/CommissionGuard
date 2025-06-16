@@ -14,7 +14,9 @@ import {
   Search, 
   BarChart3,
   FileSpreadsheet,
-  ShieldAlert
+  ShieldAlert,
+  ChevronDown,
+  UserPlus
 } from "lucide-react";
 import logoIcon from "@/assets/commission-guard-icon.svg";
 import { Button } from "@/components/ui/button";
@@ -172,6 +174,53 @@ export default function Navbar() {
             <div className="flex justify-between items-center overflow-x-auto scrollbar-hide">
               {navItems.map((item, index) => {
                 const IconComponent = item.icon;
+                
+                // Special handling for Clients tab with dropdown
+                if (item.path === "/clients") {
+                  return (
+                    <motion.div
+                      key={item.path}
+                      className="flex-shrink-0"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1, duration: 0.3 }}
+                    >
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <motion.button
+                            className={`whitespace-nowrap py-3 px-1 sm:px-2 border-b-2 font-medium text-xs transition-colors flex flex-col sm:flex-row items-center gap-1 ${
+                              location === item.path
+                                ? "border-primary text-primary"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                            }`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            title={item.label}
+                          >
+                            <div className="flex items-center gap-1">
+                              <IconComponent className="h-4 w-4 flex-shrink-0" />
+                              <ChevronDown className="h-3 w-3" />
+                            </div>
+                            <span className="hidden lg:inline">{item.label}</span>
+                            <span className="lg:hidden">{item.shortLabel}</span>
+                          </motion.button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="center" className="w-48">
+                          <DropdownMenuItem onClick={() => setLocation("/clients")} className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            All Clients
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setLocation("/clients?action=add")} className="flex items-center gap-2">
+                            <UserPlus className="h-4 w-4" />
+                            Add New Client
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </motion.div>
+                  );
+                }
+                
+                // Regular navigation items
                 return (
                   <motion.button
                     key={item.path}

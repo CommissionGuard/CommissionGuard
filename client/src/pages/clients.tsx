@@ -21,6 +21,17 @@ export default function Clients() {
   const [, setLocation] = useLocation();
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [showContractsModal, setShowContractsModal] = useState(false);
+  const [showAddClientForm, setShowAddClientForm] = useState(false);
+
+  // Check URL parameters to auto-open Add Client form
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('action') === 'add') {
+      setShowAddClientForm(true);
+      // Clean up URL parameter
+      window.history.replaceState({}, '', '/clients');
+    }
+  }, []);
 
   const { data: clients = [], isLoading: clientsLoading } = useQuery({
     queryKey: ["/api/clients"],
@@ -213,9 +224,22 @@ export default function Clients() {
             </Card>
           </div>
 
-          {/* Add Client Form */}
+          {/* Add Client Button */}
           <div>
-            <AddClientForm />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center">
+                    <UserPlus className="h-5 w-5 mr-2" />
+                    Client Management
+                  </span>
+                  <Button onClick={() => setShowAddClientForm(true)} className="flex items-center gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    Add New Client
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+            </Card>
           </div>
         </div>
 
@@ -528,6 +552,19 @@ export default function Clients() {
                 </div>
               )}
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Client Modal */}
+        <Dialog open={showAddClientForm} onOpenChange={setShowAddClientForm}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5" />
+                Add New Client
+              </DialogTitle>
+            </DialogHeader>
+            <AddClientForm onClose={() => setShowAddClientForm(false)} />
           </DialogContent>
         </Dialog>
       </div>
