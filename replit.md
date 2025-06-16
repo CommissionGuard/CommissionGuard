@@ -147,6 +147,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **June 16, 2025**: ShowingTime Integration Implementation
+  - Successfully integrated ShowingTime API service for automatic appointment import
+  - Created comprehensive ShowingTimeService with full API authentication and data transformation
+  - Built dedicated frontend interface at `/showingtime-integration` with status monitoring and sync controls
+  - Implemented automatic property and client creation from ShowingTime appointment data
+  - Added bulk and selective appointment import capabilities with real-time status updates
+  - Created complete API routes for sync operations, status checking, and individual appointment imports
+  - Enhanced storage layer with ShowingTime-specific methods for data mapping and integration stats
+  - Added ShowingTime navigation menu item for easy access to integration features
+  - Provided comprehensive setup documentation in SHOWINGTIME_SETUP.md
+  - System automatically enables commission protection for all imported ShowingTime appointments
+
 - **June 15, 2025**: Twilio SMS Integration with Intelligent Response Routing
   - Successfully integrated Twilio SMS service for automated showing reminders
   - Implemented 24-hour and 1-hour advance notifications for scheduled showings
