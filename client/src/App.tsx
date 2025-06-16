@@ -41,33 +41,24 @@ function Router() {
   return (
     <>
       <Switch>
-        {!isAuthenticated ? (
-          <>
-            <Route path="/" component={Landing} />
-            <Route component={Landing} />
-          </>
-        ) : (
-          <>
-            <Route path="/" component={Dashboard} />
-            <Route path="/clients" component={Clients} />
-            <Route path="/clients/:clientId" component={ClientProfile} />
-            <Route path="/contracts" component={Contracts} />
-            <Route path="/alerts" component={Alerts} />
-            <Route path="/reports" component={Reports} />
-            <Route path="/legal-support" component={LegalSupport} />
-            <Route path="/showing-tracker" component={ShowingTracker} />
-            <Route path="/commission-tracker" component={CommissionTracker} />
-            <Route path="/contract-reminders" component={ContractReminders} />
-            <Route path="/property-analyzer" component={PropertyAnalyzer} />
-            <Route path="/admin" component={AdminDashboard} />
-            <Route path="/admin-enhanced" component={EnhancedAdminDashboard} />
-            <Route path="/subscription" component={Subscription} />
-            <Route path="/support" component={Support} />
-            <Route path="/public-records" component={PublicRecordsMonitor} />
-            <Route path="/public-records-search" component={PublicRecords} />
-            <Route path="*" component={NotFound} />
-          </>
-        )}
+        <Route path="/" component={!isAuthenticated ? Landing : Dashboard} />
+        <Route path="/clients" component={isAuthenticated ? Clients : Landing} />
+        <Route path="/clients/:clientId" component={isAuthenticated ? ClientProfile : Landing} />
+        <Route path="/contracts" component={isAuthenticated ? Contracts : Landing} />
+        <Route path="/alerts" component={isAuthenticated ? Alerts : Landing} />
+        <Route path="/reports" component={isAuthenticated ? Reports : Landing} />
+        <Route path="/legal-support" component={isAuthenticated ? LegalSupport : Landing} />
+        <Route path="/showing-tracker" component={isAuthenticated ? ShowingTracker : Landing} />
+        <Route path="/commission-tracker" component={isAuthenticated ? CommissionTracker : Landing} />
+        <Route path="/contract-reminders" component={isAuthenticated ? ContractReminders : Landing} />
+        <Route path="/property-analyzer" component={isAuthenticated ? PropertyAnalyzer : Landing} />
+        <Route path="/admin" component={isAuthenticated ? AdminDashboard : Landing} />
+        <Route path="/admin-enhanced" component={isAuthenticated ? EnhancedAdminDashboard : Landing} />
+        <Route path="/subscription" component={isAuthenticated ? Subscription : Landing} />
+        <Route path="/support" component={isAuthenticated ? Support : Landing} />
+        <Route path="/public-records" component={isAuthenticated ? PublicRecordsMonitor : Landing} />
+        <Route path="/public-records-search" component={isAuthenticated ? PublicRecords : Landing} />
+        <Route component={NotFound} />
       </Switch>
       {isAuthenticated && (
         <AISupportChat 
