@@ -194,6 +194,43 @@ export default function PublicRecordsMonitor() {
           </Card>
         </div>
 
+        {/* API Setup Guide */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Building className="h-5 w-5 mr-2 text-blue-600" />
+              Enhance Scan Coverage - API Setup
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-blue-50 p-4 rounded-lg mb-4">
+              <p className="text-sm text-blue-700 mb-3">
+                Currently using basic fallback scanning. For comprehensive breach detection, add these API keys to your environment:
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <h4 className="font-medium text-blue-900 mb-2">Property Data APIs:</h4>
+                  <ul className="space-y-1 text-blue-700">
+                    <li>• ATTOM_DATA_API_KEY - Property transactions</li>
+                    <li>• DATATREE_API_KEY - First American data</li>
+                    <li>• PROPERTY_RADAR_API_KEY - Public records</li>
+                    <li>• REALTY_TRAC_API_KEY - Foreclosure data</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium text-blue-900 mb-2">Contact Information:</h4>
+                  <ul className="space-y-1 text-blue-700">
+                    <li>• ATTOM Data: attomdata.com</li>
+                    <li>• DataTree: datatree.com</li>
+                    <li>• PropertyRadar: propertyradar.com</li>
+                    <li>• RealtyTrac: realtytrac.com</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* How It Works */}
         <Card className="mb-8">
           <CardHeader>
@@ -258,7 +295,10 @@ export default function PublicRecordsMonitor() {
                   <div>
                     <span className="text-gray-500">Contract Period:</span>
                     <span className="ml-2 font-medium">
-                      {new Date(scanResults.contractPeriod.start).toLocaleDateString()} - {new Date(scanResults.contractPeriod.end).toLocaleDateString()}
+                      {scanResults.contractStartDate && scanResults.contractEndDate ? 
+                        `${new Date(scanResults.contractStartDate).toLocaleDateString()} - ${new Date(scanResults.contractEndDate).toLocaleDateString()}` : 
+                        "Not specified"
+                      }
                     </span>
                   </div>
                   <div>

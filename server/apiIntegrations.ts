@@ -380,16 +380,17 @@ export class ApiIntegrationService {
 
       return {
         clientName,
-        contractPeriod: { 
-          start: contractStartDate, 
-          end: contractEndDate,
-          isActive: currentDate >= contractStart && currentDate <= contractEnd
-        },
+        contractStartDate,
+        contractEndDate,
         scanResults: {
           totalRecordsFound: allRecords.length,
           breachesDetected: breachRecords.length,
-          breachRecords,
-          estimatedLostCommission: breachRecords.reduce((total, record) => total + (record.estimatedLostCommission || 0), 0),
+          breachRecords: breachRecords.map(record => ({
+            ...record,
+            estimatedLostCommission: record.estimatedLostCommission || this.calculateEstimatedCommission(record.salePrice)
+          })),
+          estimatedLostCommission: breachRecords.reduce((total, record) => 
+            total + (record.estimatedLostCommission || this.calculateEstimatedCommission(record.salePrice)), 0),
           dataSource: nassauApiKey || suffolkApiKey ? "Official County Records" : "Public Property APIs"
         },
         monitoring: {
@@ -1737,6 +1738,13 @@ export class ApiIntegrationService {
       leads: [],
       message: "Lead generation API integration ready"
     };
+  }
+
+  // Helper function to calculate estimated commission loss
+  private calculateEstimatedCommission(salePrice: number): number {
+    const standardCommissionRate = 0.06; // 6% total commission
+    const agentShare = 0.5; // Agent gets 50% of total commission
+    return Math.round(salePrice * standardCommissionRate * agentShare);
   }
 }
 
