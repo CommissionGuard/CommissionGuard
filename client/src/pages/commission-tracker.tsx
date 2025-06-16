@@ -94,6 +94,49 @@ export default function CommissionTracker() {
           <p className="text-gray-600 mt-1">Monitor and protect your commission earnings</p>
         </div>
 
+        {/* How Commission Protection Works */}
+        <Card className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <CardHeader>
+            <CardTitle className="flex items-center text-blue-900">
+              <Shield className="h-6 w-6 mr-2" />
+              How Commission Protection Works
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="bg-blue-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
+                  <Calendar className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-blue-900 mb-2">1. Schedule Showing</h3>
+                <p className="text-sm text-blue-700">
+                  Create showing appointments in the Showing Tracker with clients under exclusive contracts
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <div className="bg-green-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
+                  <Shield className="h-6 w-6 text-green-600" />
+                </div>
+                <h3 className="font-semibold text-green-900 mb-2">2. Complete & Track</h3>
+                <p className="text-sm text-green-700">
+                  Use "Track Route" button to mark showing complete - automatically creates protection record with GPS proof
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <div className="bg-red-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-red-600" />
+                </div>
+                <h3 className="font-semibold text-red-900 mb-2">3. Legal Protection</h3>
+                <p className="text-sm text-red-700">
+                  Protection records serve as evidence for commission claims if clients breach their exclusive agreement
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -138,6 +181,120 @@ export default function CommissionTracker() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Demo: Protection Workflow */}
+        <Card className="mb-8 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          <CardHeader>
+            <CardTitle className="flex items-center text-green-900">
+              <Shield className="h-6 w-6 mr-2" />
+              Live Demo: Protection Record Creation
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <p className="text-green-800">
+                Here's exactly how protection records are automatically created and integrated with breach detection:
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white p-4 rounded-lg border border-green-200">
+                  <div className="text-center mb-3">
+                    <div className="bg-blue-100 p-2 rounded-full w-10 h-10 mx-auto flex items-center justify-center">
+                      <Calendar className="h-5 w-5 text-blue-600" />
+                    </div>
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">1. Schedule Showing</h4>
+                  <p className="text-sm text-gray-700">
+                    Create showing appointment in Showing Tracker for client with active exclusive contract
+                  </p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-lg border border-green-200">
+                  <div className="text-center mb-3">
+                    <div className="bg-green-100 p-2 rounded-full w-10 h-10 mx-auto flex items-center justify-center">
+                      <Shield className="h-5 w-5 text-green-600" />
+                    </div>
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">2. Complete & Track</h4>
+                  <p className="text-sm text-gray-700">
+                    Click "Track Route" button - system records GPS location, timestamp, and creates protection record
+                  </p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-lg border border-green-200">
+                  <div className="text-center mb-3">
+                    <div className="bg-red-100 p-2 rounded-full w-10 h-10 mx-auto flex items-center justify-center">
+                      <DollarSign className="h-5 w-5 text-red-600" />
+                    </div>
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">3. Breach Detection</h4>
+                  <p className="text-sm text-gray-700">
+                    Public records monitoring automatically matches unauthorized purchases with your protection records
+                  </p>
+                </div>
+              </div>
+              
+              <div className="bg-white p-4 rounded-lg border border-green-200">
+                <h5 className="font-semibold text-gray-900 mb-3">Sample Protection Record Generated:</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Client:</span>
+                    <span className="ml-2 font-medium">John & Sarah Smith</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Property:</span>
+                    <span className="ml-2 font-medium">123 Oak Street, Huntington, NY</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Evidence Type:</span>
+                    <span className="ml-2 font-medium">GPS + Timestamp Proof</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Protection Date:</span>
+                    <span className="ml-2 font-medium">{new Date().toLocaleDateString()}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Expires:</span>
+                    <span className="ml-2 font-medium">{new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString()}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Est. Commission:</span>
+                    <span className="ml-2 font-medium text-green-600">$18,000</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h5 className="font-medium text-blue-900 mb-2">How Public Records Integration Works:</h5>
+                <p className="text-sm text-blue-800 mb-2">
+                  When you scan public records and find this property was purchased during the protection period:
+                </p>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>• System automatically matches property address with protection record</li>
+                  <li>• Calculates commission loss based on actual sale price vs. your protection amount</li>
+                  <li>• Generates high-priority breach alert with legal evidence attached</li>
+                  <li>• Provides documentation ready for commission dispute proceedings</li>
+                </ul>
+              </div>
+              
+              <div className="text-center">
+                <Button 
+                  onClick={() => window.location.href = '/showing-tracker'}
+                  className="bg-green-600 hover:bg-green-700 text-white mr-4"
+                >
+                  Start Creating Protection Records
+                </Button>
+                <Button 
+                  onClick={() => window.location.href = '/public-records-monitor'}
+                  variant="outline"
+                  className="border-green-300 text-green-700 hover:bg-green-50"
+                >
+                  Test Public Records Scanning
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Commission Protection List */}
         <Card className="bg-white rounded-xl shadow-sm border border-gray-200">
