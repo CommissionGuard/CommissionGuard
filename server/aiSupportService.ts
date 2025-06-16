@@ -63,7 +63,35 @@ Maintain a helpful, professional tone while being concise and practical in your 
 
     } catch (error) {
       console.error('Error generating AI support response:', error);
-      throw new Error('Failed to generate AI response');
+      
+      // Provide helpful fallback responses based on common keywords
+      const lowerMessage = message.toLowerCase();
+      
+      if (lowerMessage.includes('contract') || lowerMessage.includes('agreement')) {
+        return "I'd be happy to help with contract management! Commission Guard helps you track representation agreements, monitor expiration dates, and set up automated reminders. You can upload contracts in the Contracts section and our system will analyze them for important dates and terms. For specific legal questions, please use our Legal Support feature.";
+      }
+      
+      if (lowerMessage.includes('client') || lowerMessage.includes('customer')) {
+        return "For client management, Commission Guard provides comprehensive client tracking, showing schedules, and communication history. You can add clients in the Clients section, track their property interests, and monitor all interactions to protect your commissions. The system also helps detect if clients work with other agents.";
+      }
+      
+      if (lowerMessage.includes('showing') || lowerMessage.includes('appointment')) {
+        return "The Showing Tracker helps you schedule and monitor property showings, integrate with ShowingTime, and automatically detect missed appointments. This creates a paper trail to protect your commissions if clients later work with other agents. You can also set up automated SMS reminders for clients.";
+      }
+      
+      if (lowerMessage.includes('commission') || lowerMessage.includes('protection')) {
+        return "Commission Guard specializes in protecting your real estate commissions from client ghosting and unauthorized transactions. The platform monitors public records, tracks client activities, and provides legal evidence if clients breach their representation agreements. Check the Commission Tracker for detailed protection records.";
+      }
+      
+      if (lowerMessage.includes('alert') || lowerMessage.includes('notification')) {
+        return "The alert system monitors contract expirations, potential breaches, and suspicious client activity. You can view all alerts in the Alerts section and set up automated notifications via email and SMS. The system prioritizes alerts based on urgency and commission risk.";
+      }
+      
+      if (lowerMessage.includes('help') || lowerMessage.includes('how') || lowerMessage.includes('support')) {
+        return "Commission Guard offers multiple support options: AI assistance (currently limited), Legal Support for contract issues, IT Support for technical problems, and Real Estate Support through our Frontline Realty partnership. You can access all support options through the Support menu in your user dropdown.";
+      }
+      
+      return "I'm currently experiencing technical difficulties with my AI responses due to API limitations. However, I can still help you navigate Commission Guard! The platform includes Contracts, Clients, Showing Tracker, Commission Protection, Alerts, and Public Records monitoring. For immediate assistance, please use the Support menu or contact our support team directly.";
     }
   }
 
@@ -95,10 +123,46 @@ Maintain a helpful, professional tone while being concise and practical in your 
 
     } catch (error) {
       console.error('Error generating suggestions:', error);
+      
+      // Provide contextual fallback suggestions based on user query
+      const lowerQuery = userQuery.toLowerCase();
+      
+      if (lowerQuery.includes('contract')) {
+        return [
+          "How do I upload and analyze contracts?",
+          "What contract terms should I monitor?",
+          "How do I set up expiration alerts?"
+        ];
+      }
+      
+      if (lowerQuery.includes('client')) {
+        return [
+          "How do I track client communications?",
+          "What signs indicate client ghosting?",
+          "How do I add new clients to the system?"
+        ];
+      }
+      
+      if (lowerQuery.includes('showing')) {
+        return [
+          "How do I schedule property showings?",
+          "Can I integrate with ShowingTime?",
+          "How do I track missed appointments?"
+        ];
+      }
+      
+      if (lowerQuery.includes('commission')) {
+        return [
+          "How does commission protection work?",
+          "What evidence do I need for breaches?",
+          "How do I monitor public records?"
+        ];
+      }
+      
       return [
-        "How do I set up contract alerts?",
-        "What evidence should I collect for protection?",
-        "How does public records monitoring work?"
+        "How do I protect my commissions?",
+        "What features help prevent client ghosting?",
+        "How do I set up automated monitoring?"
       ];
     }
   }
