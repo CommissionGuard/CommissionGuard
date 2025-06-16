@@ -28,6 +28,7 @@ import Support from "@/pages/support";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -38,53 +39,52 @@ function Router() {
   }
 
   return (
-    <Switch>
-      {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route component={Landing} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/clients" component={Clients} />
-          <Route path="/clients/:clientId" component={ClientProfile} />
-          <Route path="/contracts" component={Contracts} />
-          <Route path="/alerts" component={Alerts} />
-          <Route path="/reports" component={Reports} />
-          <Route path="/legal-support" component={LegalSupport} />
-          <Route path="/showing-tracker" component={ShowingTracker} />
-          <Route path="/commission-tracker" component={CommissionTracker} />
-          <Route path="/contract-reminders" component={ContractReminders} />
-          <Route path="/property-analyzer" component={PropertyAnalyzer} />
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/admin-enhanced" component={EnhancedAdminDashboard} />
-          <Route path="/subscription" component={Subscription} />
-          <Route path="/support" component={Support} />
-          <Route path="/public-records" component={PublicRecordsMonitor} />
-          <Route path="/public-records-search" component={PublicRecords} />
-          <Route path="*" component={NotFound} />
-        </>
+    <>
+      <Switch>
+        {!isAuthenticated ? (
+          <>
+            <Route path="/" component={Landing} />
+            <Route component={Landing} />
+          </>
+        ) : (
+          <>
+            <Route path="/" component={Dashboard} />
+            <Route path="/clients" component={Clients} />
+            <Route path="/clients/:clientId" component={ClientProfile} />
+            <Route path="/contracts" component={Contracts} />
+            <Route path="/alerts" component={Alerts} />
+            <Route path="/reports" component={Reports} />
+            <Route path="/legal-support" component={LegalSupport} />
+            <Route path="/showing-tracker" component={ShowingTracker} />
+            <Route path="/commission-tracker" component={CommissionTracker} />
+            <Route path="/contract-reminders" component={ContractReminders} />
+            <Route path="/property-analyzer" component={PropertyAnalyzer} />
+            <Route path="/admin" component={AdminDashboard} />
+            <Route path="/admin-enhanced" component={EnhancedAdminDashboard} />
+            <Route path="/subscription" component={Subscription} />
+            <Route path="/support" component={Support} />
+            <Route path="/public-records" component={PublicRecordsMonitor} />
+            <Route path="/public-records-search" component={PublicRecords} />
+            <Route path="*" component={NotFound} />
+          </>
+        )}
+      </Switch>
+      {isAuthenticated && (
+        <AISupportChat 
+          isOpen={isChatOpen} 
+          onToggle={() => setIsChatOpen(!isChatOpen)} 
+        />
       )}
-    </Switch>
+    </>
   );
 }
 
 function App() {
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Router />
-        {isAuthenticated && (
-          <AISupportChat 
-            isOpen={isChatOpen} 
-            onToggle={() => setIsChatOpen(!isChatOpen)} 
-          />
-        )}
       </TooltipProvider>
     </QueryClientProvider>
   );
