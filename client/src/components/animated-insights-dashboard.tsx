@@ -196,15 +196,17 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
                     <TooltipProvider delayDuration={0} skipDelayDuration={0}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Badge 
-                            variant={
-                              activity.priority === 'high' ? 'destructive' : 
-                              activity.priority === 'medium' ? 'default' : 'secondary'
-                            }
-                            className="text-xs cursor-help"
-                          >
-                            {activity.priority}
-                          </Badge>
+                          <div className="inline-block cursor-help">
+                            <Badge 
+                              variant={
+                                activity.priority === 'high' ? 'destructive' : 
+                                activity.priority === 'medium' ? 'default' : 'secondary'
+                              }
+                              className="text-xs"
+                            >
+                              {activity.priority}
+                            </Badge>
+                          </div>
                         </TooltipTrigger>
                         <TooltipContent side="top" align="center" sideOffset={5}>
                           <p className="max-w-xs text-sm">
