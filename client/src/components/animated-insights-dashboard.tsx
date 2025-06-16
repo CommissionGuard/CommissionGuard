@@ -599,11 +599,11 @@ export default function AnimatedInsightsDashboard() {
       {/* Floating Action Notifications */}
       <AnimatePresence>
         <motion.div
-          initial={{ opacity: 0, scale: 0.8, x: 100 }}
+          initial={{ opacity: 0, scale: 0.8, x: -100 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
-          exit={{ opacity: 0, scale: 0.8, x: 100 }}
+          exit={{ opacity: 0, scale: 0.8, x: -100 }}
           transition={{ duration: 0.5, delay: 2 }}
-          className="fixed bottom-6 right-6 z-50"
+          className="fixed bottom-6 left-6 z-50"
         >
           <motion.div
             animate={{ 
