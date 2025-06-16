@@ -3,7 +3,6 @@ import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -52,7 +51,7 @@ export default function AISupportChat({ isOpen, onToggle }: AISupportChatProps) 
     },
     onSuccess: (data) => {
       const assistantMessage: ChatMessage = {
-        id: Date.now().toString(),
+        id: `assistant-${Date.now()}`,
         role: "assistant",
         content: data.response,
         timestamp: new Date()
@@ -60,10 +59,11 @@ export default function AISupportChat({ isOpen, onToggle }: AISupportChatProps) 
       setMessages(prev => [...prev, assistantMessage]);
     },
     onError: (error) => {
+      console.error("Chat error:", error);
       const errorMessage: ChatMessage = {
-        id: Date.now().toString(),
+        id: `error-${Date.now()}`,
         role: "assistant",
-        content: "I'm sorry, I'm having trouble responding right now. Please try again or contact our support team for immediate assistance.",
+        content: "I'm having trouble responding right now. Please try again or contact support if the issue persists.",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -71,10 +71,10 @@ export default function AISupportChat({ isOpen, onToggle }: AISupportChatProps) 
   });
 
   const handleSendMessage = () => {
-    if (!currentMessage.trim() || chatMutation.isPending) return;
+    if (!currentMessage.trim()) return;
 
     const userMessage: ChatMessage = {
-      id: Date.now().toString(),
+      id: `user-${Date.now()}`,
       role: "user",
       content: currentMessage,
       timestamp: new Date()
@@ -117,8 +117,8 @@ export default function AISupportChat({ isOpen, onToggle }: AISupportChatProps) 
   }
 
   return (
-    <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 bg-primary text-white rounded-t-lg">
+    <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 bg-primary text-white rounded-t-lg flex-shrink-0">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <Bot className="h-5 w-5" />
           Commission Guard AI
@@ -133,8 +133,8 @@ export default function AISupportChat({ isOpen, onToggle }: AISupportChatProps) 
         </Button>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col p-0">
-        <ScrollArea className="flex-1 p-4">
+      <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-4" style={{ maxHeight: "400px" }}>
           <div className="space-y-4">
             {messages.map((message) => (
               <div
@@ -157,7 +157,7 @@ export default function AISupportChat({ isOpen, onToggle }: AISupportChatProps) 
                     )}
                     <div className="text-sm whitespace-pre-wrap">{message.content}</div>
                   </div>
-                  <div className={`text-xs mt-1 opacity-70`}>
+                  <div className="text-xs mt-1 opacity-70">
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
@@ -177,10 +177,10 @@ export default function AISupportChat({ isOpen, onToggle }: AISupportChatProps) 
             )}
           </div>
           <div ref={messagesEndRef} />
-        </ScrollArea>
+        </div>
 
         {messages.length === 1 && (
-          <div className="p-4 border-t">
+          <div className="p-4 border-t flex-shrink-0">
             <div className="text-sm text-gray-600 mb-3">Quick questions to get started:</div>
             <div className="space-y-2">
               {suggestedQuestions.map((question, index) => (
@@ -197,7 +197,7 @@ export default function AISupportChat({ isOpen, onToggle }: AISupportChatProps) 
           </div>
         )}
 
-        <div className="p-4 border-t">
+        <div className="p-4 border-t flex-shrink-0">
           <div className="flex gap-2">
             <Input
               value={currentMessage}
