@@ -147,6 +147,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **June 16, 2025**: AI Support Chatbot Model Fix
+  - Fixed AI chatbot functionality by updating all AI services to use GPT-3.5-turbo instead of GPT-4
+  - Resolved model access errors that were preventing the AI support chat from responding to users
+  - Updated aiSupportService.ts, aiService.ts, and aiCommunicationService.ts to use accessible OpenAI models
+  - AI chatbot now successfully integrated as globally accessible feature throughout the platform
+  - All AI-powered features (contract analysis, market insights, legal support) now use compatible models
+
 - **June 16, 2025**: Contract Reminders Integration into Contracts Tab
   - Successfully combined Contract Reminders functionality into the main Contracts page using tabbed navigation
   - Removed separate Contract Reminders navigation item to reduce interface complexity and improve efficiency
