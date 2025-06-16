@@ -147,6 +147,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **June 16, 2025**: Contract Reminders Integration into Contracts Tab
+  - Successfully combined Contract Reminders functionality into the main Contracts page using tabbed navigation
+  - Removed separate Contract Reminders navigation item to reduce interface complexity and improve efficiency
+  - Created unified contract management experience with "Contracts" and "Contract Reminders" tabs
+  - Enhanced user workflow by consolidating all contract-related features in one location
+  - Maintained full reminder functionality including setup automation, processing controls, and detailed statistics
+  - Fixed React hooks ordering issues to ensure stable component rendering
+  - Updated navigation menu to streamline user experience while preserving all existing features
+
 - **June 16, 2025**: Automated Contract Reminder System Implementation
   - Created comprehensive automated reminder system for weekly client check-ins and contract expiration warnings
   - Built ContractReminder table with notification types, scheduling, and recurring reminder capabilities
