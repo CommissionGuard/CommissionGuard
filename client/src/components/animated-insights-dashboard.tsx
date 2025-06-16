@@ -194,7 +194,7 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
                     <span className="font-medium text-gray-900">{activity.title}</span>
                     
                     <TooltipProvider>
-                      <Tooltip>
+                      <Tooltip delayDuration={300}>
                         <TooltipTrigger asChild>
                           <Badge 
                             variant={
@@ -206,8 +206,8 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
                             {activity.priority}
                           </Badge>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <p>
+                        <TooltipContent side="top" align="center" sideOffset={5}>
+                          <p className="max-w-xs text-sm">
                             {activity.priority === 'high' && 'Urgent attention required - immediate action needed to prevent commission loss'}
                             {activity.priority === 'medium' && 'Important notification - review and take action within 24 hours'}
                             {activity.priority === 'low' && 'General information - review when convenient for awareness'}
