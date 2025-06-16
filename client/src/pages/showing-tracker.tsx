@@ -29,7 +29,14 @@ import {
   CheckCircle,
   XCircle,
   Route,
-  Zap
+  Zap,
+  RefreshCw,
+  Download,
+  Settings,
+  RotateCcw,
+  User,
+  Phone,
+  Mail
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -124,6 +131,7 @@ export default function ShowingTracker() {
     showingType: 'in-person',
     agentNotes: ''
   });
+  const [selectedAppointments, setSelectedAppointments] = useState<string[]>([]);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -164,6 +172,17 @@ export default function ShowingTracker() {
   const { data: commissionProtections = [], isLoading: isLoadingCommission, refetch: refetchCommission } = useQuery({
     queryKey: ["/api/commission-protection"],
     enabled: isAuthenticated,
+  });
+
+  // ShowingTime queries
+  const { data: showingTimeStatus = {}, isLoading: isLoadingStatus, refetch: refetchStatus } = useQuery({
+    queryKey: ["/api/integrations/showingtime/status"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: showingTimeAppointments = [], isLoading: isLoadingAppointments, refetch: refetchAppointments } = useQuery({
+    queryKey: ["/api/integrations/showingtime/appointments"],
+    enabled: isAuthenticated && showingTimeStatus?.connected,
   });
 
   // Mutations
@@ -246,6 +265,56 @@ export default function ShowingTracker() {
       toast({
         title: "Error",
         description: error.message || "Failed to mark showing as missed",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // ShowingTime mutations
+  const syncShowingTimeMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("/api/integrations/showingtime/sync", {
+        method: "POST"
+      });
+    },
+    onSuccess: (result: any) => {
+      toast({
+        title: "Sync Complete",
+        description: `Imported ${result.imported || 0} new appointments`,
+      });
+      refetchShowings();
+      refetchAppointments();
+      refetchStatus();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Failed to sync ShowingTime appointments",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const importSelectedMutation = useMutation({
+    mutationFn: async (appointmentIds: string[]) => {
+      return apiRequest("/api/integrations/showingtime/import", {
+        method: "POST",
+        body: JSON.stringify({ appointmentIds })
+      });
+    },
+    onSuccess: (result: any) => {
+      toast({
+        title: "Import Complete",
+        description: `Imported ${result.imported || 0} appointments`,
+      });
+      setSelectedAppointments([]);
+      refetchShowings();
+      refetchAppointments();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Import Failed",
+        description: error.message || "Failed to import selected appointments",
         variant: "destructive",
       });
     },
@@ -389,6 +458,7 @@ export default function ShowingTracker() {
         <Tabs defaultValue="showings" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="showings">Scheduled Showings</TabsTrigger>
+            <TabsTrigger value="showingtime">ShowingTime Import</TabsTrigger>
             <TabsTrigger value="visits">Property Visits</TabsTrigger>
             <TabsTrigger value="unauthorized">Unauthorized Visits</TabsTrigger>
             <TabsTrigger value="protection">Commission Protection</TabsTrigger>
