@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Shield, Bell } from "lucide-react";
+import logoIcon from "@/assets/commission-guard-icon.svg";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -45,11 +46,14 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
             <div 
-              className="flex items-center space-x-2 cursor-pointer"
+              className="flex items-center space-x-3 cursor-pointer"
               onClick={() => setLocation("/")}
             >
-              <Shield className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-gray-900">Commission Guard</span>
+              <img src={logoIcon} alt="Commission Guard" className="h-8 w-8" />
+              <div className="flex flex-col">
+                <span className="text-lg font-bold text-gray-900 leading-tight">Commission</span>
+                <span className="text-lg font-bold text-primary leading-tight">GUARD</span>
+              </div>
             </div>
           </div>
           
