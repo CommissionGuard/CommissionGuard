@@ -24,7 +24,11 @@ const clientFormSchema = z.object({
 
 type ClientFormData = z.infer<typeof clientFormSchema>;
 
-export default function AddClientForm() {
+interface AddClientFormProps {
+  onClose?: () => void;
+}
+
+export default function AddClientForm({ onClose }: AddClientFormProps) {
   const [contractFile, setContractFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -90,6 +94,11 @@ export default function AddClientForm() {
       form.reset();
       setContractFile(null);
       setIsSubmitting(false);
+      
+      // Close modal if onClose callback is provided
+      if (onClose) {
+        onClose();
+      }
     },
     onError: (error) => {
       setIsSubmitting(false);
@@ -277,13 +286,25 @@ export default function AddClientForm() {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-primary text-white hover:bg-blue-700"
-          >
-            {isSubmitting ? "Adding..." : "Add Client & Contract"}
-          </Button>
+          <div className="flex gap-3">
+            {onClose && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            )}
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 bg-primary text-white hover:bg-blue-700"
+            >
+              {isSubmitting ? "Adding..." : "Add Client & Contract"}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
