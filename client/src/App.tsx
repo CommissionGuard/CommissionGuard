@@ -15,6 +15,7 @@ import Reports from "@/pages/reports";
 import LegalSupport from "@/pages/legal-support";
 import ShowingTracker from "@/pages/showing-tracker";
 import CommissionTracker from "@/pages/commission-tracker";
+import ContractReminders from "@/pages/contract-reminders";
 import PropertyAnalyzer from "@/pages/property-analyzer";
 import AdminDashboard from "@/pages/admin-dashboard";
 import EnhancedAdminDashboard from "@/pages/enhanced-admin-dashboard";
@@ -52,6 +53,7 @@ function Router() {
           <Route path="/legal-support" component={LegalSupport} />
           <Route path="/showing-tracker" component={ShowingTracker} />
           <Route path="/commission-tracker" component={CommissionTracker} />
+          <Route path="/contract-reminders" component={ContractReminders} />
           <Route path="/property-analyzer" component={PropertyAnalyzer} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin-enhanced" component={EnhancedAdminDashboard} />

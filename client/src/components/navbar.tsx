@@ -31,6 +31,7 @@ export default function Navbar() {
     { path: "/", label: "Dashboard" },
     { path: "/clients", label: "Clients" },
     { path: "/contracts", label: "Contracts" },
+    { path: "/contract-reminders", label: "Contract Reminders" },
     { path: "/showing-tracker", label: "Showing Tracker" },
     { path: "/commission-tracker", label: "Commission Protection" },
     { path: "/alerts", label: "Alerts" },

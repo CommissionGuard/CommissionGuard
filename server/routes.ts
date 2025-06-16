@@ -15,6 +15,7 @@ import {
   insertLocationTrackingSchema,
   insertPropertyVisitSchema,
   insertCommissionProtectionSchema,
+  insertContractReminderSchema,
   insertDripCampaignSchema,
   insertCampaignStepSchema,
   insertCampaignEnrollmentSchema,
