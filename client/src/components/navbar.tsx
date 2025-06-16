@@ -32,7 +32,6 @@ export default function Navbar() {
     { path: "/clients", label: "Clients" },
     { path: "/contracts", label: "Contracts" },
     { path: "/showing-tracker", label: "Showing Tracker" },
-    { path: "/showingtime-integration", label: "ShowingTime" },
     { path: "/prospecting", label: "Prospecting" },
     { path: "/deal-pipeline", label: "Deal Pipeline" },
     { path: "/property-analyzer", label: "Market Analyzer" },

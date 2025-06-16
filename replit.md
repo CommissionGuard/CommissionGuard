@@ -147,17 +147,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **June 16, 2025**: ShowingTime Integration Implementation
-  - Successfully integrated ShowingTime API service for automatic appointment import
-  - Created comprehensive ShowingTimeService with full API authentication and data transformation
-  - Built dedicated frontend interface at `/showingtime-integration` with status monitoring and sync controls
-  - Implemented automatic property and client creation from ShowingTime appointment data
-  - Added bulk and selective appointment import capabilities with real-time status updates
-  - Created complete API routes for sync operations, status checking, and individual appointment imports
-  - Enhanced storage layer with ShowingTime-specific methods for data mapping and integration stats
-  - Added ShowingTime navigation menu item for easy access to integration features
-  - Provided comprehensive setup documentation in SHOWINGTIME_SETUP.md
-  - System automatically enables commission protection for all imported ShowingTime appointments
+- **June 16, 2025**: Unified Showing Tracker with ShowingTime Integration
+  - Successfully consolidated ShowingTime functionality into the main Showing Tracker interface
+  - Created unified experience combining manual showing scheduling with ShowingTime automation
+  - Added "ShowingTime Import" tab within Showing Tracker for seamless workflow integration
+  - Implemented comprehensive connection status monitoring with clear setup instructions
+  - Built selective and bulk appointment import capabilities directly in the tracker interface
+  - Enhanced user experience with single-location management for all showing activities
+  - Removed separate ShowingTime navigation item to reduce interface complexity
+  - Maintained all existing ShowingTime API functionality within consolidated interface
+  - System provides step-by-step API credential setup guidance for users
+  - Complete ShowingTime integration now accessible through unified Showing Tracker dashboard
 
 - **June 15, 2025**: Twilio SMS Integration with Intelligent Response Routing
   - Successfully integrated Twilio SMS service for automated showing reminders

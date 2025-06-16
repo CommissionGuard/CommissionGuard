@@ -456,7 +456,7 @@ export default function ShowingTracker() {
         </div>
 
         <Tabs defaultValue="showings" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="showings">Scheduled Showings</TabsTrigger>
             <TabsTrigger value="showingtime">ShowingTime Import</TabsTrigger>
             <TabsTrigger value="visits">Property Visits</TabsTrigger>
@@ -543,6 +543,183 @@ export default function ShowingTracker() {
                       ))}
                     </TableBody>
                   </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="showingtime" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Zap className="h-5 w-5 mr-2" />
+                  ShowingTime Integration
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!showingTimeStatus?.connected ? (
+                  <div className="text-center py-8">
+                    <AlertTriangle className="h-12 w-12 text-orange-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">ShowingTime Not Connected</h3>
+                    <p className="text-gray-600 mb-4">
+                      To import appointments from ShowingTime, you need API credentials.
+                    </p>
+                    <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-700 mb-4">
+                      <p className="font-medium mb-2">How to get ShowingTime API access:</p>
+                      <ol className="list-decimal list-inside space-y-1">
+                        <li>Contact ShowingTime support at developer-support@showingtime.com</li>
+                        <li>Request API access for Commission Guard integration</li>
+                        <li>Provide your business details and real estate license</li>
+                        <li>Add your API credentials to Replit environment variables</li>
+                      </ol>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => refetchStatus()}
+                      disabled={isLoadingStatus}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Check Connection
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                      <div className="flex items-center">
+                        <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                        <div>
+                          <p className="font-medium text-green-900">ShowingTime Connected</p>
+                          <p className="text-sm text-green-700">
+                            Agent: {showingTimeStatus?.agentEmail || 'Unknown'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          onClick={() => syncShowingTimeMutation.mutate()}
+                          disabled={syncShowingTimeMutation.isPending}
+                          className="bg-primary hover:bg-primary/90"
+                        >
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Sync All
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => refetchAppointments()}
+                          disabled={isLoadingAppointments}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Refresh
+                        </Button>
+                      </div>
+                    </div>
+
+                    {isLoadingAppointments ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
+                        <p className="text-gray-600 mt-2">Loading ShowingTime appointments...</p>
+                      </div>
+                    ) : !Array.isArray(showingTimeAppointments) || showingTimeAppointments.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No ShowingTime Appointments</h3>
+                        <p className="text-gray-600">No new appointments found in your ShowingTime account.</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-medium">Available Appointments</h3>
+                          {selectedAppointments.length > 0 && (
+                            <Button
+                              onClick={() => importSelectedMutation.mutate(selectedAppointments)}
+                              disabled={importSelectedMutation.isPending}
+                              className="bg-primary hover:bg-primary/90"
+                            >
+                              Import Selected ({selectedAppointments.length})
+                            </Button>
+                          )}
+                        </div>
+
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-12">Select</TableHead>
+                              <TableHead>Date & Time</TableHead>
+                              <TableHead>Property</TableHead>
+                              <TableHead>Client</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead>Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {showingTimeAppointments.map((appointment: any) => (
+                              <TableRow key={appointment.id}>
+                                <TableCell>
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedAppointments.includes(appointment.id)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedAppointments([...selectedAppointments, appointment.id]);
+                                      } else {
+                                        setSelectedAppointments(selectedAppointments.filter(id => id !== appointment.id));
+                                      }
+                                    }}
+                                    className="rounded border-gray-300"
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  {format(new Date(appointment.scheduledDateTime), "MMM d, yyyy h:mm a")}
+                                </TableCell>
+                                <TableCell>
+                                  <div>
+                                    <p className="font-medium">{appointment.propertyAddress}</p>
+                                    <p className="text-sm text-gray-600">{appointment.appointmentType}</p>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div>
+                                    <p className="font-medium">{appointment.clientName || 'Unknown Client'}</p>
+                                    {appointment.clientPhone && (
+                                      <p className="text-sm text-gray-600 flex items-center">
+                                        <Phone className="h-3 w-3 mr-1" />
+                                        {appointment.clientPhone}
+                                      </p>
+                                    )}
+                                    {appointment.clientEmail && (
+                                      <p className="text-sm text-gray-600 flex items-center">
+                                        <Mail className="h-3 w-3 mr-1" />
+                                        {appointment.clientEmail}
+                                      </p>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className={
+                                    appointment.status === 'confirmed' ? "bg-green-100 text-green-800" :
+                                    appointment.status === 'pending' ? "bg-yellow-100 text-yellow-800" :
+                                    "bg-gray-100 text-gray-800"
+                                  }>
+                                    {appointment.status.toUpperCase()}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => importSelectedMutation.mutate([appointment.id])}
+                                    disabled={importSelectedMutation.isPending}
+                                  >
+                                    Import
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>
