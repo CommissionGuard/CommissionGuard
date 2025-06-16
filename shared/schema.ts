@@ -235,6 +235,65 @@ export const commissionProtection = pgTable("commission_protection", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Breach management system
+export const potentialBreaches = pgTable("potential_breaches", {
+  id: serial("id").primaryKey(),
+  agentId: varchar("agent_id").notNull(),
+  clientId: serial("client_id").notNull(),
+  contractId: serial("contract_id").notNull(),
+  propertyId: serial("property_id"),
+  breachType: varchar("breach_type").notNull(), // unauthorized_purchase, contract_violation, commission_bypass, dual_agency
+  detectionMethod: varchar("detection_method").notNull(), // public_records, agent_report, client_report, automated_scan
+  detectionDate: timestamp("detection_date").defaultNow(),
+  breachDate: timestamp("breach_date"), // When the actual breach occurred
+  evidenceData: jsonb("evidence_data"), // All supporting evidence
+  riskLevel: varchar("risk_level").notNull().default("medium"), // low, medium, high, critical
+  estimatedCommissionLoss: numeric("estimated_commission_loss", { precision: 12, scale: 2 }),
+  status: varchar("status").notNull().default("pending"), // pending, investigating, confirmed, dismissed, resolved
+  adminReviewerId: varchar("admin_reviewer_id"), // Admin who reviewed the breach
+  adminNotes: text("admin_notes"),
+  confirmationDate: timestamp("confirmation_date"),
+  agentNotifiedDate: timestamp("agent_notified_date"),
+  resolutionDate: timestamp("resolution_date"),
+  resolutionOutcome: varchar("resolution_outcome"), // commission_recovered, legal_action, dismissed, client_education
+  description: text("description").notNull(),
+  autoDetectionScore: numeric("auto_detection_score", { precision: 5, scale: 2 }), // AI confidence score 0-100
+  requiresLegalAction: boolean("requires_legal_action").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const breachTasks = pgTable("breach_tasks", {
+  id: serial("id").primaryKey(),
+  breachId: serial("breach_id").notNull(),
+  assignedToId: varchar("assigned_to_id").notNull(), // Admin user ID
+  taskType: varchar("task_type").notNull(), // verify_contract, contact_agent, verify_evidence, legal_review, resolution
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  priority: varchar("priority").notNull().default("medium"), // low, medium, high, urgent
+  status: varchar("status").notNull().default("pending"), // pending, in_progress, completed, cancelled
+  dueDate: timestamp("due_date"),
+  completedDate: timestamp("completed_date"),
+  completedById: varchar("completed_by_id"),
+  result: text("result"), // Task completion notes
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const breachNotifications = pgTable("breach_notifications", {
+  id: serial("id").primaryKey(),
+  breachId: serial("breach_id").notNull(),
+  recipientId: varchar("recipient_id").notNull(), // Agent or admin user ID
+  notificationType: varchar("notification_type").notNull(), // breach_detected, confirmation_required, breach_confirmed, resolution_update
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  sentDate: timestamp("sent_date").defaultNow(),
+  readDate: timestamp("read_date"),
+  deliveryMethod: varchar("delivery_method").notNull().default("in_app"), // in_app, email, sms
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const buyerPreApprovals = pgTable("buyer_pre_approvals", {
   id: serial("id").primaryKey(),
   agentId: varchar("agent_id").notNull(),
@@ -671,6 +730,57 @@ export const commissionProtectionRelations = relations(commissionProtection, ({ 
   }),
 }));
 
+export const potentialBreachesRelations = relations(potentialBreaches, ({ one, many }) => ({
+  agent: one(users, {
+    fields: [potentialBreaches.agentId],
+    references: [users.id],
+  }),
+  client: one(clients, {
+    fields: [potentialBreaches.clientId],
+    references: [clients.id],
+  }),
+  contract: one(contracts, {
+    fields: [potentialBreaches.contractId],
+    references: [contracts.id],
+  }),
+  property: one(properties, {
+    fields: [potentialBreaches.propertyId],
+    references: [properties.id],
+  }),
+  adminReviewer: one(users, {
+    fields: [potentialBreaches.adminReviewerId],
+    references: [users.id],
+  }),
+  tasks: many(breachTasks),
+  notifications: many(breachNotifications),
+}));
+
+export const breachTasksRelations = relations(breachTasks, ({ one }) => ({
+  breach: one(potentialBreaches, {
+    fields: [breachTasks.breachId],
+    references: [potentialBreaches.id],
+  }),
+  assignedTo: one(users, {
+    fields: [breachTasks.assignedToId],
+    references: [users.id],
+  }),
+  completedBy: one(users, {
+    fields: [breachTasks.completedById],
+    references: [users.id],
+  }),
+}));
+
+export const breachNotificationsRelations = relations(breachNotifications, ({ one }) => ({
+  breach: one(potentialBreaches, {
+    fields: [breachNotifications.breachId],
+    references: [potentialBreaches.id],
+  }),
+  recipient: one(users, {
+    fields: [breachNotifications.recipientId],
+    references: [users.id],
+  }),
+}));
+
 export const buyerPreApprovalsRelations = relations(buyerPreApprovals, ({ one }) => ({
   agent: one(users, {
     fields: [buyerPreApprovals.agentId],
@@ -808,6 +918,24 @@ export const insertContractReminderSchema = createInsertSchema(contractReminders
   updatedAt: true,
 });
 
+// Breach management insert schemas
+export const insertPotentialBreachSchema = createInsertSchema(potentialBreaches).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBreachTaskSchema = createInsertSchema(breachTasks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBreachNotificationSchema = createInsertSchema(breachNotifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -837,6 +965,14 @@ export type InsertBuyerPreApproval = z.infer<typeof insertBuyerPreApprovalSchema
 export type BuyerPreApproval = typeof buyerPreApprovals.$inferSelect;
 export type InsertContractReminder = z.infer<typeof insertContractReminderSchema>;
 export type ContractReminder = typeof contractReminders.$inferSelect;
+
+// Breach management types
+export type InsertPotentialBreach = z.infer<typeof insertPotentialBreachSchema>;
+export type PotentialBreach = typeof potentialBreaches.$inferSelect;
+export type InsertBreachTask = z.infer<typeof insertBreachTaskSchema>;
+export type BreachTask = typeof breachTasks.$inferSelect;
+export type InsertBreachNotification = z.infer<typeof insertBreachNotificationSchema>;
+export type BreachNotification = typeof breachNotifications.$inferSelect;
 
 // Extended types with relations
 export type ClientWithContracts = Client & {
@@ -883,4 +1019,21 @@ export type CommissionProtectionWithDetails = CommissionProtection & {
   agent: User;
   client: Client;
   property: Property;
+};
+
+// Breach management extended types
+export type PotentialBreachWithDetails = PotentialBreach & {
+  agent: User;
+  client: Client;
+  contract: Contract;
+  property?: Property;
+  adminReviewer?: User;
+  tasks: BreachTask[];
+  notifications: BreachNotification[];
+};
+
+export type BreachTaskWithDetails = BreachTask & {
+  breach: PotentialBreach;
+  assignedTo: User;
+  completedBy?: User;
 };
