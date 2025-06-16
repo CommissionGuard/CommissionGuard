@@ -50,7 +50,7 @@ Maintain a helpful, professional tone while being concise and practical in your 
       ];
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-3.5-turbo",
         messages: messages,
         max_tokens: 800,
         temperature: 0.7,
