@@ -33,6 +33,7 @@ import PublicRecords from "@/pages/public-records";
 import Subscription from "@/pages/subscription";
 import Support from "@/pages/support";
 import CommissionTracker from "@/pages/commission-tracker";
+import ShowingTimeIntegration from "@/pages/showingtime-integration";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -76,6 +77,7 @@ function Router() {
           <Route path="/rental-market" component={RentalMarket} />
           <Route path="/system-test" component={SystemTest} />
           <Route path="/showing-tracker" component={ShowingTracker} />
+          <Route path="/showingtime-integration" component={ShowingTimeIntegration} />
           <Route path="/commission-tracker" component={CommissionTracker} />
           <Route path="/subscription" component={Subscription} />
           <Route path="/support" component={Support} />

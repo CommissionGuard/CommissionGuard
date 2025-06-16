@@ -1307,6 +1307,145 @@ export class DatabaseStorage implements IStorage {
   async deleteCalendarEventsByShowing(showingId: number): Promise<void> {
     await db.delete(calendarEvents).where(eq(calendarEvents.showingId, showingId));
   }
+
+  // ShowingTime Integration Methods
+  async createOrUpdateShowingFromShowingTime(showingTimeData: any, agentId: string): Promise<any> {
+    try {
+      // First, try to find or create the property
+      let property = await this.findPropertyByAddress(showingTimeData.propertyAddress);
+      if (!property) {
+        property = await this.createProperty({
+          agentId,
+          address: showingTimeData.propertyAddress,
+          propertyType: "residential",
+          status: "active"
+        });
+      }
+
+      // Try to find or create the client
+      let client = null;
+      if (showingTimeData.clientEmail || showingTimeData.clientPhone) {
+        client = await this.findClientByEmailOrPhone(showingTimeData.clientEmail, showingTimeData.clientPhone, agentId);
+        if (!client && showingTimeData.clientName) {
+          client = await this.createClient({
+            agentId,
+            fullName: showingTimeData.clientName,
+            email: showingTimeData.clientEmail || null,
+            phone: showingTimeData.clientPhone || null,
+            isConverted: false
+          });
+        }
+      }
+
+      // Check if showing already exists by ShowingTime ID
+      const existingShowing = await this.findShowingByExternalId(showingTimeData.id);
+      
+      const showingData = {
+        agentId,
+        clientId: client?.id || null,
+        propertyId: property.id,
+        scheduledDate: new Date(showingTimeData.scheduledDateTime),
+        showingType: showingTimeData.appointmentType || "showing",
+        status: this.mapShowingTimeStatus(showingTimeData.status),
+        agentNotes: showingTimeData.instructions || null,
+        commissionProtected: true
+      };
+
+      if (existingShowing) {
+        return await this.updateShowing(existingShowing.id, showingData);
+      } else {
+        return await this.createShowing(showingData);
+      }
+    } catch (error) {
+      console.error("Error creating/updating showing from ShowingTime:", error);
+      throw error;
+    }
+  }
+
+  async findPropertyByAddress(address: string): Promise<any> {
+    try {
+      const [property] = await db
+        .select()
+        .from(properties)
+        .where(eq(properties.address, address))
+        .limit(1);
+
+      return property || null;
+    } catch (error) {
+      console.error("Error finding property by address:", error);
+      return null;
+    }
+  }
+
+  async findClientByEmailOrPhone(email: string | null, phone: string | null, agentId: string): Promise<any> {
+    try {
+      if (!email && !phone) return null;
+
+      let query = db.select().from(clients).where(eq(clients.agentId, agentId));
+      
+      if (email && phone) {
+        query = query.where(or(eq(clients.email, email), eq(clients.phone, phone)));
+      } else if (email) {
+        query = query.where(eq(clients.email, email));
+      } else if (phone) {
+        query = query.where(eq(clients.phone, phone));
+      }
+
+      const [client] = await query.limit(1);
+      return client || null;
+    } catch (error) {
+      console.error("Error finding client by email or phone:", error);
+      return null;
+    }
+  }
+
+  async findShowingByExternalId(externalId: string): Promise<any> {
+    try {
+      // For now, we'll check by a combination of factors since we don't have externalId field yet
+      // This can be enhanced once we add the externalId field to the schema
+      return null;
+    } catch (error) {
+      console.error("Error finding showing by external ID:", error);
+      return null;
+    }
+  }
+
+  private mapShowingTimeStatus(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'confirmed':
+        return 'scheduled';
+      case 'cancelled':
+        return 'cancelled';
+      case 'pending':
+        return 'scheduled';
+      default:
+        return 'scheduled';
+    }
+  }
+
+  async getShowingTimeIntegrationStats(agentId: string): Promise<{
+    totalImported: number;
+    lastSyncDate: Date | null;
+    pendingSync: number;
+  }> {
+    try {
+      // For now, return basic stats - this can be enhanced with actual tracking
+      const allShowings = await this.getShowingsByAgent(agentId);
+      
+      return {
+        totalImported: allShowings.length,
+        lastSyncDate: allShowings.length > 0 ? new Date() : null,
+        pendingSync: 0
+      };
+    } catch (error) {
+      console.error("Error getting ShowingTime integration stats:", error);
+      return {
+        totalImported: 0,
+        lastSyncDate: null,
+        pendingSync: 0
+      };
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

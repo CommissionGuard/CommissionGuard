@@ -24,7 +24,7 @@ import {
   AlertCircle,
   Download,
   Settings,
-  Sync,
+  RotateCcw,
   ExternalLink
 } from "lucide-react";
 
@@ -239,7 +239,7 @@ export default function ShowingTimeIntegration() {
                 onClick={() => syncMutation.mutate()}
                 disabled={syncMutation.isPending}
               >
-                <Sync className={`h-4 w-4 mr-2 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
+                <RotateCcw className={`h-4 w-4 mr-2 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
                 Sync All Appointments
               </Button>
 
