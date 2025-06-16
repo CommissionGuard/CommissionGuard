@@ -135,6 +135,10 @@ export interface IStorage {
   }>;
   getAllUsersWithSubscriptions(): Promise<any[]>;
   getAllPayments(): Promise<any[]>;
+  getAllUsers(): Promise<User[]>;
+  getAllContracts(): Promise<Contract[]>;
+  getAllShowings(): Promise<Showing[]>;
+  getAllCommissionProtection(): Promise<CommissionProtection[]>;
   
   // Property operations
   createProperty(property: InsertProperty): Promise<Property>;
@@ -1444,6 +1448,47 @@ export class DatabaseStorage implements IStorage {
         lastSyncDate: null,
         pendingSync: 0
       };
+    }
+  }
+
+  // Admin methods for enhanced admin interface
+  async getAllUsers(): Promise<User[]> {
+    try {
+      const users = await db.select().from(schema.users);
+      return users;
+    } catch (error) {
+      console.error("Error fetching all users:", error);
+      return [];
+    }
+  }
+
+  async getAllContracts(): Promise<Contract[]> {
+    try {
+      const contracts = await db.select().from(schema.contracts);
+      return contracts;
+    } catch (error) {
+      console.error("Error fetching all contracts:", error);
+      return [];
+    }
+  }
+
+  async getAllShowings(): Promise<Showing[]> {
+    try {
+      const showings = await db.select().from(schema.showings);
+      return showings;
+    } catch (error) {
+      console.error("Error fetching all showings:", error);
+      return [];
+    }
+  }
+
+  async getAllCommissionProtection(): Promise<CommissionProtection[]> {
+    try {
+      const protectionRecords = await db.select().from(schema.commissionProtection);
+      return protectionRecords;
+    } catch (error) {
+      console.error("Error fetching all commission protection records:", error);
+      return [];
     }
   }
 }
