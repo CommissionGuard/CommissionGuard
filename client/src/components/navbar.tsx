@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Bell } from "lucide-react";
 import logoIcon from "@/assets/commission-guard-icon.svg";
 import { Button } from "@/components/ui/button";
@@ -43,31 +44,69 @@ export default function Navbar() {
 
   return (
     <>
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+      <motion.div 
+        className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         {/* Top brand bar */}
-        <div className="bg-gradient-to-r from-primary to-primary/90 text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div 
+          className="bg-gradient-to-r from-primary to-primary/90 text-white relative overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+            animate={{ x: [-100, 400] }}
+            transition={{ duration: 3, repeat: Infinity, repeatDelay: 5 }}
+          />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="flex items-center justify-between h-12">
-              <div 
+              <motion.div 
                 className="flex items-center space-x-2 cursor-pointer"
                 onClick={() => setLocation("/")}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <img src={logoIcon} alt="Commission Guard" className="h-6 w-6" />
+                <motion.img 
+                  src={logoIcon} 
+                  alt="Commission Guard" 
+                  className="h-6 w-6" 
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 5 }}
+                />
                 <span className="text-sm font-bold">Commission GUARD</span>
-              </div>
+              </motion.div>
               
               <div className="flex items-center space-x-3">
-                <button 
+                <motion.button 
                   className="relative p-1.5 text-white/80 hover:text-white transition-colors"
                   onClick={() => setLocation("/alerts")}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                 >
-                  <Bell className="h-4 w-4" />
-                  {(unreadCount as any)?.count > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-xs">
-                      {(unreadCount as any).count > 9 ? '9+' : (unreadCount as any).count}
-                    </span>
-                  )}
-                </button>
+                  <motion.div
+                    animate={{ rotate: (unreadCount as any)?.count > 0 ? [0, 15, -15, 0] : 0 }}
+                    transition={{ duration: 0.5, repeat: (unreadCount as any)?.count > 0 ? Infinity : 0, repeatDelay: 2 }}
+                  >
+                    <Bell className="h-4 w-4" />
+                  </motion.div>
+                  <AnimatePresence>
+                    {(unreadCount as any)?.count > 0 && (
+                      <motion.span 
+                        className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-xs"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      >
+                        {(unreadCount as any).count > 9 ? '9+' : (unreadCount as any).count}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -108,14 +147,19 @@ export default function Navbar() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Navigation tabs */}
-        <nav className="bg-white">
+        <motion.nav 
+          className="bg-white"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex space-x-8 overflow-x-auto scrollbar-hide">
-              {navItems.map((item) => (
-                <button
+              {navItems.map((item, index) => (
+                <motion.button
                   key={item.path}
                   onClick={() => setLocation(item.path)}
                   className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
@@ -123,14 +167,19 @@ export default function Navbar() {
                       ? "border-primary text-primary"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1, duration: 0.3 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {item.label}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
-        </nav>
-      </div>
+        </motion.nav>
+      </motion.div>
       
       <ProfileSettingsModal 
         open={showProfileSettings} 

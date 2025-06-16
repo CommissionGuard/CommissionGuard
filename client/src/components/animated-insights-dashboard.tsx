@@ -535,36 +535,102 @@ export default function AnimatedInsightsDashboard() {
         transition={{ duration: 0.5, delay: 0.8 }}
         className="grid grid-cols-1 md:grid-cols-3 gap-4"
       >
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardContent className="p-6 text-center">
-              <Shield className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+        <motion.div 
+          whileHover={{ scale: 1.02, y: -5 }} 
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        >
+          <Card className="cursor-pointer hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardContent className="p-6 text-center relative z-10">
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              >
+                <Shield className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+              </motion.div>
               <h3 className="font-semibold mb-2">Start Protection</h3>
               <p className="text-sm text-gray-600">Create new commission protection record</p>
             </CardContent>
           </Card>
         </motion.div>
 
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardContent className="p-6 text-center">
-              <FileText className="h-8 w-8 text-green-600 mx-auto mb-3" />
+        <motion.div 
+          whileHover={{ scale: 1.02, y: -5 }} 
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        >
+          <Card className="cursor-pointer hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-green-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardContent className="p-6 text-center relative z-10">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
+              >
+                <FileText className="h-8 w-8 text-green-600 mx-auto mb-3" />
+              </motion.div>
               <h3 className="font-semibold mb-2">New Contract</h3>
               <p className="text-sm text-gray-600">Upload representation agreement</p>
             </CardContent>
           </Card>
         </motion.div>
 
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardContent className="p-6 text-center">
-              <Eye className="h-8 w-8 text-purple-600 mx-auto mb-3" />
+        <motion.div 
+          whileHover={{ scale: 1.02, y: -5 }} 
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        >
+          <Card className="cursor-pointer hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardContent className="p-6 text-center relative z-10">
+              <motion.div
+                animate={{ rotateY: [0, 180, 360] }}
+                transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+              >
+                <Eye className="h-8 w-8 text-purple-600 mx-auto mb-3" />
+              </motion.div>
               <h3 className="font-semibold mb-2">View Reports</h3>
               <p className="text-sm text-gray-600">Analyze protection performance</p>
             </CardContent>
           </Card>
         </motion.div>
       </motion.div>
+
+      {/* Floating Action Notifications */}
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, x: 100 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
+          exit={{ opacity: 0, scale: 0.8, x: 100 }}
+          transition={{ duration: 0.5, delay: 2 }}
+          className="fixed bottom-6 right-6 z-50"
+        >
+          <motion.div
+            animate={{ 
+              boxShadow: [
+                "0 0 20px rgba(59, 130, 246, 0.5)",
+                "0 0 30px rgba(59, 130, 246, 0.8)",
+                "0 0 20px rgba(59, 130, 246, 0.5)"
+              ]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="bg-white p-4 rounded-lg shadow-lg border-l-4 border-blue-500 max-w-sm"
+          >
+            <div className="flex items-center gap-3">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              >
+                <Activity className="h-5 w-5 text-blue-600" />
+              </motion.div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Live Monitoring Active</p>
+                <p className="text-xs text-gray-600">Commission protection is running</p>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
