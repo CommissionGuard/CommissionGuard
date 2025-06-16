@@ -1431,6 +1431,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ShowingTime Integration Routes
+  app.post("/api/integrations/showingtime/sync", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const user = await storage.getUser(agentId);
+      
+      if (!user?.email) {
+        return res.status(400).json({ 
+          message: "Agent email not found. Please update your profile." 
+        });
+      }
+
+      const { showingTimeService } = await import('./showingTimeService');
+      const results = await showingTimeService.syncAppointments(user.email, agentId);
+      
+      res.json({
+        success: true,
+        message: `Sync completed. Imported: ${results.imported}, Updated: ${results.updated}`,
+        results
+      });
+    } catch (error: any) {
+      console.error("ShowingTime sync error:", error);
+      res.status(500).json({ 
+        message: "Failed to sync with ShowingTime", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.get("/api/integrations/showingtime/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const user = await storage.getUser(agentId);
+      
+      if (!user?.email) {
+        return res.status(400).json({ 
+          message: "Agent email not found" 
+        });
+      }
+
+      const { showingTimeService } = await import('./showingTimeService');
+      const isConnected = await showingTimeService.testConnection(user.email);
+      const stats = await storage.getShowingTimeIntegrationStats(agentId);
+      
+      res.json({
+        connected: isConnected,
+        agentEmail: user.email,
+        ...stats
+      });
+    } catch (error: any) {
+      console.error("ShowingTime status check error:", error);
+      res.status(500).json({ 
+        message: "Failed to check ShowingTime status",
+        error: error.message
+      });
+    }
+  });
+
+  app.get("/api/integrations/showingtime/appointments", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const user = await storage.getUser(agentId);
+      
+      if (!user?.email) {
+        return res.status(400).json({ 
+          message: "Agent email not found" 
+        });
+      }
+
+      const { startDate, endDate } = req.query;
+      const { showingTimeService } = await import('./showingTimeService');
+      
+      const appointments = await showingTimeService.getAppointments(
+        user.email,
+        startDate ? new Date(startDate as string) : undefined,
+        endDate ? new Date(endDate as string) : undefined
+      );
+      
+      res.json(appointments);
+    } catch (error: any) {
+      console.error("ShowingTime appointments fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch ShowingTime appointments",
+        error: error.message 
+      });
+    }
+  });
+
+  app.post("/api/integrations/showingtime/import/:appointmentId", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.user.claims.sub;
+      const { appointmentId } = req.params;
+      
+      const user = await storage.getUser(agentId);
+      if (!user?.email) {
+        return res.status(400).json({ 
+          message: "Agent email not found" 
+        });
+      }
+
+      const { showingTimeService } = await import('./showingTimeService');
+      const appointments = await showingTimeService.getAppointments(user.email);
+      const appointment = appointments.find(apt => apt.id === appointmentId);
+      
+      if (!appointment) {
+        return res.status(404).json({ 
+          message: "Appointment not found in ShowingTime" 
+        });
+      }
+
+      const showing = await storage.createOrUpdateShowingFromShowingTime(appointment, agentId);
+      
+      res.json({
+        success: true,
+        message: "Appointment imported successfully",
+        showing
+      });
+    } catch (error: any) {
+      console.error("ShowingTime import error:", error);
+      res.status(500).json({ 
+        message: "Failed to import appointment",
+        error: error.message 
+      });
+    }
+  });
+
   // Functionality testing endpoint
   app.get("/api/test/functionality", isAuthenticated, async (req: any, res) => {
     try {
