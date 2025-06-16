@@ -193,8 +193,8 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
                     
                     <span className="font-medium text-gray-900">{activity.title}</span>
                     
-                    <TooltipProvider>
-                      <Tooltip delayDuration={300}>
+                    <TooltipProvider delayDuration={0} skipDelayDuration={0}>
+                      <Tooltip>
                         <TooltipTrigger asChild>
                           <Badge 
                             variant={
