@@ -3,7 +3,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Bell } from "lucide-react";
+import { 
+  Shield, 
+  Bell, 
+  Users, 
+  FileText, 
+  Calendar, 
+  DollarSign, 
+  AlertTriangle, 
+  Search, 
+  BarChart3,
+  FileSpreadsheet,
+  ShieldAlert
+} from "lucide-react";
 import logoIcon from "@/assets/commission-guard-icon.svg";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,16 +42,16 @@ export default function Navbar() {
     user.email?.[0]?.toUpperCase() || 'U' : 'U';
 
   const navItems = [
-    { path: "/", label: "Dashboard" },
-    { path: "/clients", label: "Clients" },
-    { path: "/contracts", label: "Contracts" },
-    { path: "/showing-tracker", label: "Showing Tracker" },
-    { path: "/commission-tracker", label: "Commission Protection" },
-    { path: "/alerts", label: "Alerts" },
-    { path: "/public-records", label: "Public Records Monitor" },
-    { path: "/property-analyzer", label: "Market Analyzer" },
-    { path: "/reports", label: "Reports" },
-    ...(user?.role === 'admin' ? [{ path: "/breach-management", label: "Breach Management" }] : []),
+    { path: "/", label: "Dashboard", icon: BarChart3, shortLabel: "Home" },
+    { path: "/clients", label: "Clients", icon: Users, shortLabel: "Clients" },
+    { path: "/contracts", label: "Contracts", icon: FileText, shortLabel: "Contracts" },
+    { path: "/showing-tracker", label: "Showing Tracker", icon: Calendar, shortLabel: "Showings" },
+    { path: "/commission-tracker", label: "Commission Protection", icon: DollarSign, shortLabel: "Protection" },
+    { path: "/alerts", label: "Alerts", icon: AlertTriangle, shortLabel: "Alerts" },
+    { path: "/public-records", label: "Public Records Monitor", icon: Search, shortLabel: "Records" },
+    { path: "/property-analyzer", label: "Market Analyzer", icon: BarChart3, shortLabel: "Market" },
+    { path: "/reports", label: "Reports", icon: FileSpreadsheet, shortLabel: "Reports" },
+    ...(user?.role === 'admin' ? [{ path: "/breach-management", label: "Breach Management", icon: ShieldAlert, shortLabel: "Breach" }] : []),
   ];
 
   return (
@@ -156,26 +168,32 @@ export default function Navbar() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 lg:justify-start">
-              {navItems.map((item, index) => (
-                <motion.button
-                  key={item.path}
-                  onClick={() => setLocation(item.path)}
-                  className={`py-3 px-3 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
-                    location === item.path
-                      ? "border-primary text-primary"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.3 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {item.label}
-                </motion.button>
-              ))}
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
+            <div className="flex justify-between items-center overflow-x-auto scrollbar-hide">
+              {navItems.map((item, index) => {
+                const IconComponent = item.icon;
+                return (
+                  <motion.button
+                    key={item.path}
+                    onClick={() => setLocation(item.path)}
+                    className={`whitespace-nowrap py-3 px-1 sm:px-2 border-b-2 font-medium text-xs transition-colors flex-shrink-0 flex flex-col sm:flex-row items-center gap-1 ${
+                      location === item.path
+                        ? "border-primary text-primary"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1, duration: 0.3 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    title={item.label}
+                  >
+                    <IconComponent className="h-4 w-4 flex-shrink-0" />
+                    <span className="hidden lg:inline">{item.label}</span>
+                    <span className="lg:hidden">{item.shortLabel}</span>
+                  </motion.button>
+                );
+              })}
             </div>
           </div>
         </motion.nav>
