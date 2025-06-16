@@ -1606,6 +1606,274 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
   }
+
+  // Breach management methods
+  async getPotentialBreaches() {
+    try {
+      const breaches = await db
+        .select({
+          id: potentialBreaches.id,
+          agentId: potentialBreaches.agentId,
+          clientId: potentialBreaches.clientId,
+          contractId: potentialBreaches.contractId,
+          propertyId: potentialBreaches.propertyId,
+          breachType: potentialBreaches.breachType,
+          detectionMethod: potentialBreaches.detectionMethod,
+          detectionDate: potentialBreaches.detectionDate,
+          breachDate: potentialBreaches.breachDate,
+          evidenceData: potentialBreaches.evidenceData,
+          riskLevel: potentialBreaches.riskLevel,
+          estimatedCommissionLoss: potentialBreaches.estimatedCommissionLoss,
+          status: potentialBreaches.status,
+          adminReviewerId: potentialBreaches.adminReviewerId,
+          adminNotes: potentialBreaches.adminNotes,
+          confirmationDate: potentialBreaches.confirmationDate,
+          agentNotifiedDate: potentialBreaches.agentNotifiedDate,
+          resolutionDate: potentialBreaches.resolutionDate,
+          resolutionOutcome: potentialBreaches.resolutionOutcome,
+          description: potentialBreaches.description,
+          autoDetectionScore: potentialBreaches.autoDetectionScore,
+          requiresLegalAction: potentialBreaches.requiresLegalAction,
+          createdAt: potentialBreaches.createdAt,
+          updatedAt: potentialBreaches.updatedAt,
+          agent: {
+            id: users.id,
+            email: users.email,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            phone: users.phone,
+            role: users.role
+          },
+          client: {
+            id: clients.id,
+            fullName: clients.fullName,
+            email: clients.email,
+            phone: clients.phone
+          },
+          contract: {
+            id: contracts.id,
+            representationType: contracts.representationType,
+            propertyAddress: contracts.propertyAddress,
+            startDate: contracts.startDate,
+            endDate: contracts.endDate,
+            status: contracts.status
+          }
+        })
+        .from(potentialBreaches)
+        .leftJoin(users, eq(potentialBreaches.agentId, users.id))
+        .leftJoin(clients, eq(potentialBreaches.clientId, clients.id))
+        .leftJoin(contracts, eq(potentialBreaches.contractId, contracts.id))
+        .orderBy(desc(potentialBreaches.createdAt));
+
+      return breaches;
+    } catch (error) {
+      console.error("Error fetching potential breaches:", error);
+      return [];
+    }
+  }
+
+  async getPotentialBreachById(id: number) {
+    try {
+      const breach = await db
+        .select()
+        .from(potentialBreaches)
+        .where(eq(potentialBreaches.id, id))
+        .limit(1);
+
+      return breach[0] || null;
+    } catch (error) {
+      console.error("Error fetching potential breach:", error);
+      return null;
+    }
+  }
+
+  async confirmBreach(id: number, updates: any) {
+    try {
+      const result = await db
+        .update(potentialBreaches)
+        .set({
+          ...updates,
+          updatedAt: new Date()
+        })
+        .where(eq(potentialBreaches.id, id))
+        .returning();
+
+      return result[0];
+    } catch (error) {
+      console.error("Error confirming breach:", error);
+      throw error;
+    }
+  }
+
+  async dismissBreach(id: number, updates: any) {
+    try {
+      const result = await db
+        .update(potentialBreaches)
+        .set({
+          ...updates,
+          updatedAt: new Date()
+        })
+        .where(eq(potentialBreaches.id, id))
+        .returning();
+
+      return result[0];
+    } catch (error) {
+      console.error("Error dismissing breach:", error);
+      throw error;
+    }
+  }
+
+  async createBreachNotification(data: any) {
+    try {
+      const result = await db
+        .insert(breachNotifications)
+        .values(data)
+        .returning();
+
+      return result[0];
+    } catch (error) {
+      console.error("Error creating breach notification:", error);
+      throw error;
+    }
+  }
+
+  async updateBreachAgentNotified(breachId: number, notifiedDate: Date) {
+    try {
+      await db
+        .update(potentialBreaches)
+        .set({
+          agentNotifiedDate: notifiedDate,
+          updatedAt: new Date()
+        })
+        .where(eq(potentialBreaches.id, breachId));
+    } catch (error) {
+      console.error("Error updating breach agent notification:", error);
+      throw error;
+    }
+  }
+
+  async createBreachTask(data: any) {
+    try {
+      const result = await db
+        .insert(breachTasks)
+        .values(data)
+        .returning();
+
+      return result[0];
+    } catch (error) {
+      console.error("Error creating breach task:", error);
+      throw error;
+    }
+  }
+
+  async getBreachTasks() {
+    try {
+      const tasks = await db
+        .select({
+          id: breachTasks.id,
+          breachId: breachTasks.breachId,
+          assignedToId: breachTasks.assignedToId,
+          taskType: breachTasks.taskType,
+          title: breachTasks.title,
+          description: breachTasks.description,
+          priority: breachTasks.priority,
+          status: breachTasks.status,
+          dueDate: breachTasks.dueDate,
+          completedDate: breachTasks.completedDate,
+          completedById: breachTasks.completedById,
+          result: breachTasks.result,
+          createdAt: breachTasks.createdAt,
+          updatedAt: breachTasks.updatedAt,
+          breach: {
+            id: potentialBreaches.id,
+            description: potentialBreaches.description,
+            breachType: potentialBreaches.breachType,
+            riskLevel: potentialBreaches.riskLevel,
+            status: potentialBreaches.status
+          },
+          assignedTo: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email
+          }
+        })
+        .from(breachTasks)
+        .leftJoin(potentialBreaches, eq(breachTasks.breachId, potentialBreaches.id))
+        .leftJoin(users, eq(breachTasks.assignedToId, users.id))
+        .orderBy(desc(breachTasks.createdAt));
+
+      return tasks;
+    } catch (error) {
+      console.error("Error fetching breach tasks:", error);
+      return [];
+    }
+  }
+
+  async updateBreachTask(id: number, updates: any) {
+    try {
+      const result = await db
+        .update(breachTasks)
+        .set({
+          ...updates,
+          updatedAt: new Date()
+        })
+        .where(eq(breachTasks.id, id))
+        .returning();
+
+      return result[0];
+    } catch (error) {
+      console.error("Error updating breach task:", error);
+      throw error;
+    }
+  }
+
+  async getBreachStats() {
+    try {
+      const totalBreaches = await db
+        .select({ count: sql`count(*)`.mapWith(Number) })
+        .from(potentialBreaches);
+
+      const pendingBreaches = await db
+        .select({ count: sql`count(*)`.mapWith(Number) })
+        .from(potentialBreaches)
+        .where(eq(potentialBreaches.status, 'pending'));
+
+      const confirmedBreaches = await db
+        .select({ count: sql`count(*)`.mapWith(Number) })
+        .from(potentialBreaches)
+        .where(eq(potentialBreaches.status, 'confirmed'));
+
+      const highRiskBreaches = await db
+        .select({ count: sql`count(*)`.mapWith(Number) })
+        .from(potentialBreaches)
+        .where(eq(potentialBreaches.riskLevel, 'high'));
+
+      const totalCommissionLoss = await db
+        .select({ 
+          total: sql`COALESCE(SUM(${potentialBreaches.estimatedCommissionLoss}), 0)`.mapWith(Number)
+        })
+        .from(potentialBreaches)
+        .where(eq(potentialBreaches.status, 'confirmed'));
+
+      return {
+        totalBreaches: totalBreaches[0]?.count || 0,
+        pendingBreaches: pendingBreaches[0]?.count || 0,
+        confirmedBreaches: confirmedBreaches[0]?.count || 0,
+        highRiskBreaches: highRiskBreaches[0]?.count || 0,
+        totalCommissionLoss: totalCommissionLoss[0]?.total || 0
+      };
+    } catch (error) {
+      console.error("Error fetching breach stats:", error);
+      return {
+        totalBreaches: 0,
+        pendingBreaches: 0,
+        confirmedBreaches: 0,
+        highRiskBreaches: 0,
+        totalCommissionLoss: 0
+      };
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

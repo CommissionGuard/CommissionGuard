@@ -2841,6 +2841,171 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Breach management routes (Admin only)
+  app.get("/api/admin/potential-breaches", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const breaches = await storage.getPotentialBreaches();
+      res.json(breaches);
+    } catch (error: any) {
+      console.error("Error fetching potential breaches:", error);
+      res.status(500).json({ message: "Failed to fetch potential breaches" });
+    }
+  });
+
+  app.get("/api/admin/potential-breaches/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const breach = await storage.getPotentialBreachById(parseInt(req.params.id));
+      if (!breach) {
+        return res.status(404).json({ message: "Breach not found" });
+      }
+      res.json(breach);
+    } catch (error: any) {
+      console.error("Error fetching potential breach:", error);
+      res.status(500).json({ message: "Failed to fetch potential breach" });
+    }
+  });
+
+  app.post("/api/admin/potential-breaches/:id/confirm", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const breachId = parseInt(req.params.id);
+      const { adminNotes, requiresLegalAction } = req.body;
+      
+      // Update breach status to confirmed
+      const updatedBreach = await storage.confirmBreach(breachId, {
+        adminReviewerId: req.user.id,
+        adminNotes,
+        requiresLegalAction,
+        confirmationDate: new Date(),
+        status: 'confirmed'
+      });
+
+      // Create notification for the agent
+      await storage.createBreachNotification({
+        breachId,
+        recipientId: updatedBreach.agentId,
+        notificationType: 'breach_confirmed',
+        title: 'Commission Breach Confirmed',
+        message: `A potential commission breach has been confirmed for your client. Please review the details and take appropriate action.`,
+        deliveryMethod: 'in_app'
+      });
+
+      // Update agent notification date
+      await storage.updateBreachAgentNotified(breachId, new Date());
+
+      res.json(updatedBreach);
+    } catch (error: any) {
+      console.error("Error confirming breach:", error);
+      res.status(500).json({ message: "Failed to confirm breach" });
+    }
+  });
+
+  app.post("/api/admin/potential-breaches/:id/dismiss", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const breachId = parseInt(req.params.id);
+      const { adminNotes } = req.body;
+      
+      const updatedBreach = await storage.dismissBreach(breachId, {
+        adminReviewerId: req.user.id,
+        adminNotes,
+        status: 'dismissed',
+        resolutionDate: new Date(),
+        resolutionOutcome: 'dismissed'
+      });
+
+      res.json(updatedBreach);
+    } catch (error: any) {
+      console.error("Error dismissing breach:", error);
+      res.status(500).json({ message: "Failed to dismiss breach" });
+    }
+  });
+
+  app.post("/api/admin/potential-breaches/:id/tasks", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const breachId = parseInt(req.params.id);
+      const taskData = {
+        breachId,
+        assignedToId: req.user.id,
+        ...req.body
+      };
+      
+      const task = await storage.createBreachTask(taskData);
+      res.json(task);
+    } catch (error: any) {
+      console.error("Error creating breach task:", error);
+      res.status(500).json({ message: "Failed to create breach task" });
+    }
+  });
+
+  app.get("/api/admin/breach-tasks", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const tasks = await storage.getBreachTasks();
+      res.json(tasks);
+    } catch (error: any) {
+      console.error("Error fetching breach tasks:", error);
+      res.status(500).json({ message: "Failed to fetch breach tasks" });
+    }
+  });
+
+  app.patch("/api/admin/breach-tasks/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const taskId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      if (updates.status === 'completed') {
+        updates.completedDate = new Date();
+        updates.completedById = req.user.id;
+      }
+      
+      const task = await storage.updateBreachTask(taskId, updates);
+      res.json(task);
+    } catch (error: any) {
+      console.error("Error updating breach task:", error);
+      res.status(500).json({ message: "Failed to update breach task" });
+    }
+  });
+
+  app.get("/api/admin/breach-stats", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const stats = await storage.getBreachStats();
+      res.json(stats);
+    } catch (error: any) {
+      console.error("Error fetching breach stats:", error);
+      res.status(500).json({ message: "Failed to fetch breach stats" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
