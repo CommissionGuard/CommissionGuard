@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import Navbar from "@/components/navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,14 +18,15 @@ import AddClientForm from "@/components/add-client-form";
 export default function Clients() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [showContractsModal, setShowContractsModal] = useState(false);
 
-  const { data: clients, isLoading: clientsLoading } = useQuery({
+  const { data: clients = [], isLoading: clientsLoading } = useQuery({
     queryKey: ["/api/clients"],
   });
 
-  const { data: clientContracts, isLoading: contractsLoading } = useQuery({
+  const { data: clientContracts = [], isLoading: contractsLoading } = useQuery({
     queryKey: [`/api/contracts/client/${selectedClientId}`],
     enabled: !!selectedClientId,
   });

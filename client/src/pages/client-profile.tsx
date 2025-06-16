@@ -37,7 +37,7 @@ export default function ClientProfile() {
   const [, setLocation] = useLocation();
 
   // Fetch client data
-  const { data: client, isLoading: clientLoading } = useQuery({
+  const { data: client = {}, isLoading: clientLoading } = useQuery({
     queryKey: [`/api/clients/${clientId}`],
     enabled: isAuthenticated && !!clientId,
   });
@@ -102,7 +102,7 @@ export default function ClientProfile() {
     return null;
   }
 
-  const clientInitials = client.fullName
+  const clientInitials = (client as any)?.fullName
     ?.split(" ")
     .map((n: string) => n[0])
     .join("")
