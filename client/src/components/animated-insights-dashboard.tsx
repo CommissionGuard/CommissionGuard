@@ -208,7 +208,7 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
                             </Badge>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent side="top" align="center" sideOffset={5}>
+                        <TooltipContent side="bottom" align="center" sideOffset={5}>
                           <p className="max-w-xs text-sm">
                             {activity.priority === 'high' && 'Urgent attention required - immediate action needed to prevent commission loss'}
                             {activity.priority === 'medium' && 'Important notification - review and take action within 24 hours'}
