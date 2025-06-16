@@ -157,12 +157,12 @@ export default function Navbar() {
           transition={{ delay: 0.4, duration: 0.5 }}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex space-x-8 overflow-x-auto scrollbar-hide">
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 lg:justify-start">
               {navItems.map((item, index) => (
                 <motion.button
                   key={item.path}
                   onClick={() => setLocation(item.path)}
-                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  className={`py-3 px-3 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
                     location === item.path
                       ? "border-primary text-primary"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
