@@ -1491,6 +1491,118 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
   }
+
+  // Contract reminder methods
+  async createContractReminder(reminder: InsertContractReminder): Promise<ContractReminder> {
+    try {
+      const [newReminder] = await db.insert(contractReminders).values(reminder).returning();
+      return newReminder;
+    } catch (error) {
+      console.error("Error creating contract reminder:", error);
+      throw error;
+    }
+  }
+
+  async getContractReminders(agentId: string): Promise<ContractReminder[]> {
+    try {
+      const reminders = await db
+        .select()
+        .from(contractReminders)
+        .where(eq(contractReminders.agentId, agentId))
+        .orderBy(desc(contractReminders.scheduledDate));
+      return reminders;
+    } catch (error) {
+      console.error("Error fetching contract reminders:", error);
+      return [];
+    }
+  }
+
+  async getPendingReminders(): Promise<ContractReminder[]> {
+    try {
+      const now = new Date();
+      const reminders = await db
+        .select()
+        .from(contractReminders)
+        .where(
+          and(
+            eq(contractReminders.status, "pending"),
+            lte(contractReminders.scheduledDate, now)
+          )
+        );
+      return reminders;
+    } catch (error) {
+      console.error("Error fetching pending reminders:", error);
+      return [];
+    }
+  }
+
+  async updateReminderStatus(reminderId: number, status: string, sentDate?: Date): Promise<void> {
+    try {
+      const updateData: any = { status, updatedAt: new Date() };
+      if (sentDate) {
+        updateData.sentDate = sentDate;
+      }
+      
+      await db
+        .update(contractReminders)
+        .set(updateData)
+        .where(eq(contractReminders.id, reminderId));
+    } catch (error) {
+      console.error("Error updating reminder status:", error);
+      throw error;
+    }
+  }
+
+  async scheduleRecurringReminder(reminderId: number, nextSendDate: Date): Promise<void> {
+    try {
+      await db
+        .update(contractReminders)
+        .set({
+          nextSendDate,
+          lastSentDate: new Date(),
+          status: "pending",
+          updatedAt: new Date()
+        })
+        .where(eq(contractReminders.id, reminderId));
+    } catch (error) {
+      console.error("Error scheduling recurring reminder:", error);
+      throw error;
+    }
+  }
+
+  async getActiveContractsForReminders(): Promise<Contract[]> {
+    try {
+      const activeContracts = await db
+        .select()
+        .from(contracts)
+        .where(eq(contracts.status, "active"));
+      return activeContracts;
+    } catch (error) {
+      console.error("Error fetching active contracts for reminders:", error);
+      return [];
+    }
+  }
+
+  async getExpiringContracts(daysAhead: number = 30): Promise<Contract[]> {
+    try {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + daysAhead);
+      
+      const expiringContracts = await db
+        .select()
+        .from(contracts)
+        .where(
+          and(
+            eq(contracts.status, "active"),
+            lte(contracts.endDate, futureDate.toISOString())
+          )
+        );
+      return expiringContracts;
+    } catch (error) {
+      console.error("Error fetching expiring contracts:", error);
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -2399,6 +2399,182 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Contract reminder routes
+  app.post("/api/contract-reminders", isAuthenticated, async (req: any, res) => {
+    try {
+      const reminderData = insertContractReminderSchema.parse({
+        ...req.body,
+        agentId: req.user.id
+      });
+      
+      const reminder = await storage.createContractReminder(reminderData);
+      res.json(reminder);
+    } catch (error: any) {
+      console.error("Error creating contract reminder:", error);
+      res.status(500).json({ message: "Failed to create reminder" });
+    }
+  });
+
+  app.get("/api/contract-reminders", isAuthenticated, async (req: any, res) => {
+    try {
+      const reminders = await storage.getContractReminders(req.user.id);
+      res.json(reminders);
+    } catch (error: any) {
+      console.error("Error fetching contract reminders:", error);
+      res.status(500).json({ message: "Failed to fetch reminders" });
+    }
+  });
+
+  app.post("/api/contract-reminders/setup-automated", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.user.id;
+      
+      // Get all active contracts for the agent
+      const activeContracts = await storage.getContractsByAgent(agentId);
+      const remindersCreated = [];
+
+      for (const contract of activeContracts) {
+        if (contract.status === 'active') {
+          // Create weekly check-in reminder
+          const weeklyReminder = await storage.createContractReminder({
+            agentId,
+            contractId: contract.id,
+            clientId: contract.clientId,
+            reminderType: 'weekly_checkin',
+            scheduledDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Next week
+            isRecurring: true,
+            recurringInterval: 7, // Every 7 days
+            notificationMethod: 'email',
+            priority: 'normal',
+            message: `Weekly check-in reminder for client contract expiring on ${contract.endDate}`,
+            metadata: {
+              contractId: contract.id,
+              clientName: 'Client',
+              contractEndDate: contract.endDate
+            }
+          });
+          remindersCreated.push(weeklyReminder);
+
+          // Create expiration warning (30 days before)
+          const contractEndDate = new Date(contract.endDate);
+          const warningDate = new Date(contractEndDate);
+          warningDate.setDate(warningDate.getDate() - 30);
+
+          if (warningDate > new Date()) {
+            const expirationReminder = await storage.createContractReminder({
+              agentId,
+              contractId: contract.id,
+              clientId: contract.clientId,
+              reminderType: 'expiration_warning',
+              scheduledDate: warningDate,
+              isRecurring: false,
+              notificationMethod: 'email',
+              priority: 'high',
+              message: `Contract expiring in 30 days - renewal action required`,
+              metadata: {
+                contractId: contract.id,
+                clientName: 'Client',
+                contractEndDate: contract.endDate,
+                daysUntilExpiration: 30
+              }
+            });
+            remindersCreated.push(expirationReminder);
+          }
+
+          // Create final expiration warning (7 days before)
+          const finalWarningDate = new Date(contractEndDate);
+          finalWarningDate.setDate(finalWarningDate.getDate() - 7);
+
+          if (finalWarningDate > new Date()) {
+            const finalReminder = await storage.createContractReminder({
+              agentId,
+              contractId: contract.id,
+              clientId: contract.clientId,
+              reminderType: 'expiration_warning',
+              scheduledDate: finalWarningDate,
+              isRecurring: false,
+              notificationMethod: 'both',
+              priority: 'urgent',
+              message: `URGENT: Contract expiring in 7 days - immediate action required`,
+              metadata: {
+                contractId: contract.id,
+                clientName: 'Client',
+                contractEndDate: contract.endDate,
+                daysUntilExpiration: 7
+              }
+            });
+            remindersCreated.push(finalReminder);
+          }
+        }
+      }
+
+      res.json({
+        message: `Successfully set up automated reminders for ${activeContracts.length} active contracts`,
+        remindersCreated: remindersCreated.length,
+        activeContracts: activeContracts.length
+      });
+    } catch (error: any) {
+      console.error("Error setting up automated reminders:", error);
+      res.status(500).json({ message: "Failed to setup automated reminders" });
+    }
+  });
+
+  app.get("/api/contract-reminders/pending", isAuthenticated, async (req: any, res) => {
+    try {
+      const pendingReminders = await storage.getPendingReminders();
+      res.json(pendingReminders);
+    } catch (error: any) {
+      console.error("Error fetching pending reminders:", error);
+      res.status(500).json({ message: "Failed to fetch pending reminders" });
+    }
+  });
+
+  app.post("/api/contract-reminders/process", isAuthenticated, async (req: any, res) => {
+    try {
+      const pendingReminders = await storage.getPendingReminders();
+      const processedReminders = [];
+
+      for (const reminder of pendingReminders) {
+        try {
+          // Send notification based on method
+          if (reminder.notificationMethod === 'email' || reminder.notificationMethod === 'both') {
+            // Email notification logic would go here
+            console.log(`Sending email reminder: ${reminder.message}`);
+          }
+          
+          if (reminder.notificationMethod === 'sms' || reminder.notificationMethod === 'both') {
+            // SMS notification logic would go here
+            console.log(`Sending SMS reminder: ${reminder.message}`);
+          }
+
+          // Update reminder status
+          await storage.updateReminderStatus(reminder.id, 'sent', new Date());
+
+          // Schedule next occurrence if recurring
+          if (reminder.isRecurring && reminder.recurringInterval) {
+            const nextSendDate = new Date();
+            nextSendDate.setDate(nextSendDate.getDate() + Number(reminder.recurringInterval));
+            await storage.scheduleRecurringReminder(reminder.id, nextSendDate);
+          }
+
+          processedReminders.push(reminder);
+        } catch (reminderError) {
+          console.error(`Failed to process reminder ${reminder.id}:`, reminderError);
+          await storage.updateReminderStatus(reminder.id, 'failed');
+        }
+      }
+
+      res.json({
+        message: `Processed ${processedReminders.length} reminders`,
+        processedCount: processedReminders.length,
+        totalPending: pendingReminders.length
+      });
+    } catch (error: any) {
+      console.error("Error processing reminders:", error);
+      res.status(500).json({ message: "Failed to process reminders" });
+    }
+  });
+
   // Notification reminder routes
   app.get("/api/notifications/reminders", isAuthenticatedOrDemo, async (req: any, res) => {
     try {

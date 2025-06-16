@@ -338,6 +338,27 @@ export const clientCommunications = pgTable("client_communications", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const contractReminders = pgTable("contract_reminders", {
+  id: serial("id").primaryKey(),
+  agentId: varchar("agent_id").notNull(),
+  contractId: serial("contract_id").notNull(),
+  clientId: serial("client_id").notNull(),
+  reminderType: varchar("reminder_type").notNull(), // weekly_checkin, expiration_warning, renewal_due
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  sentDate: timestamp("sent_date"),
+  status: varchar("status").notNull().default("pending"), // pending, sent, delivered, failed
+  notificationMethod: varchar("notification_method").notNull().default("email"), // email, sms, both
+  message: text("message"),
+  isRecurring: boolean("is_recurring").default(false),
+  recurringInterval: numeric("recurring_interval"), // Days between recurring reminders
+  lastSentDate: timestamp("last_sent_date"),
+  nextSendDate: timestamp("next_send_date"),
+  priority: varchar("priority").default("normal"), // low, normal, high, urgent
+  metadata: jsonb("metadata"), // Additional reminder data
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const aiConversations = pgTable("ai_conversations", {
   id: serial("id").primaryKey(),
   agentId: varchar("agent_id").notNull(),
@@ -661,6 +682,21 @@ export const buyerPreApprovalsRelations = relations(buyerPreApprovals, ({ one })
   }),
 }));
 
+export const contractRemindersRelations = relations(contractReminders, ({ one }) => ({
+  agent: one(users, {
+    fields: [contractReminders.agentId],
+    references: [users.id],
+  }),
+  contract: one(contracts, {
+    fields: [contractReminders.contractId],
+    references: [contracts.id],
+  }),
+  client: one(clients, {
+    fields: [contractReminders.clientId],
+    references: [clients.id],
+  }),
+}));
+
 export const contractsRelations = relations(contracts, ({ one, many }) => ({
   client: one(clients, {
     fields: [contracts.clientId],
@@ -672,6 +708,7 @@ export const contractsRelations = relations(contracts, ({ one, many }) => ({
   }),
   alerts: many(alerts),
   signers: many(contractSigners),
+  reminders: many(contractReminders),
 }));
 
 export const contractSignersRelations = relations(contractSigners, ({ one }) => ({
@@ -765,6 +802,12 @@ export const insertBuyerPreApprovalSchema = createInsertSchema(buyerPreApprovals
   updatedAt: true,
 });
 
+export const insertContractReminderSchema = createInsertSchema(contractReminders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -792,6 +835,8 @@ export type InsertCommissionProtection = z.infer<typeof insertCommissionProtecti
 export type CommissionProtection = typeof commissionProtection.$inferSelect;
 export type InsertBuyerPreApproval = z.infer<typeof insertBuyerPreApprovalSchema>;
 export type BuyerPreApproval = typeof buyerPreApprovals.$inferSelect;
+export type InsertContractReminder = z.infer<typeof insertContractReminderSchema>;
+export type ContractReminder = typeof contractReminders.$inferSelect;
 
 // Extended types with relations
 export type ClientWithContracts = Client & {
