@@ -224,20 +224,18 @@ export default function Clients() {
             </Card>
           </div>
 
-          {/* Add Client Button */}
+          {/* Client Management Section */}
           <div>
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center">
-                    <UserPlus className="h-5 w-5 mr-2" />
-                    Client Management
-                  </span>
-                  <Button onClick={() => setShowAddClientForm(true)} className="flex items-center gap-2">
-                    <UserPlus className="h-4 w-4" />
-                    Add New Client
-                  </Button>
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center">
+                  <UserPlus className="h-5 w-5 mr-2" />
+                  Client Management
                 </CardTitle>
+                <Button onClick={() => setShowAddClientForm(true)} className="flex items-center gap-2 w-fit">
+                  <UserPlus className="h-4 w-4" />
+                  Add New Client
+                </Button>
               </CardHeader>
             </Card>
           </div>
