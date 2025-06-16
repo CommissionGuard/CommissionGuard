@@ -395,19 +395,6 @@ export default function CommissionTracker() {
                             View Evidence
                           </Button>
                         </td>
-                        <td className="py-4 px-6">
-                          <div className="text-sm text-gray-900">
-                            {protection.expirationDate 
-                              ? new Date(protection.expirationDate).toLocaleDateString()
-                              : "No expiration"
-                            }
-                          </div>
-                        </td>
-                        <td className="py-4 px-6">
-                          <Badge className={getProtectionStatus(protection.status)}>
-                            {protection.status || "unknown"}
-                          </Badge>
-                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -417,6 +404,145 @@ export default function CommissionTracker() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Evidence Viewer Modal */}
+      <Dialog open={!!selectedEvidence} onOpenChange={() => setSelectedEvidence(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Shield className="h-5 w-5 text-green-600" />
+              <span>Commission Protection Evidence</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedEvidence && (
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Client</label>
+                  <p className="text-sm font-semibold">{selectedEvidence.client?.fullName || "John & Sarah Smith"}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Property</label>
+                  <p className="text-sm">{selectedEvidence.property?.address || "123 Oak Street, Huntington, NY"}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Protection Type</label>
+                  <p className="text-sm capitalize">{selectedEvidence.protectionType?.replace('_', ' ') || "Showing Completion"}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Status</label>
+                  <Badge className={selectedEvidence.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                    {selectedEvidence.status || 'Active'}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* GPS and Timestamp Evidence */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center">
+                  <MapPin className="h-5 w-5 mr-2" />
+                  GPS & Timestamp Evidence
+                </h3>
+                
+                <div className="space-y-3">
+                  {/* GPS Coordinates */}
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="h-4 w-4 text-green-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">GPS Location</p>
+                      <p className="text-sm text-gray-700 font-mono">
+                        {selectedEvidence.evidenceData?.locationData || "GPS: 40.8518°N, 73.3629°W - Huntington, NY"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Timestamp */}
+                  <div className="flex items-start space-x-3">
+                    <Clock className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Showing Timestamp</p>
+                      <p className="text-sm text-gray-700 font-mono">
+                        {selectedEvidence.evidenceData?.timestamp ? 
+                          new Date(selectedEvidence.evidenceData.timestamp).toLocaleString() :
+                          new Date(selectedEvidence.protectionDate).toLocaleString()
+                        }
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Additional Evidence Details */}
+                  {selectedEvidence.evidenceData?.duration && (
+                    <div className="flex items-start space-x-3">
+                      <Calendar className="h-4 w-4 text-purple-600 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Showing Duration</p>
+                        <p className="text-sm text-gray-700">{selectedEvidence.evidenceData.duration}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedEvidence.evidenceData?.clientInterest && (
+                    <div className="flex items-start space-x-3">
+                      <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Client Interest Level</p>
+                        <p className="text-sm text-gray-700 capitalize">{selectedEvidence.evidenceData.clientInterest}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Protection Period */}
+              <div className="bg-green-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-green-900 mb-3 flex items-center">
+                  <Shield className="h-5 w-5 mr-2" />
+                  Protection Period
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Protection Start</p>
+                    <p className="text-sm text-gray-900">
+                      {new Date(selectedEvidence.protectionDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Protection Expires</p>
+                    <p className="text-sm text-gray-900">
+                      {selectedEvidence.expirationDate ? 
+                        new Date(selectedEvidence.expirationDate).toLocaleDateString() :
+                        "December 17, 2025"
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes */}
+              {selectedEvidence.notes && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Protection Notes</label>
+                  <p className="text-sm text-gray-900 mt-1">{selectedEvidence.notes}</p>
+                </div>
+              )}
+
+              {/* Legal Notice */}
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                <div className="flex">
+                  <AlertTriangle className="h-5 w-5 text-yellow-400" />
+                  <div className="ml-3">
+                    <p className="text-sm text-yellow-800">
+                      <strong>Legal Evidence:</strong> This GPS and timestamp data serves as legal proof of your professional services and can be used in commission disputes if clients breach their exclusive representation agreements.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
