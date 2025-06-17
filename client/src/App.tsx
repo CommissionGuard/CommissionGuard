@@ -19,6 +19,7 @@ import ShowingTracker from "@/pages/showing-tracker";
 import CommissionTracker from "@/pages/commission-tracker";
 import ContractReminders from "@/pages/contract-reminders";
 import PropertyAnalyzer from "@/pages/property-analyzer";
+import CommissionIntelligence from "@/pages/commission-intelligence";
 import AdminDashboard from "@/pages/admin-dashboard";
 import EnhancedAdminDashboard from "@/pages/enhanced-admin-dashboard";
 import BreachManagement from "@/pages/breach-management";
@@ -52,7 +53,7 @@ function Router() {
         <Route path="/showing-tracker" component={isAuthenticated ? ShowingTracker : Landing} />
         <Route path="/commission-tracker" component={isAuthenticated ? CommissionTracker : Landing} />
         <Route path="/contract-reminders" component={isAuthenticated ? ContractReminders : Landing} />
-        <Route path="/property-analyzer" component={isAuthenticated ? PropertyAnalyzer : Landing} />
+        <Route path="/commission-intelligence" component={isAuthenticated ? CommissionIntelligence : Landing} />
         <Route path="/admin" component={isAuthenticated ? AdminDashboard : Landing} />
         <Route path="/admin-enhanced" component={isAuthenticated ? EnhancedAdminDashboard : Landing} />
         <Route path="/breach-management" component={isAuthenticated ? BreachManagement : Landing} />
