@@ -634,19 +634,19 @@ export default function AnimatedInsightsDashboard() {
           whileHover={{ scale: 1.02, y: -5 }} 
           whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          onClick={() => setLocation("/contracts")}
+          onClick={() => setLocation("/subscription")}
         >
           <Card className="cursor-pointer hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-green-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <CardContent className="p-6 text-center relative z-10">
               <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
               >
-                <FileText className="h-8 w-8 text-green-600 mx-auto mb-3" />
+                <DollarSign className="h-8 w-8 text-purple-600 mx-auto mb-3" />
               </motion.div>
-              <h3 className="font-semibold mb-2">New Contract</h3>
-              <p className="text-sm text-gray-600">Upload representation agreement</p>
+              <h3 className="font-semibold mb-2">Subscription</h3>
+              <p className="text-sm text-gray-600">Upgrade or manage your account</p>
             </CardContent>
           </Card>
         </motion.div>
