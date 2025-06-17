@@ -643,6 +643,104 @@ export default function AnimatedInsightsDashboard() {
         </TooltipProvider>
       </div>
 
+      {/* Commission Protection Progress */}
+      {Array.isArray(clients) && clients.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Your Protection Progress</h2>
+              <p className="text-gray-600">Building stronger commission security</p>
+            </div>
+            <div className="bg-green-100 rounded-full p-3">
+              <Shield className="h-6 w-6 text-green-600" />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-white rounded-lg p-4 border border-green-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Clients Added</span>
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              </div>
+              <div className="text-2xl font-bold text-green-600">{Array.isArray(clients) ? clients.length : 0}</div>
+              <Progress value={Math.min((Array.isArray(clients) ? clients.length : 0) * 20, 100)} className="mt-2" />
+            </div>
+            
+            <div className="bg-white rounded-lg p-4 border border-green-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Contracts Uploaded</span>
+                {((dashboardStats as any)?.activeContracts || 0) > 0 ? 
+                  <CheckCircle className="h-4 w-4 text-green-600" /> : 
+                  <XCircle className="h-4 w-4 text-gray-400" />
+                }
+              </div>
+              <div className="text-2xl font-bold text-blue-600">{(dashboardStats as any)?.activeContracts || 0}</div>
+              <Progress value={Math.min(((dashboardStats as any)?.activeContracts || 0) * 25, 100)} className="mt-2" />
+            </div>
+            
+            <div className="bg-white rounded-lg p-4 border border-green-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Protection Value</span>
+                <DollarSign className="h-4 w-4 text-green-600" />
+              </div>
+              <div className="text-2xl font-bold text-green-600">
+                {formatCurrency((dashboardStats as any)?.protectedCommission || 0)}
+              </div>
+              <Progress value={Math.min(((dashboardStats as any)?.protectedCommission || 0) / 1000, 100)} className="mt-2" />
+            </div>
+            
+            <div className="bg-white rounded-lg p-4 border border-green-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Risk Level</span>
+                <AlertTriangle className={`h-4 w-4 ${((dashboardStats as any)?.potentialBreaches || 0) > 0 ? 'text-yellow-500' : 'text-green-600'}`} />
+              </div>
+              <div className={`text-2xl font-bold ${((dashboardStats as any)?.potentialBreaches || 0) > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
+                {((dashboardStats as any)?.potentialBreaches || 0) === 0 ? 'Low' : 'Medium'}
+              </div>
+              <Progress 
+                value={((dashboardStats as any)?.potentialBreaches || 0) > 0 ? 60 : 90} 
+                className={`mt-2 ${((dashboardStats as any)?.potentialBreaches || 0) > 0 ? '[&>div]:bg-yellow-500' : '[&>div]:bg-green-500'}`}
+              />
+            </div>
+          </div>
+          
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => setLocation("/clients")}
+              className="border-green-300 text-green-700 hover:bg-green-50"
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Add More Clients
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => setLocation("/showing-tracker")}
+              className="border-blue-300 text-blue-700 hover:bg-blue-50"
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Schedule Showing
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => setLocation("/alerts")}
+              className="border-purple-300 text-purple-700 hover:bg-purple-50"
+            >
+              <Bell className="h-4 w-4 mr-2" />
+              Review Alerts
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
       {/* Performance Overview */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
