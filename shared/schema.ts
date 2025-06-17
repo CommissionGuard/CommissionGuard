@@ -294,6 +294,53 @@ export const breachNotifications = pgTable("breach_notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Property monitoring for open house visits
+export const propertyMonitoring = pgTable("property_monitoring", {
+  id: serial("id").primaryKey(),
+  agentId: varchar("agent_id").notNull(),
+  clientId: serial("client_id").notNull(),
+  propertyAddress: text("property_address").notNull(),
+  streetAddress: varchar("street_address").notNull(),
+  city: varchar("city").notNull(),
+  state: varchar("state").notNull(),
+  zipCode: varchar("zip_code").notNull(),
+  monitoringType: varchar("monitoring_type").notNull().default("open_house_visit"), // open_house_visit, showing_visit, inquiry
+  visitDate: timestamp("visit_date").notNull(),
+  monitoringStartDate: timestamp("monitoring_start_date").defaultNow(),
+  monitoringEndDate: timestamp("monitoring_end_date"), // Optional end date for monitoring
+  status: varchar("status").notNull().default("active"), // active, purchased_detected, monitoring_ended, expired
+  lastCheckedDate: timestamp("last_checked_date"),
+  checkFrequency: varchar("check_frequency").notNull().default("weekly"), // daily, weekly, monthly
+  notes: text("notes"),
+  alertsEnabled: boolean("alerts_enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Purchase detection alerts when monitored properties are sold
+export const purchaseDetectionAlerts = pgTable("purchase_detection_alerts", {
+  id: serial("id").primaryKey(),
+  monitoringId: serial("monitoring_id").notNull(),
+  agentId: varchar("agent_id").notNull(),
+  clientId: serial("client_id").notNull(),
+  propertyAddress: text("property_address").notNull(),
+  detectionDate: timestamp("detection_date").defaultNow(),
+  purchaseDate: timestamp("purchase_date"),
+  salePrice: numeric("sale_price", { precision: 12, scale: 2 }),
+  buyerName: varchar("buyer_name"),
+  buyerMatchConfidence: numeric("buyer_match_confidence", { precision: 5, scale: 2 }), // AI confidence 0-100
+  dataSource: varchar("data_source").notNull(), // public_records, mls, zillow, etc
+  detectionMethod: varchar("detection_method").notNull(), // automated_scan, manual_check, agent_report
+  requiresInvestigation: boolean("requires_investigation").default(true),
+  investigationStatus: varchar("investigation_status").default("pending"), // pending, investigating, confirmed_breach, no_breach, dismissed
+  estimatedCommissionLoss: numeric("estimated_commission_loss", { precision: 12, scale: 2 }),
+  agentNotified: boolean("agent_notified").default(false),
+  agentNotificationDate: timestamp("agent_notification_date"),
+  rawDataSnapshot: jsonb("raw_data_snapshot"), // Store the raw detection data
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const buyerPreApprovals = pgTable("buyer_pre_approvals", {
   id: serial("id").primaryKey(),
   agentId: varchar("agent_id").notNull(),
@@ -580,6 +627,24 @@ export type InsertNotificationReminder = z.infer<typeof insertNotificationRemind
 export type InsertSmsMessage = z.infer<typeof insertSmsMessageSchema>;
 export type InsertCalendarIntegration = z.infer<typeof insertCalendarIntegrationSchema>;
 export type InsertCalendarEvent = z.infer<typeof insertCalendarEventSchema>;
+
+// Property monitoring schemas
+export const insertPropertyMonitoringSchema = createInsertSchema(propertyMonitoring).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPurchaseDetectionAlertSchema = createInsertSchema(purchaseDetectionAlerts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type PropertyMonitoring = typeof propertyMonitoring.$inferSelect;
+export type PurchaseDetectionAlert = typeof purchaseDetectionAlerts.$inferSelect;
+export type InsertPropertyMonitoring = z.infer<typeof insertPropertyMonitoringSchema>;
+export type InsertPurchaseDetectionAlert = z.infer<typeof insertPurchaseDetectionAlertSchema>;
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
