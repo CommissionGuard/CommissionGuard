@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,149 +7,140 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { 
-  Home, 
-  Search, 
-  DollarSign, 
+  Shield, 
+  FileText, 
+  AlertTriangle, 
   TrendingUp, 
-  MapPin,
-  Building2,
+  Brain,
   Users,
   Loader2,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  MessageSquare,
+  Target,
+  Zap
 } from "lucide-react";
 import Navbar from "@/components/navbar";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
-export default function RentalMarket() {
+export default function CommissionIntelligence() {
   const { toast } = useToast();
+  const { isAuthenticated, isLoading } = useAuth();
   
-  const [searchFilters, setSearchFilters] = useState({
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    bedrooms: "",
-    bathrooms: "",
-    radius: "5"
-  });
+  const [contractText, setContractText] = useState("");
+  const [clientBehaviorText, setClientBehaviorText] = useState("");
+  const [marketAddress, setMarketAddress] = useState("");
   
-  const [rentEstimateAddress, setRentEstimateAddress] = useState("");
-  const [marketCity, setMarketCity] = useState("");
-  const [marketState, setMarketState] = useState("");
-  
-  const [searchResults, setSearchResults] = useState(null);
-  const [rentEstimate, setRentEstimate] = useState(null);
-  const [marketData, setMarketData] = useState(null);
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [behaviorAnalysis, setBehaviorAnalysis] = useState(null);
+  const [marketInsights, setMarketInsights] = useState(null);
 
-  const searchRentals = useMutation({
-    mutationFn: async (filters: any) => {
-      const response = await apiRequest("/api/rentcast/search", "POST", filters);
+  // Load dashboard data
+  const { data: stats = {}, isLoading: statsLoading } = useQuery({
+    queryKey: ["/api/dashboard/stats"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: contracts = [], isLoading: contractsLoading } = useQuery({
+    queryKey: ["/api/contracts"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: clients = [], isLoading: clientsLoading } = useQuery({
+    queryKey: ["/api/clients"],
+    enabled: isAuthenticated,
+  });
+
+  const analyzeContract = useMutation({
+    mutationFn: async (contractText: string) => {
+      const response = await apiRequest("/api/ai/analyze-contract", "POST", { contractText });
       return response;
     },
     onSuccess: (data) => {
-      setSearchResults(data);
-      if (data.success) {
-        toast({
-          title: "Search Complete",
-          description: `Found ${data.count || 0} rental properties`,
-        });
-      } else {
-        toast({
-          title: "Search Error",
-          description: data.error || "Failed to search properties",
-          variant: "destructive",
-        });
-      }
+      setAnalysisResult(data);
+      toast({
+        title: "Contract Analysis Complete",
+        description: "AI analysis results ready",
+      });
     },
     onError: (error) => {
       toast({
-        title: "Search Failed",
-        description: "Unable to search rental properties",
+        title: "Analysis Failed",
+        description: "Unable to analyze contract",
         variant: "destructive",
       });
     }
   });
 
-  const getRentEstimate = useMutation({
+  const analyzeClientBehavior = useMutation({
+    mutationFn: async (behaviorText: string) => {
+      const response = await apiRequest("/api/ai/analyze-client-behavior", "POST", { behaviorText });
+      return response;
+    },
+    onSuccess: (data) => {
+      setBehaviorAnalysis(data);
+      toast({
+        title: "Behavior Analysis Complete",
+        description: "Client risk assessment ready",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Analysis Failed",
+        description: "Unable to analyze client behavior",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const getMarketInsights = useMutation({
     mutationFn: async (address: string) => {
-      const response = await apiRequest("/api/rentcast/rent-estimate", "POST", { address });
+      const response = await apiRequest("/api/ai/market-insights", "POST", { address });
       return response;
     },
     onSuccess: (data) => {
-      setRentEstimate(data);
-      if (data.success) {
-        toast({
-          title: "Rent Estimate Retrieved",
-          description: "Property rent analysis complete",
-        });
-      } else {
-        toast({
-          title: "Estimate Error",
-          description: data.error || "Failed to get rent estimate",
-          variant: "destructive",
-        });
-      }
+      setMarketInsights(data);
+      toast({
+        title: "Market Insights Ready",
+        description: "AI market analysis complete",
+      });
     },
     onError: (error) => {
       toast({
-        title: "Estimate Failed",
-        description: "Unable to get rent estimate",
+        title: "Analysis Failed",
+        description: "Unable to get market insights",
         variant: "destructive",
       });
     }
   });
 
-  const getMarketData = useMutation({
-    mutationFn: async ({ city, state }: { city: string; state: string }) => {
-      const response = await apiRequest("/api/rentcast/market-data", "POST", { city, state });
-      return response;
-    },
-    onSuccess: (data) => {
-      setMarketData(data);
-      if (data.success) {
-        toast({
-          title: "Market Data Retrieved",
-          description: "Market analysis complete",
-        });
-      } else {
-        toast({
-          title: "Market Data Error",
-          description: data.error || "Failed to get market data",
-          variant: "destructive",
-        });
-      }
-    },
-    onError: (error) => {
-      toast({
-        title: "Market Data Failed",
-        description: "Unable to get market data",
-        variant: "destructive",
-      });
-    }
-  });
-
-  const handleSearch = () => {
-    const filters = Object.fromEntries(
-      Object.entries(searchFilters).filter(([_, value]) => value !== "")
-    );
-    searchRentals.mutate(filters);
-  };
-
-  const handleRentEstimate = () => {
-    if (rentEstimateAddress.trim()) {
-      getRentEstimate.mutate(rentEstimateAddress);
+  const handleContractAnalysis = () => {
+    if (contractText.trim()) {
+      analyzeContract.mutate(contractText);
     }
   };
 
-  const handleMarketData = () => {
-    if (marketCity.trim() && marketState.trim()) {
-      getMarketData.mutate({ city: marketCity, state: marketState });
+  const handleBehaviorAnalysis = () => {
+    if (clientBehaviorText.trim()) {
+      analyzeClientBehavior.mutate(clientBehaviorText);
     }
   };
+
+  const handleMarketInsights = () => {
+    if (marketAddress.trim()) {
+      getMarketInsights.mutate(marketAddress);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin" />
+    </div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
