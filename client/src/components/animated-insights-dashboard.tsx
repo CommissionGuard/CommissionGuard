@@ -880,7 +880,7 @@ export default function AnimatedInsightsDashboard() {
                 transition={{ duration: 0.5, delay: 0.7 }}
                 whileHover={{ y: -2, scale: 1.02 }}
                 className="bg-gradient-to-r from-white to-violet-200 rounded-xl p-4 border border-violet-200 cursor-pointer group"
-                onClick={() => setLocation("/property-research")}
+                onClick={() => setLocation("/commission-intelligence")}
               >
                 <div className="flex items-center justify-between mb-3">
                   <motion.div
