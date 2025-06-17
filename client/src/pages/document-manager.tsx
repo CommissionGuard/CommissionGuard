@@ -260,7 +260,12 @@ export default function DocumentManager() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button>
+                  <Button
+                    onClick={() => toast({
+                      title: "New Folder",
+                      description: "Folder creation will be available once document storage API is integrated.",
+                    })}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     New Folder
                   </Button>
@@ -318,19 +323,47 @@ export default function DocumentManager() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => toast({
+                              title: "Document Viewer",
+                              description: "Document viewer will be available once document storage API is integrated.",
+                            })}
+                          >
                             <Eye className="h-3 w-3 mr-1" />
                             View
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => toast({
+                              title: "Download Started",
+                              description: "Document download will be available once document storage API is integrated.",
+                            })}
+                          >
                             <Download className="h-3 w-3 mr-1" />
                             Download
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => toast({
+                              title: "Share Document",
+                              description: "Document sharing will be available once document storage API is integrated.",
+                            })}
+                          >
                             <Share className="h-3 w-3 mr-1" />
                             Share
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => toast({
+                              title: "Edit Document",
+                              description: "Document editing will be available once document storage API is integrated.",
+                            })}
+                          >
                             <Edit className="h-3 w-3" />
                           </Button>
                         </div>
@@ -356,7 +389,12 @@ export default function DocumentManager() {
                   <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Drop files here or click to upload</h3>
                   <p className="text-gray-600 mb-4">Supports PDF, DOC, DOCX, images up to 10MB</p>
-                  <Button>
+                  <Button
+                    onClick={() => toast({
+                      title: "File Upload",
+                      description: "File upload will be available once document storage API is integrated.",
+                    })}
+                  >
                     Choose Files
                   </Button>
                 </div>
