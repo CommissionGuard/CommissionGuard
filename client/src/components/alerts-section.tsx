@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -12,6 +13,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 export default function AlertsSection() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [selectedAlert, setSelectedAlert] = useState<any>(null);
   const [showBreachDetails, setShowBreachDetails] = useState(false);
 
@@ -277,7 +279,13 @@ export default function AlertsSection() {
                 </Button>
                 <div className="space-x-2">
                   {selectedAlert.type === "breach" && (
-                    <Button variant="destructive">
+                    <Button 
+                      variant="destructive"
+                      onClick={() => {
+                        setShowBreachDetails(false);
+                        setLocation("/support?tab=legal");
+                      }}
+                    >
                       Contact Legal Team
                     </Button>
                   )}
