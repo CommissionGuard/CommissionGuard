@@ -591,6 +591,7 @@ export default function AnimatedInsightsDashboard() {
           whileHover={{ scale: 1.02, y: -5 }} 
           whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          onClick={() => setLocation("/support")}
         >
           <Card className="cursor-pointer hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -611,6 +612,7 @@ export default function AnimatedInsightsDashboard() {
           whileHover={{ scale: 1.02, y: -5 }} 
           whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          onClick={() => setLocation("/contracts")}
         >
           <Card className="cursor-pointer hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-green-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -631,6 +633,7 @@ export default function AnimatedInsightsDashboard() {
           whileHover={{ scale: 1.02, y: -5 }} 
           whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          onClick={() => setLocation("/reports")}
         >
           <Card className="cursor-pointer hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
