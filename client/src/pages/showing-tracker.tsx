@@ -793,20 +793,84 @@ export default function ShowingTracker() {
           <TabsContent value="openhouse" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Home className="h-5 w-5 mr-2" />
-                  Open House Attendance
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center">
+                    <Home className="h-5 w-5 mr-2" />
+                    Open House Attendance
+                  </CardTitle>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Home className="h-4 w-4 mr-2" />
+                        Add Open House Visit
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Add Open House Visit</DialogTitle>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="client" className="text-right">
+                            Client
+                          </Label>
+                          <Select>
+                            <SelectTrigger className="col-span-3">
+                              <SelectValue placeholder="Select a client" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.isArray(clients) && clients.map((client: any) => (
+                                <SelectItem key={client.id} value={client.id.toString()}>
+                                  {client.fullName}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="address" className="text-right">
+                            Property Address
+                          </Label>
+                          <Input
+                            id="address"
+                            placeholder="Enter property address"
+                            className="col-span-3"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="date" className="text-right">
+                            Visit Date
+                          </Label>
+                          <Input
+                            id="date"
+                            type="datetime-local"
+                            className="col-span-3"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="notes" className="text-right">
+                            Notes
+                          </Label>
+                          <Textarea
+                            id="notes"
+                            placeholder="Additional notes about the visit"
+                            className="col-span-3"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline">Cancel</Button>
+                        <Button type="submit">Add Visit</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
                   <Home className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Open Houses Tracked</h3>
                   <p className="text-gray-600">Track client attendance at open houses for commission protection evidence.</p>
-                  <Button className="mt-4">
-                    <Home className="h-4 w-4 mr-2" />
-                    Add Open House Visit
-                  </Button>
                 </div>
               </CardContent>
             </Card>
