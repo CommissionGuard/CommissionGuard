@@ -14,6 +14,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserPlus, Mail, Phone, FileText, Calendar, Eye, DollarSign, Shield, TrendingUp, Edit3 } from "lucide-react";
 import AddClientForm from "@/components/add-client-form";
+import { 
+  ClientLoadingAnimation, 
+  ClientCardSkeleton, 
+  PropertySearchAnimation 
+} from "@/components/ui/loading-animations";
 
 export default function Clients() {
   const { toast } = useToast();

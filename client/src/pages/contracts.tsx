@@ -12,6 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Bell, Clock, MessageSquare, Calendar, Settings, Play, Pause, FileText, Plus } from "lucide-react";
+import { 
+  ContractLoadingAnimation, 
+  ContractCardSkeleton, 
+  KeyLoadingAnimation,
+  FloatingKey 
+} from "@/components/ui/loading-animations";
 
 export default function Contracts() {
   const { toast } = useToast();

@@ -4,6 +4,12 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/navbar";
 import AnimatedInsightsDashboard from "@/components/animated-insights-dashboard";
 import { Shield } from "lucide-react";
+import { 
+  HouseLoadingAnimation, 
+  FloatingHouse, 
+  FloatingKey, 
+  FloatingDollar 
+} from "@/components/ui/loading-animations";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -25,20 +31,19 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-32 w-32 border-4 border-gray-200"></div>
-            <div className="animate-spin rounded-full h-32 w-32 border-4 border-primary border-t-transparent absolute top-0"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Shield className="h-8 w-8 text-primary animate-pulse" />
-            </div>
-          </div>
-          <p className="mt-6 text-gray-700 font-medium">Loading your commission dashboard...</p>
-          <div className="mt-2 flex justify-center space-x-1">
-            <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-primary rounded-full animate-bounce delay-100"></div>
-            <div className="w-2 h-2 bg-primary rounded-full animate-bounce delay-200"></div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center relative overflow-hidden">
+        {/* Floating animations in background */}
+        <FloatingHouse className="top-20 left-20" />
+        <FloatingKey className="top-40 right-32" />
+        <FloatingDollar className="bottom-32 left-1/4" />
+        <FloatingHouse className="bottom-20 right-20" />
+        
+        <div className="text-center z-10">
+          <HouseLoadingAnimation size={64} message="Building your commission dashboard..." />
+          <div className="mt-4 flex justify-center space-x-1">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-100"></div>
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-200"></div>
           </div>
         </div>
       </div>
