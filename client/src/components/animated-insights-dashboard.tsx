@@ -8,6 +8,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { 
+  HouseLoadingAnimation, 
+  KeyLoadingAnimation,
+  PropertySearchAnimation,
+  CommissionProtectionAnimation,
+  ClientLoadingAnimation,
+  ContractLoadingAnimation,
+  MoneyLoadingAnimation,
+  ShowingLoadingAnimation,
+  PropertyCardSkeleton,
+  FloatingHouse,
+  FloatingKey,
+  FloatingDollar,
+  ButtonSpinner
+} from "@/components/ui/loading-animations";
 import {
   TrendingUp,
   TrendingDown,

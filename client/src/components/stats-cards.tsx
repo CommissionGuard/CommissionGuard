@@ -2,6 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Clock, AlertTriangle, DollarSign } from "lucide-react";
+import { 
+  ContractLoadingAnimation, 
+  MoneyLoadingAnimation, 
+  PropertyCardSkeleton 
+} from "@/components/ui/loading-animations";
 
 export default function StatsCards() {
   const { data: stats, isLoading } = useQuery({
@@ -31,13 +36,26 @@ export default function StatsCards() {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="pt-6">
-              <div className="h-20 bg-gray-200 rounded"></div>
-            </CardContent>
-          </Card>
-        ))}
+        <Card className="card-hover">
+          <CardContent className="pt-6">
+            <ContractLoadingAnimation size={40} message="Loading contracts..." />
+          </CardContent>
+        </Card>
+        <Card className="card-hover">
+          <CardContent className="pt-6">
+            <ContractLoadingAnimation size={40} message="Checking expirations..." />
+          </CardContent>
+        </Card>
+        <Card className="card-hover">
+          <CardContent className="pt-6">
+            <PropertyCardSkeleton />
+          </CardContent>
+        </Card>
+        <Card className="card-hover">
+          <CardContent className="pt-6">
+            <MoneyLoadingAnimation size={40} message="Calculating commission..." />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -90,7 +108,7 @@ export default function StatsCards() {
       {cards.map((card, index) => (
         <Card 
           key={card.title} 
-          className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group cursor-pointer"
+          className="card-hover btn-real-estate bg-white rounded-xl shadow-sm border border-gray-200 group cursor-pointer relative overflow-hidden"
           style={{ animationDelay: `${index * 100}ms` }}
           onClick={() => handleCardClick(card.title)}
         >
