@@ -1548,6 +1548,88 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Property monitoring methods
+  async createPropertyMonitoring(monitoring: InsertPropertyMonitoring): Promise<PropertyMonitoring> {
+    try {
+      const [newMonitoring] = await db.insert(propertyMonitoring).values(monitoring).returning();
+      return newMonitoring;
+    } catch (error) {
+      console.error("Error creating property monitoring:", error);
+      throw error;
+    }
+  }
+
+  async getPropertyMonitoringByAgent(agentId: string): Promise<PropertyMonitoring[]> {
+    try {
+      const monitoring = await db
+        .select()
+        .from(propertyMonitoring)
+        .where(eq(propertyMonitoring.agentId, agentId))
+        .orderBy(desc(propertyMonitoring.createdAt));
+      return monitoring;
+    } catch (error) {
+      console.error("Error fetching property monitoring:", error);
+      return [];
+    }
+  }
+
+  async getActivePropertyMonitoring(agentId: string): Promise<PropertyMonitoring[]> {
+    try {
+      const monitoring = await db
+        .select()
+        .from(propertyMonitoring)
+        .where(
+          and(
+            eq(propertyMonitoring.agentId, agentId),
+            eq(propertyMonitoring.status, "active")
+          )
+        )
+        .orderBy(desc(propertyMonitoring.createdAt));
+      return monitoring;
+    } catch (error) {
+      console.error("Error fetching active property monitoring:", error);
+      return [];
+    }
+  }
+
+  async updatePropertyMonitoringStatus(id: number, status: string): Promise<PropertyMonitoring> {
+    try {
+      const [monitoring] = await db
+        .update(propertyMonitoring)
+        .set({ status, updatedAt: new Date() })
+        .where(eq(propertyMonitoring.id, id))
+        .returning();
+      return monitoring;
+    } catch (error) {
+      console.error("Error updating property monitoring status:", error);
+      throw error;
+    }
+  }
+
+  async createPurchaseDetectionAlert(alert: InsertPurchaseDetectionAlert): Promise<PurchaseDetectionAlert> {
+    try {
+      const [newAlert] = await db.insert(purchaseDetectionAlerts).values(alert).returning();
+      return newAlert;
+    } catch (error) {
+      console.error("Error creating purchase detection alert:", error);
+      throw error;
+    }
+  }
+
+  async getPurchaseDetectionAlerts(agentId: string): Promise<PurchaseDetectionAlert[]> {
+    try {
+      const alerts = await db
+        .select()
+        .from(purchaseDetectionAlerts)
+        .where(eq(purchaseDetectionAlerts.agentId, agentId))
+        .orderBy(desc(purchaseDetectionAlerts.createdAt));
+      return alerts;
+    } catch (error) {
+      console.error("Error fetching purchase detection alerts:", error);
+      return [];
+    }
+  }
+
   async updateReminderStatus(reminderId: number, status: string, sentDate?: Date): Promise<void> {
     try {
       const updateData: any = { status, updatedAt: new Date() };

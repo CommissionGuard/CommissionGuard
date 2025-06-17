@@ -145,7 +145,7 @@ export default function ShowingTracker() {
   });
 
   // Function to handle adding open house visit
-  const handleAddOpenHouseVisit = () => {
+  const handleAddOpenHouseVisit = async () => {
     if (!newOpenHouseVisit.clientId || !newOpenHouseVisit.street || !newOpenHouseVisit.city || !newOpenHouseVisit.visitDate) {
       toast({
         title: "Missing Information",
@@ -165,7 +165,52 @@ export default function ShowingTracker() {
       notes: newOpenHouseVisit.notes
     };
 
+    // Add to local state
     setOpenHouseVisits(prev => [...prev, newVisit]);
+
+    // Create property monitoring record for commission protection
+    try {
+      const response = await fetch('/api/property-monitoring', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          clientId: parseInt(newOpenHouseVisit.clientId),
+          propertyAddress: newVisit.address,
+          streetAddress: newOpenHouseVisit.street,
+          city: newOpenHouseVisit.city,
+          state: newOpenHouseVisit.state,
+          zipCode: newOpenHouseVisit.zipCode,
+          monitoringType: 'open_house_visit',
+          visitDate: newOpenHouseVisit.visitDate,
+          notes: newOpenHouseVisit.notes,
+          checkFrequency: 'weekly',
+          alertsEnabled: true
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Open House Visit Added",
+          description: `Visit for ${selectedClient?.fullName} recorded and property monitoring activated.`,
+        });
+      } else {
+        toast({
+          title: "Open House Visit Added",
+          description: `Visit recorded, but property monitoring setup failed.`,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error creating property monitoring:', error);
+      toast({
+        title: "Open House Visit Added",
+        description: `Visit recorded, but property monitoring setup failed.`,
+        variant: "destructive",
+      });
+    }
+
     setShowOpenHouseDialog(false);
     setNewOpenHouseVisit({
       clientId: '',
@@ -175,11 +220,6 @@ export default function ShowingTracker() {
       zipCode: '',
       visitDate: '',
       notes: ''
-    });
-
-    toast({
-      title: "Open House Visit Added",
-      description: `Visit for ${selectedClient?.fullName} has been recorded.`,
     });
   };
 

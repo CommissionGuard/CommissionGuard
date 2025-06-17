@@ -1647,6 +1647,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Property monitoring routes
+  app.post("/api/property-monitoring", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const monitoringData = {
+        ...req.body,
+        agentId: userId
+      };
+
+      const monitoring = await storage.createPropertyMonitoring(monitoringData);
+      
+      // Create audit log
+      await storage.createAuditLog({
+        agentId: userId,
+        action: "create",
+        entityType: "property_monitoring",
+        entityId: monitoring.id.toString(),
+        details: monitoringData,
+      });
+
+      res.json(monitoring);
+    } catch (error) {
+      console.error("Error creating property monitoring:", error);
+      res.status(500).json({ message: "Failed to create property monitoring" });
+    }
+  });
+
+  app.get("/api/property-monitoring", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const monitoring = await storage.getPropertyMonitoringByAgent(userId);
+      res.json(monitoring);
+    } catch (error) {
+      console.error("Error fetching property monitoring:", error);
+      res.status(500).json({ message: "Failed to fetch property monitoring" });
+    }
+  });
+
+  app.get("/api/property-monitoring/active", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const monitoring = await storage.getActivePropertyMonitoring(userId);
+      res.json(monitoring);
+    } catch (error) {
+      console.error("Error fetching active property monitoring:", error);
+      res.status(500).json({ message: "Failed to fetch active property monitoring" });
+    }
+  });
+
+  app.put("/api/property-monitoring/:id/status", isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const userId = req.user.claims.sub;
+
+      const monitoring = await storage.updatePropertyMonitoringStatus(parseInt(id), status);
+      
+      // Create audit log
+      await storage.createAuditLog({
+        agentId: userId,
+        action: "update",
+        entityType: "property_monitoring",
+        entityId: id,
+        details: { status },
+      });
+
+      res.json(monitoring);
+    } catch (error) {
+      console.error("Error updating property monitoring status:", error);
+      res.status(500).json({ message: "Failed to update property monitoring status" });
+    }
+  });
+
+  app.get("/api/purchase-detection-alerts", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const alerts = await storage.getPurchaseDetectionAlerts(userId);
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching purchase detection alerts:", error);
+      res.status(500).json({ message: "Failed to fetch purchase detection alerts" });
+    }
+  });
+
   // Property tracking and commission protection routes
   
   // Property routes
