@@ -253,7 +253,7 @@ export default function Navbar() {
                           </motion.button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="center" className="w-48">
-                          <DropdownMenuItem onClick={() => setLocation("/contracts")} className="flex items-center gap-2">
+                          <DropdownMenuItem onClick={() => setLocation("/contracts?tab=contracts")} className="flex items-center gap-2">
                             <FileText className="h-4 w-4" />
                             All Contracts
                           </DropdownMenuItem>
