@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function CommissionIntelligence() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const [location, setLocation] = useLocation();
   
   const [contractText, setContractText] = useState("");
   const [clientBehaviorText, setClientBehaviorText] = useState("");
@@ -157,7 +159,10 @@ export default function CommissionIntelligence() {
 
         {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105"
+            onClick={() => setLocation('/contracts')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -169,7 +174,10 @@ export default function CommissionIntelligence() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105"
+            onClick={() => setLocation('/clients')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -181,7 +189,10 @@ export default function CommissionIntelligence() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105"
+            onClick={() => setLocation('/commission-tracker')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -193,7 +204,7 @@ export default function CommissionIntelligence() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
