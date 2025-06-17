@@ -162,6 +162,27 @@ interface ActivityItem {
 }
 
 function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
+  const [, setLocation] = useLocation();
+  
+  const handleActivityClick = (activity: ActivityItem) => {
+    switch (activity.type) {
+      case 'breach':
+        setLocation("/alerts");
+        break;
+      case 'contract':
+        setLocation("/contracts");
+        break;
+      case 'showing':
+        setLocation("/showing-tracker");
+        break;
+      case 'alert':
+        setLocation("/alerts");
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -185,6 +206,7 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
               transition={{ duration: 0.3, delay: index * 0.1 }}
               whileHover={{ scale: 1.02, backgroundColor: "rgba(0,0,0,0.02)" }}
               className="p-4 border rounded-lg cursor-pointer transition-colors"
+              onClick={() => handleActivityClick(activity)}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
