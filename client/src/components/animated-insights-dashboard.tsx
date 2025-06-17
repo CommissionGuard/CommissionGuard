@@ -612,14 +612,14 @@ export default function AnimatedInsightsDashboard() {
         </motion.div>
       </motion.div>
 
-      {/* Floating Action Notifications */}
+      {/* Floating Action Notifications - Collapsible Hover Tab */}
       <AnimatePresence>
         <motion.div
-          initial={{ opacity: 0, scale: 0.8, x: -100 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          exit={{ opacity: 0, scale: 0.8, x: -100 }}
+          initial={{ opacity: 0, x: -200 }}
+          animate={{ opacity: 1, x: -150 }}
+          exit={{ opacity: 0, x: -200 }}
           transition={{ duration: 0.5, delay: 2 }}
-          className="fixed bottom-6 left-6 z-50"
+          className="fixed bottom-6 left-0 z-50 group"
         >
           <motion.div
             animate={{ 
@@ -630,9 +630,30 @@ export default function AnimatedInsightsDashboard() {
               ]
             }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="bg-white p-4 rounded-lg shadow-lg border-l-4 border-blue-500 max-w-sm"
+            whileHover={{ x: 150 }}
+            className="bg-white rounded-r-lg shadow-lg border-l-4 border-blue-500 transition-all duration-300 ease-in-out cursor-pointer"
           >
-            <div className="flex items-center gap-3">
+            {/* Collapsed State - Just the tab edge */}
+            <motion.div 
+              className="flex items-center gap-2 p-2 group-hover:hidden"
+              initial={{ opacity: 1 }}
+            >
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              >
+                <Activity className="h-4 w-4 text-blue-600" />
+              </motion.div>
+              <div className="w-2 h-6 bg-blue-500 rounded-r"></div>
+            </motion.div>
+            
+            {/* Expanded State - Full content */}
+            <motion.div 
+              className="hidden group-hover:flex items-center gap-3 p-4 max-w-sm"
+              initial={{ opacity: 0, width: 0 }}
+              whileHover={{ opacity: 1, width: "auto" }}
+              transition={{ duration: 0.3 }}
+            >
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
@@ -643,7 +664,7 @@ export default function AnimatedInsightsDashboard() {
                 <p className="text-sm font-medium text-gray-900">Live Monitoring Active</p>
                 <p className="text-xs text-gray-600">Commission protection is running</p>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         </motion.div>
       </AnimatePresence>
