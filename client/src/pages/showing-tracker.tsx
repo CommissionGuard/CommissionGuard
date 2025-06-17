@@ -828,12 +828,42 @@ export default function ShowingTracker() {
                           </Select>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="address" className="text-right">
-                            Property Address
+                          <Label htmlFor="street" className="text-right">
+                            Street Address
                           </Label>
                           <Input
-                            id="address"
-                            placeholder="Enter property address"
+                            id="street"
+                            placeholder="123 Main Street"
+                            className="col-span-3"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="city" className="text-right">
+                            City
+                          </Label>
+                          <Input
+                            id="city"
+                            placeholder="City name"
+                            className="col-span-3"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="state" className="text-right">
+                            State
+                          </Label>
+                          <Input
+                            id="state"
+                            placeholder="NY"
+                            className="col-span-3"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="zipcode" className="text-right">
+                            Zip Code
+                          </Label>
+                          <Input
+                            id="zipcode"
+                            placeholder="12345"
                             className="col-span-3"
                           />
                         </div>
