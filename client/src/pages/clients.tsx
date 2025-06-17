@@ -48,88 +48,76 @@ export default function Clients() {
   });
 
   // Sample buyer pre-approval data to demonstrate commission protection values
-  const [buyerPreApprovals, setBuyerPreApprovals] = useState([
+  const buyerPreApprovals = [
     {
       id: 1,
-      clientId: 1,
-      lenderName: "Wells Fargo Home Mortgage",
+      lenderName: "Chase Bank",
       approvalAmount: 650000,
-      interestRate: 7.25,
-      approvalDate: new Date(2024, 11, 1),
-      expirationDate: new Date(2025, 2, 1),
+      interestRate: 6.75,
       loanType: "conventional",
       downPaymentPercent: 20,
+      creditScore: 780,
       monthlyIncome: 12500,
-      creditScore: 745,
-      employmentStatus: "employed",
       verificationStatus: "verified",
-      commissionRate: 2.5,
-      estimatedCommission: 16250,
+      expirationDate: new Date("2024-09-15"),
       protectedStatus: true,
-      notes: "Strong buyer profile with excellent credit and stable employment"
+      estimatedCommission: 19500
     },
     {
       id: 2,
-      clientId: 1,
-      lenderName: "Chase Bank",
-      approvalAmount: 700000,
+      lenderName: "Wells Fargo",
+      approvalAmount: 425000,
       interestRate: 7.125,
-      approvalDate: new Date(2024, 10, 15),
-      expirationDate: new Date(2025, 1, 15),
-      loanType: "conventional",
-      downPaymentPercent: 25,
-      monthlyIncome: 12500,
-      creditScore: 745,
-      employmentStatus: "employed",
-      verificationStatus: "verified",
-      commissionRate: 3.0,
-      estimatedCommission: 21000,
+      loanType: "fha",
+      downPaymentPercent: 3.5,
+      creditScore: 710,
+      monthlyIncome: 8750,
+      verificationStatus: "pending",
+      expirationDate: new Date("2024-08-22"),
       protectedStatus: true,
-      notes: "Higher approval amount with better rate - preferred option (3% commission negotiated)"
+      estimatedCommission: 12750
+    },
+    {
+      id: 3,
+      lenderName: "Bank of America",
+      approvalAmount: 825000,
+      interestRate: 6.5,
+      loanType: "jumbo",
+      downPaymentPercent: 25,
+      creditScore: 810,
+      monthlyIncome: 18000,
+      verificationStatus: "verified",
+      expirationDate: new Date("2024-10-08"),
+      protectedStatus: true,
+      estimatedCommission: 24750
     }
-  ]);
+  ];
 
-  // Update estimated commission when rate changes
-  const updateCommissionRate = (approvalId: number, newRate: number) => {
-    setBuyerPreApprovals(prev => 
-      prev.map(approval => 
-        approval.id === approvalId 
-          ? { 
-              ...approval, 
-              commissionRate: newRate, 
-              estimatedCommission: Math.round(approval.approvalAmount * (newRate / 100))
-            }
-          : approval
-      )
-    );
-  };
-
-  // Redirect to home if not authenticated
+  // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
+        title: "Authentication Required",
+        description: "Please log in to access client management.",
         variant: "destructive",
       });
       setTimeout(() => {
         window.location.href = "/api/login";
-      }, 500);
+      }, 1000);
       return;
     }
   }, [isAuthenticated, isLoading, toast]);
 
+  // Show loading while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+        <ClientLoadingAnimation />
       </div>
     );
   }
 
+  // Don't render if not authenticated
   if (!isAuthenticated) {
     return null;
   }
@@ -144,106 +132,114 @@ export default function Clients() {
           <p className="text-gray-600 mt-1">Manage your client database and representation agreements</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Clients List */}
-          <div className="lg:col-span-2">
-            <Card className="bg-white rounded-xl shadow-sm border border-gray-200">
-              <CardHeader className="border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl font-semibold text-gray-900">All Clients</CardTitle>
-                  <Badge variant="secondary">{clients?.length || 0} clients</Badge>
+        {/* All Clients Section */}
+        <div className="mb-8">
+          <Card className="bg-white rounded-xl shadow-sm border border-gray-200">
+            <CardHeader className="border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold text-gray-900">All Clients</CardTitle>
+                <Badge variant="secondary">{(clients as any[])?.length || 0} clients</Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              {clientsLoading ? (
+                <div className="p-6">
+                  <div className="animate-pulse space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-16 bg-gray-200 rounded"></div>
+                    ))}
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                {clientsLoading ? (
-                  <div className="p-6">
-                    <div className="animate-pulse space-y-4">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-16 bg-gray-200 rounded"></div>
-                      ))}
-                    </div>
-                  </div>
-                ) : !clients || clients.length === 0 ? (
-                  <div className="text-center py-12">
-                    <UserPlus className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Clients Found</h3>
-                    <p className="text-gray-600">Add your first client to get started with commission protection.</p>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-gray-200">
-                    {clients.map((client: any) => {
-                      const clientInitials = client.fullName
-                        ?.split(" ")
-                        .map((n: string) => n[0])
-                        .join("")
-                        .toUpperCase() || "?";
+              ) : !clients || (clients as any[]).length === 0 ? (
+                <div className="text-center py-12">
+                  <UserPlus className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Clients Found</h3>
+                  <p className="text-gray-600">Add your first client to get started with commission protection.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-200">
+                  {(clients as any[]).map((client: any) => {
+                    const clientInitials = client.fullName
+                      ?.split(" ")
+                      .map((n: string) => n[0])
+                      .join("")
+                      .toUpperCase() || "?";
 
-                      return (
-                        <div key={client.id} className="p-6 hover:bg-gray-50">
-                          <div className="flex items-center space-x-4">
-                            <Avatar className="h-12 w-12">
-                              <AvatarFallback className="bg-blue-100 text-primary text-lg font-semibold">
-                                {clientInitials}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <button 
-                                className="text-lg font-semibold text-gray-900 hover:text-primary transition-colors cursor-pointer text-left"
-                                onClick={() => setLocation(`/clients/${client.id}`)}
-                              >
-                                {client.fullName}
-                              </button>
-                              <div className="flex items-center space-x-4 mt-1">
-                                <div className="flex items-center text-sm text-gray-600">
-                                  <Mail className="h-4 w-4 mr-1" />
-                                  {client.email}
-                                </div>
+                    return (
+                      <div key={client.id} className="p-6 hover:bg-gray-50">
+                        <div className="flex items-center space-x-4">
+                          <Avatar className="h-12 w-12">
+                            <AvatarFallback className="bg-blue-100 text-primary text-lg font-semibold">
+                              {clientInitials}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <button 
+                              className="text-lg font-semibold text-gray-900 hover:text-primary transition-colors cursor-pointer text-left"
+                              onClick={() => setLocation(`/clients/${client.id}`)}
+                            >
+                              {client.fullName}
+                            </button>
+                            <div className="flex items-center space-x-4 mt-1">
+                              <div className="flex items-center text-sm text-gray-600">
+                                <Mail className="h-4 w-4 mr-1" />
+                                {client.email}
+                              </div>
+                              {client.phone && (
                                 <div className="flex items-center text-sm text-gray-600">
                                   <Phone className="h-4 w-4 mr-1" />
                                   {client.phone}
                                 </div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-gray-500">
-                                Added {new Date(client.createdAt).toLocaleDateString()}
-                              </p>
-                              <Button 
-                                variant="link" 
-                                className="text-primary text-sm p-0 mt-1"
-                                onClick={() => {
-                                  setSelectedClientId(client.id);
-                                  setShowContractsModal(true);
-                                }}
-                              >
-                                View Contracts
-                              </Button>
+                              )}
                             </div>
                           </div>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedClientId(client.id);
+                                setShowContractsModal(true);
+                              }}
+                              className="flex items-center gap-1"
+                            >
+                              <FileText className="h-4 w-4" />
+                              Contracts
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setLocation(`/clients/${client.id}`)}
+                              className="flex items-center gap-1"
+                            >
+                              <Eye className="h-4 w-4" />
+                              View
+                            </Button>
+                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-          {/* Client Management Section */}
-          <div>
-            <Card>
-              <CardHeader className="pb-4 text-center">
-                <CardTitle className="flex items-center justify-center">
-                  <UserPlus className="h-5 w-5 mr-2" />
-                  Client Management
-                </CardTitle>
-                <Button onClick={() => setShowAddClientForm(true)} className="flex items-center gap-2 mx-auto w-fit">
-                  <UserPlus className="h-4 w-4" />
-                  Add New Client
-                </Button>
-              </CardHeader>
-            </Card>
-          </div>
+        {/* Client Management Section */}
+        <div className="mb-8">
+          <Card>
+            <CardHeader className="pb-4 text-center">
+              <CardTitle className="flex items-center justify-center">
+                <UserPlus className="h-5 w-5 mr-2" />
+                Client Management
+              </CardTitle>
+              <Button onClick={() => setShowAddClientForm(true)} className="flex items-center gap-2 mx-auto w-fit">
+                <UserPlus className="h-4 w-4" />
+                Add New Client
+              </Button>
+            </CardHeader>
+          </Card>
         </div>
 
         {/* Commission Protection Summary */}
@@ -347,55 +343,27 @@ export default function Clients() {
                               <p className="font-semibold">{approval.expirationDate.toLocaleDateString()}</p>
                             </div>
                           </div>
-
-                          {approval.notes && (
-                            <div className="mt-3">
-                              <p className="text-gray-500 text-sm">Notes</p>
-                              <p className="text-sm text-gray-700">{approval.notes}</p>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="text-right space-y-3">
-                          <div className="text-2xl font-bold text-green-600">
-                            ${approval.estimatedCommission.toLocaleString()}
-                          </div>
-                          <p className="text-sm text-gray-500">Protected Commission</p>
                           
-                          {/* Editable Commission Rate */}
-                          <div className="space-y-2">
-                            <Label htmlFor={`commission-rate-${approval.id}`} className="text-xs text-gray-600">
-                              Commission Rate
-                            </Label>
+                          <div className="flex items-center justify-between pt-3 border-t">
                             <div className="flex items-center space-x-2">
-                              <Input
-                                id={`commission-rate-${approval.id}`}
-                                type="number"
-                                min="1"
-                                max="10"
-                                step="0.1"
-                                value={approval.commissionRate}
-                                onChange={(e) => updateCommissionRate(approval.id, parseFloat(e.target.value) || 0)}
-                                className="w-16 h-8 text-sm text-center"
-                              />
-                              <span className="text-sm text-gray-600">%</span>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8 w-8 p-0"
-                                onClick={() => {
-                                  const commonRates = [2.0, 2.5, 3.0];
-                                  const currentIndex = commonRates.indexOf(approval.commissionRate);
-                                  const nextRate = commonRates[(currentIndex + 1) % commonRates.length];
-                                  updateCommissionRate(approval.id, nextRate);
-                                }}
-                              >
-                                <Edit3 className="h-3 w-3" />
+                              <DollarSign className="h-4 w-4 text-green-600" />
+                              <span className="text-sm font-medium text-gray-700">
+                                Protected Commission: 
+                                <span className="text-green-600 font-semibold ml-1">
+                                  ${approval.estimatedCommission.toLocaleString()}
+                                </span>
+                              </span>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button variant="outline" size="sm">
+                                <Edit3 className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4 mr-1" />
+                                Details
                               </Button>
                             </div>
-                            <p className="text-xs text-gray-400">
-                              Quick: 2% | 2.5% | 3%
-                            </p>
                           </div>
                         </div>
                       </div>
@@ -403,73 +371,55 @@ export default function Clients() {
                   ))}
                 </TabsContent>
                 
-                <TabsContent value="summary">
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <Card className="border-green-200 bg-green-50">
-                        <CardHeader>
-                          <CardTitle className="text-lg text-green-800 flex items-center">
-                            <TrendingUp className="h-5 w-5 mr-2" />
-                            Commission Protection Impact
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="flex justify-between">
-                            <span className="text-green-700">Total Protected Value:</span>
-                            <span className="font-bold text-green-800">
-                              ${buyerPreApprovals.reduce((sum, approval) => sum + approval.estimatedCommission, 0).toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-green-700">Average Commission:</span>
-                            <span className="font-bold text-green-800">
-                              ${Math.round(buyerPreApprovals.reduce((sum, approval) => sum + approval.estimatedCommission, 0) / buyerPreApprovals.length).toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-green-700">Protection Rate:</span>
-                            <span className="font-bold text-green-800">100%</span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="border-blue-200 bg-blue-50">
-                        <CardHeader>
-                          <CardTitle className="text-lg text-blue-800 flex items-center">
-                            <DollarSign className="h-5 w-5 mr-2" />
-                            Buyer Financial Strength
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="flex justify-between">
-                            <span className="text-blue-700">Total Buying Power:</span>
-                            <span className="font-bold text-blue-800">
-                              ${buyerPreApprovals.reduce((sum, approval) => sum + approval.approvalAmount, 0).toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-blue-700">Average Credit Score:</span>
-                            <span className="font-bold text-blue-800">
-                              {Math.round(buyerPreApprovals.reduce((sum, approval) => sum + approval.creditScore, 0) / buyerPreApprovals.length)}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-blue-700">Qualified Buyers:</span>
-                            <span className="font-bold text-blue-800">{buyerPreApprovals.length}</span>
-                          </div>
-                        </CardContent>
-                      </Card>
+                <TabsContent value="summary" className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-green-800">Total Buying Power</h4>
+                      <p className="text-2xl font-bold text-green-600">
+                        ${buyerPreApprovals.reduce((sum, approval) => sum + approval.approvalAmount, 0).toLocaleString()}
+                      </p>
                     </div>
-                    
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-yellow-800 mb-2">Commission Protection Benefits</h4>
-                      <ul className="text-sm text-yellow-700 space-y-1">
-                        <li>• Automated tracking of all buyer pre-approvals and their commission values</li>
-                        <li>• Legal documentation establishing agent representation before property showings</li>
-                        <li>• GPS and time-stamped evidence of all client property interactions</li>
-                        <li>• Protection against commission disputes with comprehensive activity records</li>
-                        <li>• Real-time monitoring of unauthorized property visits by clients</li>
-                      </ul>
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-blue-800">Average Interest Rate</h4>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {(buyerPreApprovals.reduce((sum, approval) => sum + approval.interestRate, 0) / buyerPreApprovals.length).toFixed(2)}%
+                      </p>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-purple-800">Protected Commissions</h4>
+                      <p className="text-2xl font-bold text-purple-600">
+                        ${buyerPreApprovals.reduce((sum, approval) => sum + approval.estimatedCommission, 0).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-orange-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-orange-800">Average Credit Score</h4>
+                      <p className="text-2xl font-bold text-orange-600">
+                        {Math.round(buyerPreApprovals.reduce((sum, approval) => sum + approval.creditScore, 0) / buyerPreApprovals.length)}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-6 rounded-lg">
+                    <h4 className="font-semibold text-gray-800 mb-4">Pre-Approval Distribution</h4>
+                    <div className="space-y-3">
+                      {buyerPreApprovals.map((approval) => (
+                        <div key={approval.id} className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{approval.lenderName}</span>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-32 h-2 bg-gray-200 rounded-full">
+                              <div 
+                                className="h-2 bg-blue-500 rounded-full" 
+                                style={{ 
+                                  width: `${(approval.approvalAmount / Math.max(...buyerPreApprovals.map(a => a.approvalAmount))) * 100}%` 
+                                }}
+                              ></div>
+                            </div>
+                            <span className="text-sm text-gray-600">
+                              ${approval.approvalAmount.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </TabsContent>
@@ -480,77 +430,41 @@ export default function Clients() {
 
         {/* Client Contracts Modal */}
         <Dialog open={showContractsModal} onOpenChange={setShowContractsModal}>
-          <DialogContent className="max-w-4xl">
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Client Contracts
-                {selectedClientId && (
-                  <Badge variant="secondary">
-                    Client ID: {selectedClientId}
-                  </Badge>
-                )}
-              </DialogTitle>
+              <DialogTitle>Client Contracts</DialogTitle>
             </DialogHeader>
-            
-            <div className="mt-4">
+            <div className="space-y-4">
               {contractsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <span className="ml-2 text-gray-600">Loading contracts...</span>
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-2 text-gray-600">Loading contracts...</p>
                 </div>
-              ) : !clientContracts || clientContracts.length === 0 ? (
+              ) : !clientContracts || (clientContracts as any[]).length === 0 ? (
                 <div className="text-center py-8">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Contracts Found</h3>
-                  <p className="text-gray-600">This client doesn't have any contracts yet.</p>
+                  <p className="text-gray-600">This client has no contracts yet.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {clientContracts.map((contract: any) => (
-                    <Card key={contract.id} className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h4 className="font-medium text-gray-900">
-                              {contract.representationType === 'buyer' ? 'Buyer' : 'Seller'} Representation
-                            </h4>
-                            <Badge variant={contract.status === 'active' ? 'default' : 'secondary'}>
-                              {contract.status}
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              <span>Start: {new Date(contract.startDate).toLocaleDateString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              <span>End: {new Date(contract.endDate).toLocaleDateString()}</span>
-                            </div>
-                            {contract.propertyAddress && (
-                              <div className="col-span-2 flex items-center gap-1">
-                                <Eye className="h-4 w-4" />
-                                <span>Property: {contract.propertyAddress}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="text-right">
-                          <p className="text-sm text-gray-500 mb-2">
-                            Created {new Date(contract.createdAt).toLocaleDateString()}
+                  {(clientContracts as any[]).map((contract: any) => (
+                    <div key={contract.id} className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{contract.type}</h4>
+                          <p className="text-sm text-gray-600">
+                            Signed: {new Date(contract.signedDate).toLocaleDateString()}
                           </p>
-                          {contract.contractFileName && (
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4 mr-1" />
-                              View Document
-                            </Button>
-                          )}
+                          <p className="text-sm text-gray-600">
+                            Expires: {new Date(contract.expirationDate).toLocaleDateString()}
+                          </p>
                         </div>
+                        <Badge variant={contract.status === 'active' ? 'default' : 'secondary'}>
+                          {contract.status}
+                        </Badge>
                       </div>
-                    </Card>
+                    </div>
                   ))}
                 </div>
               )}
@@ -558,7 +472,7 @@ export default function Clients() {
           </DialogContent>
         </Dialog>
 
-        {/* Add Client Modal */}
+        {/* Add Client Form Modal */}
         <Dialog open={showAddClientForm} onOpenChange={setShowAddClientForm}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
