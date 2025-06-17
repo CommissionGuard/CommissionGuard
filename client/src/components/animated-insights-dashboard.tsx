@@ -884,8 +884,14 @@ export default function AnimatedInsightsDashboard() {
                     <Home className="h-5 w-5 text-violet-600" />
                   </motion.div>
                   <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, repeatDelay: 1 }}
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotateY: [0, 180, 360]
+                    }}
+                    transition={{ 
+                      scale: { duration: 2.5, repeat: Infinity, repeatDelay: 2 },
+                      rotateY: { duration: 4, repeat: Infinity, repeatDelay: 1 }
+                    }}
                     className="opacity-20"
                   >
                     <MapPin className="h-8 w-8 text-violet-600" />
