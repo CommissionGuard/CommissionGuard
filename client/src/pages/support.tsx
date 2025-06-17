@@ -415,7 +415,11 @@ export default function Support() {
                       <p className="text-sm text-blue-700 mt-1">
                         Try our knowledge base for instant solutions to common issues before contacting support.
                       </p>
-                      <Button variant="link" className="text-blue-600 p-0 h-auto mt-2">
+                      <Button 
+                        variant="link" 
+                        className="text-blue-600 p-0 h-auto mt-2"
+                        onClick={() => window.open('https://commissionguard.com/kb', '_blank')}
+                      >
                         Browse Knowledge Base →
                       </Button>
                     </div>
@@ -423,11 +427,18 @@ export default function Support() {
                 </div>
 
                 <div className="flex space-x-4">
-                  <Button className="flex items-center space-x-2">
+                  <Button 
+                    className="flex items-center space-x-2"
+                    onClick={() => window.open('https://commissionguard.com/chat', '_blank')}
+                  >
                     <MessageSquare className="h-4 w-4" />
                     <span>Live Chat Support</span>
                   </Button>
-                  <Button variant="outline" className="flex items-center space-x-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center space-x-2"
+                    onClick={() => window.open('https://commissionguard.com/support/ticket', '_blank')}
+                  >
                     <FileText className="h-4 w-4" />
                     <span>Submit Ticket</span>
                   </Button>
@@ -456,7 +467,11 @@ export default function Support() {
                       <p className="text-sm text-purple-700 mt-1">
                         Get expert real estate guidance from our sister company with over 15 years of industry experience.
                       </p>
-                      <Button variant="link" className="text-purple-600 p-0 h-auto mt-2 flex items-center space-x-1">
+                      <Button 
+                        variant="link" 
+                        className="text-purple-600 p-0 h-auto mt-2 flex items-center space-x-1"
+                        onClick={() => window.open('https://frontlinerealty.com', '_blank')}
+                      >
                         <ExternalLink className="h-3 w-3" />
                         <span>Visit Frontline Realty</span>
                       </Button>
@@ -510,15 +525,26 @@ export default function Support() {
                 <Separator />
 
                 <div className="flex space-x-4">
-                  <Button className="flex items-center space-x-2">
+                  <Button 
+                    className="flex items-center space-x-2"
+                    onClick={() => window.open('https://calendly.com/frontlinerealty', '_blank')}
+                  >
                     <Calendar className="h-4 w-4" />
                     <span>Schedule Consultation</span>
                   </Button>
-                  <Button variant="outline" className="flex items-center space-x-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center space-x-2"
+                    onClick={() => window.open('mailto:support@frontlinerealty.com', '_blank')}
+                  >
                     <MessageSquare className="h-4 w-4" />
                     <span>Connect with Expert</span>
                   </Button>
-                  <Button variant="outline" className="flex items-center space-x-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center space-x-2"
+                    onClick={() => window.open('https://frontlinerealty.com', '_blank')}
+                  >
                     <ExternalLink className="h-4 w-4" />
                     <span>Visit Frontline Realty</span>
                   </Button>

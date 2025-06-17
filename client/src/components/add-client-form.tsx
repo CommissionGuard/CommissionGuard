@@ -263,7 +263,10 @@ export default function AddClientForm({ onClose }: AddClientFormProps) {
               className={`border-2 border-dashed rounded-lg p-4 text-center hover:border-primary transition-colors cursor-pointer ${
                 contractFile ? "border-success bg-green-50" : "border-gray-300"
               }`}
-              onClick={() => document.querySelector('input[type="file"]')?.click()}
+              onClick={() => {
+                const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                if (fileInput) fileInput.click();
+              }}
             >
               {contractFile ? (
                 <>
