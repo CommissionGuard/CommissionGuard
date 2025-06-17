@@ -45,16 +45,16 @@ export default function Navbar() {
     user.email?.[0]?.toUpperCase() || 'U' : 'U';
 
   const navItems = [
-    { path: "/", label: "Dashboard", icon: BarChart3, shortLabel: "Home" },
-    { path: "/clients", label: "Clients", icon: Users, shortLabel: "Clients" },
-    { path: "/contracts", label: "Contracts", icon: FileText, shortLabel: "Contracts" },
-    { path: "/showing-tracker", label: "Showing Tracker", icon: Calendar, shortLabel: "Showings" },
-    { path: "/commission-tracker", label: "Commission Protection", icon: DollarSign, shortLabel: "Protection" },
-    { path: "/alerts", label: "Alerts", icon: AlertTriangle, shortLabel: "Alerts" },
-    { path: "/public-records", label: "Public Records Monitor", icon: Search, shortLabel: "Records" },
-    { path: "/property-analyzer", label: "Market Analyzer", icon: BarChart3, shortLabel: "Market" },
-    { path: "/reports", label: "Reports", icon: FileSpreadsheet, shortLabel: "Reports" },
-    ...(user?.role === 'admin' ? [{ path: "/breach-management", label: "Breach Management", icon: ShieldAlert, shortLabel: "Breach" }] : []),
+    { path: "/", label: "Dashboard", icon: BarChart3, shortLabel: "Home", description: "View your commission protection overview" },
+    { path: "/clients", label: "Clients", icon: Users, shortLabel: "Clients", description: "Manage your client relationships" },
+    { path: "/contracts", label: "Contracts", icon: FileText, shortLabel: "Contracts", description: "Track your exclusive agreements" },
+    { path: "/showing-tracker", label: "Showing Tracker", icon: Calendar, shortLabel: "Showings", description: "Schedule and track property showings" },
+    { path: "/commission-tracker", label: "Commission Protection", icon: DollarSign, shortLabel: "Protection", description: "Monitor your protected commissions" },
+    { path: "/alerts", label: "Alerts", icon: AlertTriangle, shortLabel: "Alerts", description: "Stay informed about potential issues" },
+    { path: "/public-records", label: "Public Records Monitor", icon: Search, shortLabel: "Records", description: "Watch for unauthorized transactions" },
+    { path: "/property-analyzer", label: "Market Analyzer", icon: BarChart3, shortLabel: "Market", description: "Analyze property values and market trends" },
+    { path: "/reports", label: "Reports", icon: FileSpreadsheet, shortLabel: "Reports", description: "Generate commission protection reports" },
+    ...(user?.role === 'admin' ? [{ path: "/breach-management", label: "Breach Management", icon: ShieldAlert, shortLabel: "Breach", description: "Manage commission breach cases" }] : []),
   ];
 
   return (

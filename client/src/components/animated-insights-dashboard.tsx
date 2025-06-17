@@ -441,8 +441,8 @@ export default function AnimatedInsightsDashboard() {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Insights Dashboard</h1>
-          <p className="text-gray-600 mt-1">Real-time analytics and commission protection insights</p>
+          <h1 className="text-3xl font-bold text-gray-900">Commission Protection Dashboard</h1>
+          <p className="text-gray-600 mt-1">Protect your commissions and track your success</p>
         </div>
         
         <motion.div
@@ -456,76 +456,191 @@ export default function AnimatedInsightsDashboard() {
         </motion.div>
       </motion.div>
 
+      {/* Success Pathway Guide */}
+      {Array.isArray(clients) && clients.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200"
+        >
+          <div className="flex items-center mb-4">
+            <Shield className="h-6 w-6 text-blue-600 mr-3" />
+            <h2 className="text-xl font-semibold text-gray-900">Start Protecting Your Commissions</h2>
+          </div>
+          <p className="text-gray-600 mb-6">Follow these simple steps to secure your commissions and prevent client ghosting:</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg p-4 border border-blue-100">
+              <div className="flex items-center mb-3">
+                <div className="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                  <span className="text-blue-600 font-semibold text-sm">1</span>
+                </div>
+                <h3 className="font-semibold text-gray-900">Add Your Clients</h3>
+              </div>
+              <p className="text-sm text-gray-600 mb-3">Start by adding your clients to track their information and activity</p>
+              <Button 
+                size="sm" 
+                className="w-full"
+                onClick={() => setLocation("/clients")}
+              >
+                Add First Client
+              </Button>
+            </div>
+            
+            <div className="bg-white rounded-lg p-4 border border-blue-100">
+              <div className="flex items-center mb-3">
+                <div className="bg-green-100 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                  <span className="text-green-600 font-semibold text-sm">2</span>
+                </div>
+                <h3 className="font-semibold text-gray-900">Upload Contracts</h3>
+              </div>
+              <p className="text-sm text-gray-600 mb-3">Upload your exclusive representation agreements for AI analysis</p>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="w-full"
+                onClick={() => setLocation("/contracts")}
+              >
+                Add Contract
+              </Button>
+            </div>
+            
+            <div className="bg-white rounded-lg p-4 border border-blue-100">
+              <div className="flex items-center mb-3">
+                <div className="bg-purple-100 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                  <span className="text-purple-600 font-semibold text-sm">3</span>
+                </div>
+                <h3 className="font-semibold text-gray-900">Track Showings</h3>
+              </div>
+              <p className="text-sm text-gray-600 mb-3">Record property visits to build protection evidence</p>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="w-full"
+                onClick={() => setLocation("/showing-tracker")}
+              >
+                Schedule Showing
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Main Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          title="Active Clients"
-          value={Array.isArray(clients) ? clients.length : 0}
-          change={5}
-          icon={
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-            >
-              <Users className="h-6 w-6 text-purple-700" />
-            </motion.div>
-          }
-          color="bg-purple-500/20 text-purple-600"
-          delay={0}
-          onClick={() => handleCardClick("Active Clients")}
-        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <MetricCard
+                  title="Active Clients"
+                  value={Array.isArray(clients) ? clients.length : 0}
+                  change={5}
+                  icon={
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    >
+                      <Users className="h-6 w-6 text-purple-700" />
+                    </motion.div>
+                  }
+                  color="bg-purple-500/20 text-purple-600"
+                  delay={0}
+                  onClick={() => handleCardClick("Active Clients")}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Click to view and manage your client relationships</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         
-        <MetricCard
-          title="Active Contracts"
-          value={(dashboardStats as any)?.activeContracts || 0}
-          change={12}
-          icon={
-            <motion.div
-              animate={{ rotateY: [0, 180, 360] }}
-              transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-            >
-              <FileText className="h-6 w-6 text-blue-700" />
-            </motion.div>
-          }
-          color="bg-blue-500/20 text-blue-600"
-          delay={0.1}
-          onClick={() => handleCardClick("Active Contracts")}
-        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <MetricCard
+                  title="Active Contracts"
+                  value={(dashboardStats as any)?.activeContracts || 0}
+                  change={12}
+                  icon={
+                    <motion.div
+                      animate={{ rotateY: [0, 180, 360] }}
+                      transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                    >
+                      <FileText className="h-6 w-6 text-blue-700" />
+                    </motion.div>
+                  }
+                  color="bg-blue-500/20 text-blue-600"
+                  delay={0.1}
+                  onClick={() => handleCardClick("Active Contracts")}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Your exclusive representation agreements being monitored</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         
-        <MetricCard
-          title="Potential Breaches"
-          value={(dashboardStats as any)?.potentialBreaches || 0}
-          change={-15}
-          icon={
-            <motion.div
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 4 }}
-            >
-              <AlertTriangle className="h-6 w-6 text-red-700" />
-            </motion.div>
-          }
-          color="bg-red-500/20 text-red-600"
-          delay={0.2}
-          onClick={() => handleCardClick("Potential Breaches")}
-        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <MetricCard
+                  title="Potential Breaches"
+                  value={(dashboardStats as any)?.potentialBreaches || 0}
+                  change={-15}
+                  icon={
+                    <motion.div
+                      animate={{ rotate: [0, 5, -5, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 4 }}
+                    >
+                      <AlertTriangle className="h-6 w-6 text-red-700" />
+                    </motion.div>
+                  }
+                  color="bg-red-500/20 text-red-600"
+                  delay={0.2}
+                  onClick={() => handleCardClick("Potential Breaches")}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Warning signs of possible commission threats</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         
-        <MetricCard
-          title="Protected Commission"
-          value={(dashboardStats as any)?.protectedCommission || 0}
-          change={8}
-          icon={
-            <motion.div
-              animate={{ y: [0, -3, 0] }}
-              transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 3.5 }}
-            >
-              <DollarSign className="h-6 w-6 text-green-700" />
-            </motion.div>
-          }
-          color="bg-green-500/20 text-green-600"
-          formatter={formatCurrency}
-          delay={0.3}
-          onClick={() => handleCardClick("Protected Commission")}
-        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <MetricCard
+                  title="Protected Commission"
+                  value={(dashboardStats as any)?.protectedCommission || 0}
+                  change={8}
+                  icon={
+                    <motion.div
+                      animate={{ y: [0, -3, 0] }}
+                      transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 3.5 }}
+                    >
+                      <DollarSign className="h-6 w-6 text-green-700" />
+                    </motion.div>
+                  }
+                  color="bg-green-500/20 text-green-600"
+                  formatter={formatCurrency}
+                  delay={0.3}
+                  onClick={() => handleCardClick("Protected Commission")}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Total commission value secured with evidence</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* Performance Overview */}
