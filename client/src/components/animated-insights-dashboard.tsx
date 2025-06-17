@@ -27,7 +27,8 @@ import {
   Activity,
   BarChart3,
   PieChart,
-  LineChart
+  LineChart,
+  Bell
 } from "lucide-react";
 
 interface AnimatedCounterProps {
