@@ -568,8 +568,11 @@ export default function AnimatedInsightsDashboard() {
                     <Users className="h-5 w-5 text-purple-600" />
                   </motion.div>
                   <motion.div
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 5, -5, 0]
+                    }}
+                    transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
                     className="opacity-20"
                   >
                     <Users className="h-8 w-8 text-purple-600" />
@@ -608,8 +611,11 @@ export default function AnimatedInsightsDashboard() {
                     <FileText className="h-5 w-5 text-blue-600" />
                   </motion.div>
                   <motion.div
-                    animate={{ rotateY: [0, 180, 360] }}
-                    transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                    animate={{ 
+                      rotateY: [0, 180, 360],
+                      scale: [1, 1.1, 1]
+                    }}
+                    transition={{ duration: 4, repeat: Infinity, repeatDelay: 1 }}
                     className="opacity-20"
                   >
                     <FileText className="h-8 w-8 text-blue-600" />
@@ -648,8 +654,11 @@ export default function AnimatedInsightsDashboard() {
                     <AlertTriangle className="h-5 w-5 text-red-600" />
                   </motion.div>
                   <motion.div
-                    animate={{ rotate: [0, 5, -5, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 4 }}
+                    animate={{ 
+                      rotate: [0, 10, -10, 0],
+                      scale: [1, 1.1, 0.9, 1]
+                    }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                     className="opacity-20"
                   >
                     <AlertTriangle className="h-8 w-8 text-red-600" />
@@ -688,8 +697,14 @@ export default function AnimatedInsightsDashboard() {
                     <DollarSign className="h-5 w-5 text-green-600" />
                   </motion.div>
                   <motion.div
-                    animate={{ y: [0, -3, 0] }}
-                    transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 3.5 }}
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotateZ: [0, 360]
+                    }}
+                    transition={{ 
+                      scale: { duration: 2, repeat: Infinity, repeatDelay: 2 },
+                      rotateZ: { duration: 6, repeat: Infinity, ease: "linear" }
+                    }}
                     className="opacity-20"
                   >
                     <DollarSign className="h-8 w-8 text-green-600" />
@@ -731,8 +746,14 @@ export default function AnimatedInsightsDashboard() {
                     <Search className="h-5 w-5 text-indigo-600" />
                   </motion.div>
                   <motion.div
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    animate={{ 
+                      rotate: [0, 360],
+                      scale: [1, 1.15, 1]
+                    }}
+                    transition={{ 
+                      rotate: { duration: 8, repeat: Infinity, ease: "linear" },
+                      scale: { duration: 3, repeat: Infinity, repeatDelay: 2 }
+                    }}
                     className="opacity-20"
                   >
                     <Eye className="h-8 w-8 text-indigo-600" />
@@ -771,8 +792,14 @@ export default function AnimatedInsightsDashboard() {
                     <TrendingUp className="h-5 w-5 text-emerald-600" />
                   </motion.div>
                   <motion.div
-                    animate={{ y: [0, -2, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                    animate={{ 
+                      y: [0, -3, 0],
+                      rotateX: [0, 180, 360]
+                    }}
+                    transition={{ 
+                      y: { duration: 2, repeat: Infinity, repeatDelay: 1 },
+                      rotateX: { duration: 5, repeat: Infinity, repeatDelay: 3 }
+                    }}
                     className="opacity-20"
                   >
                     <BarChart3 className="h-8 w-8 text-emerald-600" />
@@ -811,8 +838,14 @@ export default function AnimatedInsightsDashboard() {
                     <Calendar className="h-5 w-5 text-orange-600" />
                   </motion.div>
                   <motion.div
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+                    animate={{ 
+                      rotate: [0, -10, 10, 0],
+                      scale: [1, 1.15, 1]
+                    }}
+                    transition={{ 
+                      rotate: { duration: 2, repeat: Infinity, repeatDelay: 2 },
+                      scale: { duration: 1.5, repeat: Infinity, repeatDelay: 3 }
+                    }}
                     className="opacity-20"
                   >
                     <Clock className="h-8 w-8 text-orange-600" />
