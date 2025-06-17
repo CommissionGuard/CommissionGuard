@@ -335,15 +335,26 @@ export default function Support() {
                 <Separator />
 
                 <div className="flex space-x-4">
-                  <Button className="flex items-center space-x-2">
+                  <Button 
+                    className="flex items-center space-x-2"
+                    onClick={() => window.open('https://commissionguard.com/legal-chat', '_blank')}
+                  >
                     <MessageSquare className="h-4 w-4" />
                     <span>Start Live Chat</span>
                   </Button>
-                  <Button variant="outline" className="flex items-center space-x-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center space-x-2"
+                    onClick={() => window.open('https://calendly.com/commissionguard-legal', '_blank')}
+                  >
                     <Calendar className="h-4 w-4" />
                     <span>Schedule Consultation</span>
                   </Button>
-                  <Button variant="outline" className="flex items-center space-x-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center space-x-2"
+                    onClick={() => window.open('https://commissionguard.com/legal/submit-case', '_blank')}
+                  >
                     <FileText className="h-4 w-4" />
                     <span>Submit Case</span>
                   </Button>

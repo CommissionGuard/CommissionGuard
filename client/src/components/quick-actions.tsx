@@ -35,7 +35,7 @@ export default function QuickActions() {
       icon: Scale,
       label: "Legal Support",
       onClick: () => {
-        setLocation("/legal-support");
+        setLocation("/support?tab=legal");
       }
     }
   ];

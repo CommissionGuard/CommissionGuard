@@ -289,7 +289,16 @@ export default function AlertsSection() {
                       Contact Legal Team
                     </Button>
                   )}
-                  <Button>
+                  <Button
+                    onClick={() => {
+                      // TODO: Implement alert resolution API call
+                      toast({ 
+                        title: "Alert Resolved", 
+                        description: "This alert has been marked as resolved." 
+                      });
+                      setShowBreachDetails(false);
+                    }}
+                  >
                     Mark as Resolved
                   </Button>
                 </div>
