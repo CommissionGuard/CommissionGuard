@@ -545,114 +545,161 @@ export default function AnimatedInsightsDashboard() {
         </motion.div>
       )}
 
-      {/* Main Metrics Grid */}
+      {/* All Widgets - Unified Format */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Active Clients Widget */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div>
-                <MetricCard
-                  title="Active Clients"
-                  value={Array.isArray(clients) ? clients.length : 0}
-                  change={5}
-                  icon={
-                    <motion.div
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                    >
-                      <Users className="h-6 w-6 text-purple-700" />
-                    </motion.div>
-                  }
-                  color="bg-purple-500/20 text-purple-600"
-                  delay={0}
-                  onClick={() => handleCardClick("Active Clients")}
-                />
-              </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0 }}
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-gradient-to-br from-purple-50 to-violet-100 rounded-xl p-4 border border-purple-200 cursor-pointer group"
+                onClick={() => handleCardClick("Active Clients")}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <motion.div
+                    className="bg-purple-100 rounded-full p-2"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Users className="h-5 w-5 text-purple-600" />
+                  </motion.div>
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    className="opacity-20"
+                  >
+                    <Users className="h-8 w-8 text-purple-600" />
+                  </motion.div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Active Clients</h3>
+                <p className="text-sm text-gray-600 mb-3">Client relationships</p>
+                <div className="text-2xl font-bold text-purple-600 mb-1">{Array.isArray(clients) ? clients.length : 0}</div>
+                <div className="text-xs text-gray-500">+5% this month</div>
+              </motion.div>
             </TooltipTrigger>
             <TooltipContent>
               <p>Click to view and manage your client relationships</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        
+
+        {/* Active Contracts Widget */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div>
-                <MetricCard
-                  title="Active Contracts"
-                  value={(dashboardStats as any)?.activeContracts || 0}
-                  change={12}
-                  icon={
-                    <motion.div
-                      animate={{ rotateY: [0, 180, 360] }}
-                      transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-                    >
-                      <FileText className="h-6 w-6 text-blue-700" />
-                    </motion.div>
-                  }
-                  color="bg-blue-500/20 text-blue-600"
-                  delay={0.1}
-                  onClick={() => handleCardClick("Active Contracts")}
-                />
-              </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-gradient-to-br from-blue-50 to-cyan-100 rounded-xl p-4 border border-blue-200 cursor-pointer group"
+                onClick={() => handleCardClick("Active Contracts")}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <motion.div
+                    className="bg-blue-100 rounded-full p-2"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <FileText className="h-5 w-5 text-blue-600" />
+                  </motion.div>
+                  <motion.div
+                    animate={{ rotateY: [0, 180, 360] }}
+                    transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                    className="opacity-20"
+                  >
+                    <FileText className="h-8 w-8 text-blue-600" />
+                  </motion.div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Active Contracts</h3>
+                <p className="text-sm text-gray-600 mb-3">Representation agreements</p>
+                <div className="text-2xl font-bold text-blue-600 mb-1">{(dashboardStats as any)?.activeContracts || 0}</div>
+                <div className="text-xs text-gray-500">+12% this month</div>
+              </motion.div>
             </TooltipTrigger>
             <TooltipContent>
               <p>Your exclusive representation agreements being monitored</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        
+
+        {/* Potential Breaches Widget */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div>
-                <MetricCard
-                  title="Potential Breaches"
-                  value={(dashboardStats as any)?.potentialBreaches || 0}
-                  change={-15}
-                  icon={
-                    <motion.div
-                      animate={{ rotate: [0, 5, -5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 4 }}
-                    >
-                      <AlertTriangle className="h-6 w-6 text-red-700" />
-                    </motion.div>
-                  }
-                  color="bg-red-500/20 text-red-600"
-                  delay={0.2}
-                  onClick={() => handleCardClick("Potential Breaches")}
-                />
-              </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-gradient-to-br from-red-50 to-pink-100 rounded-xl p-4 border border-red-200 cursor-pointer group"
+                onClick={() => handleCardClick("Potential Breaches")}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <motion.div
+                    className="bg-red-100 rounded-full p-2"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                  </motion.div>
+                  <motion.div
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 4 }}
+                    className="opacity-20"
+                  >
+                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                  </motion.div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Potential Breaches</h3>
+                <p className="text-sm text-gray-600 mb-3">Commission threats</p>
+                <div className="text-2xl font-bold text-red-600 mb-1">{(dashboardStats as any)?.potentialBreaches || 0}</div>
+                <div className="text-xs text-gray-500">-15% this month</div>
+              </motion.div>
             </TooltipTrigger>
             <TooltipContent>
               <p>Warning signs of possible commission threats</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        
+
+        {/* Protected Commission Widget */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div>
-                <MetricCard
-                  title="Protected Commission"
-                  value={(dashboardStats as any)?.protectedCommission || 0}
-                  change={8}
-                  icon={
-                    <motion.div
-                      animate={{ y: [0, -3, 0] }}
-                      transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 3.5 }}
-                    >
-                      <DollarSign className="h-6 w-6 text-green-700" />
-                    </motion.div>
-                  }
-                  color="bg-green-500/20 text-green-600"
-                  formatter={formatCurrency}
-                  delay={0.3}
-                  onClick={() => handleCardClick("Protected Commission")}
-                />
-              </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-4 border border-green-200 cursor-pointer group"
+                onClick={() => handleCardClick("Protected Commission")}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <motion.div
+                    className="bg-green-100 rounded-full p-2"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <DollarSign className="h-5 w-5 text-green-600" />
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -3, 0] }}
+                    transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 3.5 }}
+                    className="opacity-20"
+                  >
+                    <DollarSign className="h-8 w-8 text-green-600" />
+                  </motion.div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Protected Commission</h3>
+                <p className="text-sm text-gray-600 mb-3">Secured earnings</p>
+                <div className="text-2xl font-bold text-green-600 mb-1">{formatCurrency((dashboardStats as any)?.protectedCommission || 0)}</div>
+                <div className="text-xs text-gray-500">+8% this month</div>
+              </motion.div>
             </TooltipTrigger>
             <TooltipContent>
               <p>Total commission value secured with evidence</p>
@@ -661,7 +708,7 @@ export default function AnimatedInsightsDashboard() {
         </TooltipProvider>
       </div>
 
-      {/* New Interactive Widgets Row - Records & Market Integration */}
+      {/* Second Row - Records & Market Integration */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Public Records Monitoring Widget */}
         <TooltipProvider>
@@ -692,9 +739,9 @@ export default function AnimatedInsightsDashboard() {
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Records Monitor</h3>
-                <p className="text-sm text-gray-600 mb-3">Active property surveillance</p>
+                <p className="text-sm text-gray-600 mb-3">Property surveillance</p>
                 <div className="text-2xl font-bold text-indigo-600 mb-1">24/7</div>
-                <div className="text-xs text-gray-500">Scanning Nassau & Suffolk</div>
+                <div className="text-xs text-gray-500">Nassau & Suffolk</div>
               </motion.div>
             </TooltipTrigger>
             <TooltipContent>
@@ -732,7 +779,7 @@ export default function AnimatedInsightsDashboard() {
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Market Trends</h3>
-                <p className="text-sm text-gray-600 mb-3">Real-time property data</p>
+                <p className="text-sm text-gray-600 mb-3">Real-time data</p>
                 <div className="text-2xl font-bold text-emerald-600 mb-1">Live</div>
                 <div className="text-xs text-gray-500">Updated hourly</div>
               </motion.div>
@@ -772,7 +819,7 @@ export default function AnimatedInsightsDashboard() {
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Showings</h3>
-                <p className="text-sm text-gray-600 mb-3">Schedule & track visits</p>
+                <p className="text-sm text-gray-600 mb-3">Schedule & track</p>
                 <div className="text-2xl font-bold text-orange-600 mb-1">Quick</div>
                 <div className="text-xs text-gray-500">Access tracker</div>
               </motion.div>
@@ -792,28 +839,28 @@ export default function AnimatedInsightsDashboard() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.7 }}
                 whileHover={{ y: -2, scale: 1.02 }}
-                className="bg-gradient-to-br from-purple-50 to-violet-100 rounded-xl p-4 border border-purple-200 cursor-pointer group"
+                className="bg-gradient-to-br from-violet-50 to-purple-100 rounded-xl p-4 border border-violet-200 cursor-pointer group"
                 onClick={() => setLocation("/property-research")}
               >
                 <div className="flex items-center justify-between mb-3">
                   <motion.div
-                    className="bg-purple-100 rounded-full p-2"
+                    className="bg-violet-100 rounded-full p-2"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Home className="h-5 w-5 text-purple-600" />
+                    <Home className="h-5 w-5 text-violet-600" />
                   </motion.div>
                   <motion.div
                     animate={{ rotate: [0, 10, -10, 0] }}
                     transition={{ duration: 3, repeat: Infinity, repeatDelay: 1 }}
                     className="opacity-20"
                   >
-                    <MapPin className="h-8 w-8 text-purple-600" />
+                    <MapPin className="h-8 w-8 text-violet-600" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Research</h3>
                 <p className="text-sm text-gray-600 mb-3">Property intelligence</p>
-                <div className="text-2xl font-bold text-purple-600 mb-1">AI</div>
+                <div className="text-2xl font-bold text-violet-600 mb-1">AI</div>
                 <div className="text-xs text-gray-500">Powered analysis</div>
               </motion.div>
             </TooltipTrigger>
