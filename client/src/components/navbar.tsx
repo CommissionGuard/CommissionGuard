@@ -181,49 +181,42 @@ export default function Navbar() {
                   return (
                     <motion.div
                       key={item.path}
-                      className="flex-shrink-0 group relative"
+                      className="flex-shrink-0"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
                     >
-                      <motion.button
-                        onClick={() => setLocation(item.path)}
-                        className={`whitespace-nowrap py-3 px-1 sm:px-2 border-b-2 font-medium text-xs transition-colors flex flex-col sm:flex-row items-center gap-1 ${
-                          location === item.path
-                            ? "border-primary text-primary"
-                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                        }`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        title={item.label}
-                      >
-                        <div className="flex items-center gap-1">
-                          <IconComponent className="h-4 w-4 flex-shrink-0" />
-                          <ChevronDown className="h-3 w-3" />
-                        </div>
-                        <span className="hidden lg:inline">{item.label}</span>
-                        <span className="lg:hidden">{item.shortLabel}</span>
-                      </motion.button>
-                      
-                      {/* Hover dropdown */}
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                        <div className="py-1">
-                          <button
-                            onClick={() => setLocation("/clients")}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <motion.button
+                            className={`whitespace-nowrap py-3 px-1 sm:px-2 border-b-2 font-medium text-xs transition-colors flex flex-col sm:flex-row items-center gap-1 ${
+                              location === item.path
+                                ? "border-primary text-primary"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                            }`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            title={item.label}
                           >
+                            <div className="flex items-center gap-1">
+                              <IconComponent className="h-4 w-4 flex-shrink-0" />
+                              <ChevronDown className="h-3 w-3" />
+                            </div>
+                            <span className="hidden lg:inline">{item.label}</span>
+                            <span className="lg:hidden">{item.shortLabel}</span>
+                          </motion.button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="center" className="w-48">
+                          <DropdownMenuItem onClick={() => setLocation("/clients")} className="flex items-center gap-2">
                             <Users className="h-4 w-4" />
                             All Clients
-                          </button>
-                          <button
-                            onClick={() => setLocation("/clients?action=add")}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                          >
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setLocation("/clients?action=add")} className="flex items-center gap-2">
                             <UserPlus className="h-4 w-4" />
                             Add New Client
-                          </button>
-                        </div>
-                      </div>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </motion.div>
                   );
                 }
@@ -233,56 +226,46 @@ export default function Navbar() {
                   return (
                     <motion.div
                       key={item.path}
-                      className="flex-shrink-0 group relative"
+                      className="flex-shrink-0"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
                     >
-                      <motion.button
-                        onClick={() => setLocation(item.path)}
-                        className={`whitespace-nowrap py-3 px-1 sm:px-2 border-b-2 font-medium text-xs transition-colors flex flex-col sm:flex-row items-center gap-1 ${
-                          location === item.path
-                            ? "border-primary text-primary"
-                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                        }`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        title={item.label}
-                      >
-                        <div className="flex items-center gap-1">
-                          <IconComponent className="h-4 w-4 flex-shrink-0" />
-                          <ChevronDown className="h-3 w-3" />
-                        </div>
-                        <span className="hidden lg:inline">{item.label}</span>
-                        <span className="lg:hidden">{item.shortLabel}</span>
-                      </motion.button>
-                      
-                      {/* Hover dropdown */}
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                        <div className="py-1">
-                          <button
-                            onClick={() => setLocation("/contracts")}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <motion.button
+                            className={`whitespace-nowrap py-3 px-1 sm:px-2 border-b-2 font-medium text-xs transition-colors flex flex-col sm:flex-row items-center gap-1 ${
+                              location === item.path
+                                ? "border-primary text-primary"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                            }`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            title={item.label}
                           >
+                            <div className="flex items-center gap-1">
+                              <IconComponent className="h-4 w-4 flex-shrink-0" />
+                              <ChevronDown className="h-3 w-3" />
+                            </div>
+                            <span className="hidden lg:inline">{item.label}</span>
+                            <span className="lg:hidden">{item.shortLabel}</span>
+                          </motion.button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="center" className="w-48">
+                          <DropdownMenuItem onClick={() => setLocation("/contracts")} className="flex items-center gap-2">
                             <FileText className="h-4 w-4" />
                             All Contracts
-                          </button>
-                          <button
-                            onClick={() => setLocation("/contracts?action=add")}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                          >
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setLocation("/contracts?action=add")} className="flex items-center gap-2">
                             <Plus className="h-4 w-4" />
                             Add New Contract
-                          </button>
-                          <button
-                            onClick={() => setLocation("/contracts?tab=reminders")}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                          >
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setLocation("/contracts?tab=reminders")} className="flex items-center gap-2">
                             <Bell className="h-4 w-4" />
                             Contract Reminders
-                          </button>
-                        </div>
-                      </div>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </motion.div>
                   );
                 }
