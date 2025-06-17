@@ -556,7 +556,7 @@ export default function AnimatedInsightsDashboard() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0 }}
                 whileHover={{ y: -2, scale: 1.02 }}
-                className="bg-gradient-to-br from-purple-50 to-violet-100 rounded-xl p-4 border border-purple-200 cursor-pointer group"
+                className="bg-gradient-to-r from-white to-purple-200 rounded-xl p-4 border border-purple-200 cursor-pointer group"
                 onClick={() => handleCardClick("Active Clients")}
               >
                 <div className="flex items-center justify-between mb-3">
@@ -599,7 +599,7 @@ export default function AnimatedInsightsDashboard() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
                 whileHover={{ y: -2, scale: 1.02 }}
-                className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-100 rounded-xl p-4 border border-blue-200 cursor-pointer group"
+                className="bg-gradient-to-r from-white to-blue-200 rounded-xl p-4 border border-blue-200 cursor-pointer group"
                 onClick={() => handleCardClick("Active Contracts")}
               >
                 <div className="flex items-center justify-between mb-3">
@@ -642,7 +642,7 @@ export default function AnimatedInsightsDashboard() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 whileHover={{ y: -2, scale: 1.02 }}
-                className="bg-gradient-to-r from-red-50 via-orange-50 to-yellow-100 rounded-xl p-4 border border-red-200 cursor-pointer group"
+                className="bg-gradient-to-r from-white to-red-200 rounded-xl p-4 border border-red-200 cursor-pointer group"
                 onClick={() => handleCardClick("Potential Breaches")}
               >
                 <div className="flex items-center justify-between mb-3">
@@ -685,7 +685,7 @@ export default function AnimatedInsightsDashboard() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
                 whileHover={{ y: -2, scale: 1.02 }}
-                className="bg-gradient-to-r from-green-50 via-teal-50 to-cyan-100 rounded-xl p-4 border border-green-200 cursor-pointer group"
+                className="bg-gradient-to-r from-white to-green-200 rounded-xl p-4 border border-green-200 cursor-pointer group"
                 onClick={() => handleCardClick("Protected Commission")}
               >
                 <div className="flex items-center justify-between mb-3">
@@ -734,7 +734,7 @@ export default function AnimatedInsightsDashboard() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
                 whileHover={{ y: -2, scale: 1.02 }}
-                className="bg-gradient-to-r from-indigo-50 via-slate-50 to-gray-100 rounded-xl p-4 border border-indigo-200 cursor-pointer group"
+                className="bg-gradient-to-r from-white to-indigo-200 rounded-xl p-4 border border-indigo-200 cursor-pointer group"
                 onClick={() => setLocation("/public-records")}
               >
                 <div className="flex items-center justify-between mb-3">
@@ -780,7 +780,7 @@ export default function AnimatedInsightsDashboard() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
                 whileHover={{ y: -2, scale: 1.02 }}
-                className="bg-gradient-to-r from-emerald-50 via-lime-50 to-green-100 rounded-xl p-4 border border-emerald-200 cursor-pointer group"
+                className="bg-gradient-to-r from-white to-emerald-200 rounded-xl p-4 border border-emerald-200 cursor-pointer group"
                 onClick={() => setLocation("/rental-market")}
               >
                 <div className="flex items-center justify-between mb-3">
@@ -826,7 +826,7 @@ export default function AnimatedInsightsDashboard() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
                 whileHover={{ y: -2, scale: 1.02 }}
-                className="bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-100 rounded-xl p-4 border border-orange-200 cursor-pointer group"
+                className="bg-gradient-to-r from-white to-orange-200 rounded-xl p-4 border border-orange-200 cursor-pointer group"
                 onClick={() => setLocation("/showing-tracker")}
               >
                 <div className="flex items-center justify-between mb-3">
@@ -872,7 +872,7 @@ export default function AnimatedInsightsDashboard() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.7 }}
                 whileHover={{ y: -2, scale: 1.02 }}
-                className="bg-gradient-to-r from-violet-50 via-fuchsia-50 to-pink-100 rounded-xl p-4 border border-violet-200 cursor-pointer group"
+                className="bg-gradient-to-r from-white to-violet-200 rounded-xl p-4 border border-violet-200 cursor-pointer group"
                 onClick={() => setLocation("/property-research")}
               >
                 <div className="flex items-center justify-between mb-3">
