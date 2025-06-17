@@ -652,8 +652,8 @@ export default function AnimatedInsightsDashboard() {
               >
                 <Shield className="h-8 w-8 text-blue-600 mx-auto mb-3" />
               </motion.div>
-              <h3 className="font-semibold mb-2">Start Protection</h3>
-              <p className="text-sm text-gray-600">Create new commission protection record</p>
+              <h3 className="font-semibold mb-2">Legal Support</h3>
+              <p className="text-sm text-gray-600">Access legal, IT, and real estate support services</p>
             </CardContent>
           </Card>
         </motion.div>
