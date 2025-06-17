@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,9 +75,10 @@ interface MetricCardProps {
   color: string;
   formatter?: (value: number) => string;
   delay?: number;
+  onClick?: () => void;
 }
 
-function MetricCard({ title, value, change, icon, color, formatter, delay = 0 }: MetricCardProps) {
+function MetricCard({ title, value, change, icon, color, formatter, delay = 0, onClick }: MetricCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -91,6 +93,7 @@ function MetricCard({ title, value, change, icon, color, formatter, delay = 0 }:
       }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
+      onClick={onClick}
     >
       <Card className="relative overflow-hidden cursor-pointer">
         <CardContent className="p-6">
@@ -298,8 +301,14 @@ function ProgressRing({ percentage, size, strokeWidth, color, label, delay = 0 }
 
 export default function AnimatedInsightsDashboard() {
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+  const [location, setLocation] = useLocation();
 
-  const { data: dashboardStats, isLoading } = useQuery({
+  const { data: dashboardStats, isLoading } = useQuery<{
+    activeContracts: number;
+    expiringSoon: number;
+    potentialBreaches: number;
+    protectedCommission: number;
+  }>({
     queryKey: ["/api/dashboard/stats"],
     refetchInterval: 30000,
   });
@@ -311,6 +320,29 @@ export default function AnimatedInsightsDashboard() {
   const { data: contracts } = useQuery({
     queryKey: ["/api/contracts"],
   });
+
+  const { data: clients } = useQuery({
+    queryKey: ["/api/clients"],
+  });
+
+  const handleCardClick = (cardTitle: string) => {
+    switch (cardTitle) {
+      case "Active Contracts":
+        setLocation("/contracts");
+        break;
+      case "Protected Commission":
+        setLocation("/commission-tracker");
+        break;
+      case "Potential Breaches":
+        setLocation("/alerts");
+        break;
+      case "Active Clients":
+        setLocation("/clients");
+        break;
+      default:
+        break;
+    }
+  };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -406,39 +438,43 @@ export default function AnimatedInsightsDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
           title="Active Contracts"
-          value={dashboardStats?.activeContracts || 0}
+          value={(dashboardStats as any)?.activeContracts || 0}
           change={12}
           icon={<FileText className="h-6 w-6 text-white" />}
           color="bg-blue-500/10 text-blue-600"
           delay={0}
+          onClick={() => handleCardClick("Active Contracts")}
         />
         
         <MetricCard
           title="Protected Commission"
-          value={125000}
+          value={(dashboardStats as any)?.protectedCommission || 0}
           change={8}
           icon={<DollarSign className="h-6 w-6 text-white" />}
           color="bg-green-500/10 text-green-600"
           formatter={formatCurrency}
           delay={0.1}
+          onClick={() => handleCardClick("Protected Commission")}
         />
         
         <MetricCard
           title="Potential Breaches"
-          value={dashboardStats?.potentialBreaches || 0}
+          value={(dashboardStats as any)?.potentialBreaches || 0}
           change={-15}
           icon={<AlertTriangle className="h-6 w-6 text-white" />}
           color="bg-red-500/10 text-red-600"
           delay={0.2}
+          onClick={() => handleCardClick("Potential Breaches")}
         />
         
         <MetricCard
           title="Active Clients"
-          value={24}
+          value={Array.isArray(clients) ? clients.length : 0}
           change={5}
           icon={<Users className="h-6 w-6 text-white" />}
           color="bg-purple-500/10 text-purple-600"
           delay={0.3}
+          onClick={() => handleCardClick("Active Clients")}
         />
       </div>
 
