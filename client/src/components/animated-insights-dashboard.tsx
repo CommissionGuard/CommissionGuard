@@ -467,10 +467,10 @@ export default function AnimatedInsightsDashboard() {
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
             >
-              <Users className="h-6 w-6 text-white" />
+              <Users className="h-6 w-6 text-purple-700" />
             </motion.div>
           }
-          color="bg-purple-500/10 text-purple-600"
+          color="bg-purple-500/20 text-purple-600"
           delay={0}
           onClick={() => handleCardClick("Active Clients")}
         />
@@ -484,10 +484,10 @@ export default function AnimatedInsightsDashboard() {
               animate={{ rotateY: [0, 180, 360] }}
               transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
             >
-              <FileText className="h-6 w-6 text-white" />
+              <FileText className="h-6 w-6 text-blue-700" />
             </motion.div>
           }
-          color="bg-blue-500/10 text-blue-600"
+          color="bg-blue-500/20 text-blue-600"
           delay={0.1}
           onClick={() => handleCardClick("Active Contracts")}
         />
@@ -501,10 +501,10 @@ export default function AnimatedInsightsDashboard() {
               animate={{ rotate: [0, 5, -5, 0] }}
               transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 4 }}
             >
-              <AlertTriangle className="h-6 w-6 text-white" />
+              <AlertTriangle className="h-6 w-6 text-red-700" />
             </motion.div>
           }
-          color="bg-red-500/10 text-red-600"
+          color="bg-red-500/20 text-red-600"
           delay={0.2}
           onClick={() => handleCardClick("Potential Breaches")}
         />
@@ -518,10 +518,10 @@ export default function AnimatedInsightsDashboard() {
               animate={{ y: [0, -3, 0] }}
               transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 3.5 }}
             >
-              <DollarSign className="h-6 w-6 text-white" />
+              <DollarSign className="h-6 w-6 text-green-700" />
             </motion.div>
           }
-          color="bg-green-500/10 text-green-600"
+          color="bg-green-500/20 text-green-600"
           formatter={formatCurrency}
           delay={0.3}
           onClick={() => handleCardClick("Protected Commission")}
