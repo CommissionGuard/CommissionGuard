@@ -574,8 +574,9 @@ export default function AnimatedInsightsDashboard() {
                     }}
                     transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
                     className="opacity-20"
+                    style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <Users className="h-8 w-8 text-purple-600" />
+                    <Users className="h-8 w-8 text-white" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Active Clients</h3>
@@ -617,8 +618,9 @@ export default function AnimatedInsightsDashboard() {
                     }}
                     transition={{ duration: 4, repeat: Infinity, repeatDelay: 1 }}
                     className="opacity-20"
+                    style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <FileText className="h-8 w-8 text-blue-600" />
+                    <FileText className="h-8 w-8 text-white" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Active Contracts</h3>
@@ -660,8 +662,9 @@ export default function AnimatedInsightsDashboard() {
                     }}
                     transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                     className="opacity-20"
+                    style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                    <AlertTriangle className="h-8 w-8 text-white" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Potential Breaches</h3>
@@ -706,8 +709,9 @@ export default function AnimatedInsightsDashboard() {
                       rotateZ: { duration: 6, repeat: Infinity, ease: "linear" }
                     }}
                     className="opacity-20"
+                    style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <DollarSign className="h-8 w-8 text-green-600" />
+                    <DollarSign className="h-8 w-8 text-white" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Protected Commission</h3>
@@ -755,8 +759,9 @@ export default function AnimatedInsightsDashboard() {
                       scale: { duration: 3, repeat: Infinity, repeatDelay: 2 }
                     }}
                     className="opacity-20"
+                    style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <Eye className="h-8 w-8 text-indigo-600" />
+                    <Eye className="h-8 w-8 text-white" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Records Monitor</h3>
@@ -801,8 +806,9 @@ export default function AnimatedInsightsDashboard() {
                       rotateX: { duration: 5, repeat: Infinity, repeatDelay: 3 }
                     }}
                     className="opacity-20"
+                    style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <BarChart3 className="h-8 w-8 text-emerald-600" />
+                    <BarChart3 className="h-8 w-8 text-white" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Market Trends</h3>
@@ -847,8 +853,9 @@ export default function AnimatedInsightsDashboard() {
                       scale: { duration: 1.5, repeat: Infinity, repeatDelay: 3 }
                     }}
                     className="opacity-20"
+                    style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <Clock className="h-8 w-8 text-orange-600" />
+                    <Clock className="h-8 w-8 text-white" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Showings</h3>
