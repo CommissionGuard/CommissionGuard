@@ -900,8 +900,9 @@ export default function AnimatedInsightsDashboard() {
                       rotateY: { duration: 4, repeat: Infinity, repeatDelay: 1 }
                     }}
                     className="opacity-20"
+                    style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <MapPin className="h-8 w-8 text-violet-600" />
+                    <MapPin className="h-8 w-8 text-white" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Research</h3>
