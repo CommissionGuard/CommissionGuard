@@ -16,7 +16,8 @@ import {
   FileSpreadsheet,
   ShieldAlert,
   ChevronDown,
-  UserPlus
+  UserPlus,
+  Plus
 } from "lucide-react";
 import logoIcon from "@/assets/commission-guard-icon.svg";
 import { Button } from "@/components/ui/button";

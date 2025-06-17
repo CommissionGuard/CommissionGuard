@@ -10,7 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileUp, Plus } from "lucide-react";
 
-export default function AddContractForm() {
+interface AddContractFormProps {
+  onClose?: () => void;
+}
+
+export default function AddContractForm({ onClose }: AddContractFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -39,6 +43,7 @@ export default function AddContractForm() {
       setSelectedFile(null);
       queryClient.invalidateQueries({ queryKey: ["/api/contracts"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
+      onClose?.();
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -92,56 +97,48 @@ export default function AddContractForm() {
   };
 
   return (
-    <Card className="bg-white rounded-xl shadow-sm border border-gray-200">
-      <CardHeader className="border-b border-gray-200">
-        <CardTitle className="text-xl font-semibold text-gray-900 flex items-center">
-          <Plus className="text-primary mr-2" />
-          Add New Contract
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="clientId" className="block text-sm font-medium text-gray-700 mb-2">
-                Client *
-              </Label>
-              <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients && clients.length > 0 ? (
-                    clients.map((client: any) => (
-                      <SelectItem key={client.id} value={client.id.toString()}>
-                        {client.fullName}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="no-clients" disabled>
-                      No clients available - add a client first
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <Label htmlFor="clientId" className="block text-sm font-medium text-gray-700 mb-2">
+            Client *
+          </Label>
+          <Select value={clientId} onValueChange={setClientId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a client" />
+            </SelectTrigger>
+            <SelectContent>
+              {clients && clients.length > 0 ? (
+                clients.map((client: any) => (
+                  <SelectItem key={client.id} value={client.id.toString()}>
+                    {client.fullName}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="no-clients" disabled>
+                  No clients available - add a client first
+                </SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
 
-            <div>
-              <Label htmlFor="representationType" className="block text-sm font-medium text-gray-700 mb-2">
-                Representation Type *
-              </Label>
-              <Select value={representationType} onValueChange={setRepresentationType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select representation type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="buyer">Buyer Representation</SelectItem>
-                  <SelectItem value="seller">Seller Representation</SelectItem>
-                  <SelectItem value="dual">Dual Agency</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+        <div>
+          <Label htmlFor="representationType" className="block text-sm font-medium text-gray-700 mb-2">
+            Representation Type *
+          </Label>
+          <Select value={representationType} onValueChange={setRepresentationType}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select representation type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="buyer">Buyer Representation</SelectItem>
+              <SelectItem value="seller">Seller Representation</SelectItem>
+              <SelectItem value="dual">Dual Agency</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -211,8 +208,6 @@ export default function AddContractForm() {
               {createContractMutation.isPending ? "Creating..." : "Create Contract"}
             </Button>
           </div>
-        </form>
-      </CardContent>
-    </Card>
+    </form>
   );
 }
