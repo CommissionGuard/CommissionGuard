@@ -455,13 +455,12 @@ export default function ShowingTracker() {
           </Dialog>
         </div>
 
-        <Tabs defaultValue="showings" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="showings">Scheduled Showings</TabsTrigger>
+        <Tabs defaultValue="showingtime" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="showingtime">ShowingTime Import</TabsTrigger>
+            <TabsTrigger value="showings">Scheduled Showings</TabsTrigger>
             <TabsTrigger value="visits">Property Visits</TabsTrigger>
-            <TabsTrigger value="unauthorized">Unauthorized Visits</TabsTrigger>
-            <TabsTrigger value="protection">Commission Protection</TabsTrigger>
+            <TabsTrigger value="openhouse">Open House Attendance</TabsTrigger>
           </TabsList>
 
           <TabsContent value="showings" className="space-y-6">
@@ -791,140 +790,29 @@ export default function ShowingTracker() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="unauthorized" className="space-y-6">
+          <TabsContent value="openhouse" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <AlertTriangle className="h-5 w-5 mr-2" />
-                  Unauthorized Visits
+                  <Home className="h-5 w-5 mr-2" />
+                  Open House Attendance
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {!Array.isArray(unauthorizedVisits) || unauthorizedVisits.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Shield className="h-12 w-12 text-green-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Unauthorized Visits Detected</h3>
-                    <p className="text-gray-600">Your client relationships are secure.</p>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Discovery Date</TableHead>
-                        <TableHead>Client</TableHead>
-                        <TableHead>Property</TableHead>
-                        <TableHead>Discovery Method</TableHead>
-                        <TableHead>Risk Level</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {unauthorizedVisits.map((visit: PropertyVisit) => (
-                        <TableRow key={visit.id}>
-                          <TableCell>
-                            {format(new Date(visit.visitDate), "MMM d, yyyy")}
-                          </TableCell>
-                          <TableCell>{visit.client?.fullName}</TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{visit.property?.address}</p>
-                              <p className="text-sm text-gray-600">${visit.property?.price?.toLocaleString()}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">
-                              {visit.discoveryMethod.replace("-", " ").toUpperCase()}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className="bg-red-100 text-red-800">
-                              {visit.riskLevel.toUpperCase()}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className="bg-yellow-100 text-yellow-800">
-                              REQUIRES ACTION
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
+                <div className="text-center py-8">
+                  <Home className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Open Houses Tracked</h3>
+                  <p className="text-gray-600">Track client attendance at open houses for commission protection evidence.</p>
+                  <Button className="mt-4">
+                    <Home className="h-4 w-4 mr-2" />
+                    Add Open House Visit
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="protection" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Shield className="h-5 w-5 mr-2" />
-                  Commission Protection Records
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {!Array.isArray(commissionProtections) || commissionProtections.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Commission Protections Active</h3>
-                    <p className="text-gray-600">Start scheduling showings to automatically establish commission protection.</p>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Protection Date</TableHead>
-                        <TableHead>Client</TableHead>
-                        <TableHead>Property</TableHead>
-                        <TableHead>Protection Type</TableHead>
-                        <TableHead>Evidence</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Expires</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {commissionProtections.map((protection: CommissionProtection) => (
-                        <TableRow key={protection.id}>
-                          <TableCell>
-                            {format(new Date(protection.protectionDate), "MMM d, yyyy")}
-                          </TableCell>
-                          <TableCell>{protection.client?.fullName}</TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{protection.property?.address}</p>
-                              <p className="text-sm text-gray-600">${protection.property?.price?.toLocaleString()}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">
-                              {protection.protectionType.toUpperCase()}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className="bg-blue-100 text-blue-800">
-                              {protection.evidenceType.replace("-", " ").toUpperCase()}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={protection.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
-                              {protection.status.toUpperCase()}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {protection.expirationDate ? 
-                              format(new Date(protection.expirationDate), "MMM d, yyyy") : 
-                              "Never"
-                            }
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+
         </Tabs>
       </div>
     </div>
