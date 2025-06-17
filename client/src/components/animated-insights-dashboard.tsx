@@ -612,12 +612,12 @@ export default function AnimatedInsightsDashboard() {
         </motion.div>
       </motion.div>
 
-      {/* Floating Action Notifications - Collapsible Hover Tab */}
+      {/* Floating Action Notifications - Side Tab */}
       <AnimatePresence>
         <motion.div
-          initial={{ opacity: 0, x: -200 }}
-          animate={{ opacity: 1, x: -150 }}
-          exit={{ opacity: 0, x: -200 }}
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -100 }}
           transition={{ duration: 0.5, delay: 2 }}
           className="fixed bottom-6 left-0 z-50 group"
         >
@@ -630,12 +630,11 @@ export default function AnimatedInsightsDashboard() {
               ]
             }}
             transition={{ duration: 2, repeat: Infinity }}
-            whileHover={{ x: 150 }}
-            className="bg-white rounded-r-lg shadow-lg border-l-4 border-blue-500 transition-all duration-300 ease-in-out cursor-pointer"
+            className="bg-white rounded-r-lg shadow-lg border-l-4 border-blue-500 transition-all duration-300 ease-in-out cursor-pointer overflow-hidden"
           >
-            {/* Collapsed State - Just the tab edge */}
+            {/* Collapsed State - Compact tab */}
             <motion.div 
-              className="flex items-center gap-2 p-2 group-hover:hidden"
+              className="flex items-center gap-2 p-3 group-hover:hidden min-w-fit"
               initial={{ opacity: 1 }}
             >
               <motion.div
@@ -644,12 +643,12 @@ export default function AnimatedInsightsDashboard() {
               >
                 <Activity className="h-4 w-4 text-blue-600" />
               </motion.div>
-              <div className="w-2 h-6 bg-blue-500 rounded-r"></div>
+              <span className="text-xs font-medium text-gray-700 whitespace-nowrap">Live</span>
             </motion.div>
             
             {/* Expanded State - Full content */}
             <motion.div 
-              className="hidden group-hover:flex items-center gap-3 p-4 max-w-sm"
+              className="hidden group-hover:flex items-center gap-3 p-4"
               initial={{ opacity: 0, width: 0 }}
               whileHover={{ opacity: 1, width: "auto" }}
               transition={{ duration: 0.3 }}
@@ -660,7 +659,7 @@ export default function AnimatedInsightsDashboard() {
               >
                 <Activity className="h-5 w-5 text-blue-600" />
               </motion.div>
-              <div>
+              <div className="whitespace-nowrap">
                 <p className="text-sm font-medium text-gray-900">Live Monitoring Active</p>
                 <p className="text-xs text-gray-600">Commission protection is running</p>
               </div>
