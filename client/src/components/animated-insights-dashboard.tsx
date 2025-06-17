@@ -43,7 +43,9 @@ import {
   BarChart3,
   PieChart,
   LineChart,
-  Bell
+  Bell,
+  Search,
+  Home
 } from "lucide-react";
 
 interface AnimatedCounterProps {
@@ -659,7 +661,168 @@ export default function AnimatedInsightsDashboard() {
         </TooltipProvider>
       </div>
 
+      {/* New Interactive Widgets Row - Records & Market Integration */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Public Records Monitoring Widget */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-gradient-to-br from-indigo-50 to-blue-100 rounded-xl p-4 border border-indigo-200 cursor-pointer group"
+                onClick={() => setLocation("/public-records")}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <motion.div
+                    className="bg-indigo-100 rounded-full p-2"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Search className="h-5 w-5 text-indigo-600" />
+                  </motion.div>
+                  <motion.div
+                    animate={{ rotate: [0, 360] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    className="opacity-20"
+                  >
+                    <Eye className="h-8 w-8 text-indigo-600" />
+                  </motion.div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Records Monitor</h3>
+                <p className="text-sm text-gray-600 mb-3">Active property surveillance</p>
+                <div className="text-2xl font-bold text-indigo-600 mb-1">24/7</div>
+                <div className="text-xs text-gray-500">Scanning Nassau & Suffolk</div>
+              </motion.div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Monitor public records for unauthorized client transactions</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
+        {/* Market Analysis Widget */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-gradient-to-br from-emerald-50 to-green-100 rounded-xl p-4 border border-emerald-200 cursor-pointer group"
+                onClick={() => setLocation("/rental-market")}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <motion.div
+                    className="bg-emerald-100 rounded-full p-2"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <TrendingUp className="h-5 w-5 text-emerald-600" />
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [0, -2, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                    className="opacity-20"
+                  >
+                    <BarChart3 className="h-8 w-8 text-emerald-600" />
+                  </motion.div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Market Trends</h3>
+                <p className="text-sm text-gray-600 mb-3">Real-time property data</p>
+                <div className="text-2xl font-bold text-emerald-600 mb-1">Live</div>
+                <div className="text-xs text-gray-500">Updated hourly</div>
+              </motion.div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Access comprehensive market analysis and property trends</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* Showing Tracker Quick Access */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-gradient-to-br from-orange-50 to-amber-100 rounded-xl p-4 border border-orange-200 cursor-pointer group"
+                onClick={() => setLocation("/showing-tracker")}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <motion.div
+                    className="bg-orange-100 rounded-full p-2"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Calendar className="h-5 w-5 text-orange-600" />
+                  </motion.div>
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+                    className="opacity-20"
+                  >
+                    <Clock className="h-8 w-8 text-orange-600" />
+                  </motion.div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Showings</h3>
+                <p className="text-sm text-gray-600 mb-3">Schedule & track visits</p>
+                <div className="text-2xl font-bold text-orange-600 mb-1">Quick</div>
+                <div className="text-xs text-gray-500">Access tracker</div>
+              </motion.div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Schedule showings and track property visits</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* Property Research Widget */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-gradient-to-br from-purple-50 to-violet-100 rounded-xl p-4 border border-purple-200 cursor-pointer group"
+                onClick={() => setLocation("/property-research")}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <motion.div
+                    className="bg-purple-100 rounded-full p-2"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Home className="h-5 w-5 text-purple-600" />
+                  </motion.div>
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, repeatDelay: 1 }}
+                    className="opacity-20"
+                  >
+                    <MapPin className="h-8 w-8 text-purple-600" />
+                  </motion.div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Research</h3>
+                <p className="text-sm text-gray-600 mb-3">Property intelligence</p>
+                <div className="text-2xl font-bold text-purple-600 mb-1">AI</div>
+                <div className="text-xs text-gray-500">Powered analysis</div>
+              </motion.div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Research properties with AI-powered market insights</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
 
       {/* Performance Overview */}
       <motion.div
