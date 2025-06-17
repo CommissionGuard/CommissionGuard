@@ -871,11 +871,27 @@ export default function AnimatedInsightsDashboard() {
         </TooltipProvider>
       </div>
 
-      {/* Performance Overview */}
+      {/* Activity Feed */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>Real-Time Activity Stream</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ActivityFeed activities={sampleActivities} />
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Performance Overview */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
         className="grid grid-cols-1 lg:grid-cols-3 gap-6"
       >
         <Card className="lg:col-span-2">
@@ -894,7 +910,7 @@ export default function AnimatedInsightsDashboard() {
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: "94%" }}
-                transition={{ duration: 1.5, delay: 0.8 }}
+                transition={{ duration: 1.5, delay: 1.0 }}
                 className="h-2 bg-green-500 rounded-full"
                 style={{ width: "94%" }}
               />
@@ -906,7 +922,7 @@ export default function AnimatedInsightsDashboard() {
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: "87%" }}
-                transition={{ duration: 1.5, delay: 1 }}
+                transition={{ duration: 1.5, delay: 1.2 }}
                 className="h-2 bg-blue-500 rounded-full"
                 style={{ width: "87%" }}
               />
@@ -918,7 +934,7 @@ export default function AnimatedInsightsDashboard() {
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: "91%" }}
-                transition={{ duration: 1.5, delay: 1.2 }}
+                transition={{ duration: 1.5, delay: 1.4 }}
                 className="h-2 bg-purple-500 rounded-full"
                 style={{ width: "91%" }}
               />
@@ -941,7 +957,7 @@ export default function AnimatedInsightsDashboard() {
                 strokeWidth={6}
                 color="#10b981"
                 label="Secured Deals"
-                delay={0.5}
+                delay={0.7}
               />
               
               <ProgressRing
@@ -950,25 +966,9 @@ export default function AnimatedInsightsDashboard() {
                 strokeWidth={6}
                 color="#3b82f6"
                 label="Client Satisfaction"
-                delay={0.7}
+                delay={0.9}
               />
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Activity Feed */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle>Real-Time Activity Stream</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ActivityFeed activities={sampleActivities} />
           </CardContent>
         </Card>
       </motion.div>
