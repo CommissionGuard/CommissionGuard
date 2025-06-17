@@ -576,7 +576,7 @@ export default function AnimatedInsightsDashboard() {
                     className="opacity-20"
                     style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <Users className="h-8 w-8 text-white" />
+                    <Users className="h-8 w-8 text-black" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Active Clients</h3>
@@ -620,7 +620,7 @@ export default function AnimatedInsightsDashboard() {
                     className="opacity-20"
                     style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <FileText className="h-8 w-8 text-white" />
+                    <FileText className="h-8 w-8 text-black" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Active Contracts</h3>
@@ -664,7 +664,7 @@ export default function AnimatedInsightsDashboard() {
                     className="opacity-20"
                     style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <AlertTriangle className="h-8 w-8 text-white" />
+                    <AlertTriangle className="h-8 w-8 text-black" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Potential Breaches</h3>
@@ -711,7 +711,7 @@ export default function AnimatedInsightsDashboard() {
                     className="opacity-20"
                     style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <DollarSign className="h-8 w-8 text-white" />
+                    <DollarSign className="h-8 w-8 text-black" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Protected Commission</h3>
@@ -761,7 +761,7 @@ export default function AnimatedInsightsDashboard() {
                     className="opacity-20"
                     style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <Eye className="h-8 w-8 text-white" />
+                    <Eye className="h-8 w-8 text-black" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Records Monitor</h3>
@@ -808,7 +808,7 @@ export default function AnimatedInsightsDashboard() {
                     className="opacity-20"
                     style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <BarChart3 className="h-8 w-8 text-white" />
+                    <BarChart3 className="h-8 w-8 text-black" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Market Trends</h3>
@@ -855,7 +855,7 @@ export default function AnimatedInsightsDashboard() {
                     className="opacity-20"
                     style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <Clock className="h-8 w-8 text-white" />
+                    <Clock className="h-8 w-8 text-black" />
                   </motion.div>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Showings</h3>
