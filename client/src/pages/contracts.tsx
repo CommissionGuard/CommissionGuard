@@ -10,13 +10,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Clock, MessageSquare, Calendar, Settings, Play, Pause } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Bell, Clock, MessageSquare, Calendar, Settings, Play, Pause, FileText, Plus } from "lucide-react";
 
 export default function Contracts() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [filter, setFilter] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("contracts");
+  const [showAddContractForm, setShowAddContractForm] = useState(false);
 
   // Contract reminders data fetching - must be at top level
   const { data: reminders = [], isLoading: remindersLoading, refetch: refetchReminders } = useQuery({
@@ -30,11 +32,17 @@ export default function Contracts() {
     const urlParams = new URLSearchParams(window.location.search);
     const filterParam = urlParams.get('filter');
     const tabParam = urlParams.get('tab');
+    const actionParam = urlParams.get('action');
     if (filterParam) {
       setFilter(filterParam);
     }
     if (tabParam) {
       setActiveTab(tabParam);
+    }
+    if (actionParam === 'add') {
+      setShowAddContractForm(true);
+      // Clean up URL parameter
+      window.history.replaceState({}, '', '/contracts');
     }
   }, []);
 
@@ -156,7 +164,19 @@ export default function Contracts() {
                 <ContractsTable filter={filter} />
               </div>
               <div>
-                <AddContractForm />
+                {/* Contract Management Section */}
+                <Card>
+                  <CardHeader className="pb-4 text-center">
+                    <CardTitle className="flex items-center justify-center">
+                      <FileText className="h-5 w-5 mr-2" />
+                      Contract Management
+                    </CardTitle>
+                    <Button onClick={() => setShowAddContractForm(true)} className="flex items-center gap-2 mx-auto w-fit">
+                      <Plus className="h-4 w-4" />
+                      Add New Contract
+                    </Button>
+                  </CardHeader>
+                </Card>
               </div>
             </div>
           </TabsContent>
@@ -387,6 +407,19 @@ export default function Contracts() {
             </Card>
           </TabsContent>
         </Tabs>
+        
+        {/* Add Contract Modal */}
+        <Dialog open={showAddContractForm} onOpenChange={setShowAddContractForm}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                Add New Contract
+              </DialogTitle>
+            </DialogHeader>
+            <AddContractForm onClose={() => setShowAddContractForm(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
