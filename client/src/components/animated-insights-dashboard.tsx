@@ -374,7 +374,7 @@ export default function AnimatedInsightsDashboard() {
         setLocation("/commission-tracker");
         break;
       case "Potential Breaches":
-        setLocation("/alerts");
+        setLocation("/breach-management");
         break;
       case "Active Clients":
         setLocation("/clients");
