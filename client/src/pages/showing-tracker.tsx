@@ -132,6 +132,70 @@ export default function ShowingTracker() {
     agentNotes: ''
   });
   const [selectedAppointments, setSelectedAppointments] = useState<string[]>([]);
+  const [openHouseVisits, setOpenHouseVisits] = useState<any[]>([]);
+  const [showOpenHouseDialog, setShowOpenHouseDialog] = useState(false);
+  const [newOpenHouseVisit, setNewOpenHouseVisit] = useState({
+    clientId: '',
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    visitDate: '',
+    notes: ''
+  });
+
+  // Function to handle adding open house visit
+  const handleAddOpenHouseVisit = () => {
+    if (!newOpenHouseVisit.clientId || !newOpenHouseVisit.street || !newOpenHouseVisit.city || !newOpenHouseVisit.visitDate) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const selectedClient = Array.isArray(clients) ? clients.find((c: any) => c.id.toString() === newOpenHouseVisit.clientId) : null;
+    
+    const newVisit = {
+      id: Date.now(),
+      client: selectedClient,
+      address: `${newOpenHouseVisit.street}, ${newOpenHouseVisit.city}, ${newOpenHouseVisit.state} ${newOpenHouseVisit.zipCode}`,
+      visitDate: newOpenHouseVisit.visitDate,
+      notes: newOpenHouseVisit.notes
+    };
+
+    setOpenHouseVisits(prev => [...prev, newVisit]);
+    setShowOpenHouseDialog(false);
+    setNewOpenHouseVisit({
+      clientId: '',
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      visitDate: '',
+      notes: ''
+    });
+
+    toast({
+      title: "Open House Visit Added",
+      description: `Visit for ${selectedClient?.fullName} has been recorded.`,
+    });
+  };
+
+  // Function to handle cancel
+  const handleCancelOpenHouse = () => {
+    setShowOpenHouseDialog(false);
+    setNewOpenHouseVisit({
+      clientId: '',
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      visitDate: '',
+      notes: ''
+    });
+  };
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -798,9 +862,9 @@ export default function ShowingTracker() {
                     <Home className="h-5 w-5 mr-2" />
                     Open House Attendance
                   </CardTitle>
-                  <Dialog>
+                  <Dialog open={showOpenHouseDialog} onOpenChange={setShowOpenHouseDialog}>
                     <DialogTrigger asChild>
-                      <Button>
+                      <Button onClick={() => setShowOpenHouseDialog(true)}>
                         <Home className="h-4 w-4 mr-2" />
                         Add Open House Visit
                       </Button>
@@ -814,7 +878,7 @@ export default function ShowingTracker() {
                           <Label htmlFor="client" className="text-right">
                             Client
                           </Label>
-                          <Select>
+                          <Select value={newOpenHouseVisit.clientId} onValueChange={(value) => setNewOpenHouseVisit(prev => ({ ...prev, clientId: value }))}>
                             <SelectTrigger className="col-span-3">
                               <SelectValue placeholder="Select a client" />
                             </SelectTrigger>
@@ -835,6 +899,8 @@ export default function ShowingTracker() {
                             id="street"
                             placeholder="123 Main Street"
                             className="col-span-3"
+                            value={newOpenHouseVisit.street}
+                            onChange={(e) => setNewOpenHouseVisit(prev => ({ ...prev, street: e.target.value }))}
                           />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
@@ -845,6 +911,8 @@ export default function ShowingTracker() {
                             id="city"
                             placeholder="City name"
                             className="col-span-3"
+                            value={newOpenHouseVisit.city}
+                            onChange={(e) => setNewOpenHouseVisit(prev => ({ ...prev, city: e.target.value }))}
                           />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
@@ -855,6 +923,8 @@ export default function ShowingTracker() {
                             id="state"
                             placeholder="NY"
                             className="col-span-3"
+                            value={newOpenHouseVisit.state}
+                            onChange={(e) => setNewOpenHouseVisit(prev => ({ ...prev, state: e.target.value }))}
                           />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
@@ -865,6 +935,8 @@ export default function ShowingTracker() {
                             id="zipcode"
                             placeholder="12345"
                             className="col-span-3"
+                            value={newOpenHouseVisit.zipCode}
+                            onChange={(e) => setNewOpenHouseVisit(prev => ({ ...prev, zipCode: e.target.value }))}
                           />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
@@ -875,6 +947,8 @@ export default function ShowingTracker() {
                             id="date"
                             type="datetime-local"
                             className="col-span-3"
+                            value={newOpenHouseVisit.visitDate}
+                            onChange={(e) => setNewOpenHouseVisit(prev => ({ ...prev, visitDate: e.target.value }))}
                           />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
@@ -885,23 +959,56 @@ export default function ShowingTracker() {
                             id="notes"
                             placeholder="Additional notes about the visit"
                             className="col-span-3"
+                            value={newOpenHouseVisit.notes}
+                            onChange={(e) => setNewOpenHouseVisit(prev => ({ ...prev, notes: e.target.value }))}
                           />
                         </div>
                       </div>
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline">Cancel</Button>
-                        <Button type="submit">Add Visit</Button>
+                        <Button variant="outline" onClick={handleCancelOpenHouse}>Cancel</Button>
+                        <Button type="submit" onClick={handleAddOpenHouseVisit}>Add Visit</Button>
                       </div>
                     </DialogContent>
                   </Dialog>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <Home className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Open Houses Tracked</h3>
-                  <p className="text-gray-600">Track client attendance at open houses for commission protection evidence.</p>
-                </div>
+                {openHouseVisits.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Home className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Open Houses Tracked</h3>
+                    <p className="text-gray-600">Track client attendance at open houses for commission protection evidence.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {openHouseVisits.map((visit) => (
+                      <div key={visit.id} className="border rounded-lg p-4 bg-gray-50">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center">
+                            <Home className="h-5 w-5 text-blue-600 mr-2" />
+                            <div>
+                              <h4 className="font-medium text-gray-900">{visit.client?.fullName}</h4>
+                              <p className="text-sm text-gray-600">{visit.address}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-gray-900">
+                              {new Date(visit.visitDate).toLocaleDateString()}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {new Date(visit.visitDate).toLocaleTimeString()}
+                            </p>
+                          </div>
+                        </div>
+                        {visit.notes && (
+                          <div className="mt-2 p-2 bg-white rounded border">
+                            <p className="text-sm text-gray-700">{visit.notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
