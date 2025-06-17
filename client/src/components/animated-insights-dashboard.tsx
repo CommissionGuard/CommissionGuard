@@ -447,13 +447,23 @@ export default function AnimatedInsightsDashboard() {
         />
         
         <MetricCard
+          title="Active Clients"
+          value={Array.isArray(clients) ? clients.length : 0}
+          change={5}
+          icon={<Users className="h-6 w-6 text-white" />}
+          color="bg-purple-500/10 text-purple-600"
+          delay={0.1}
+          onClick={() => handleCardClick("Active Clients")}
+        />
+        
+        <MetricCard
           title="Protected Commission"
           value={(dashboardStats as any)?.protectedCommission || 0}
           change={8}
           icon={<DollarSign className="h-6 w-6 text-white" />}
           color="bg-green-500/10 text-green-600"
           formatter={formatCurrency}
-          delay={0.1}
+          delay={0.2}
           onClick={() => handleCardClick("Protected Commission")}
         />
         
@@ -463,18 +473,8 @@ export default function AnimatedInsightsDashboard() {
           change={-15}
           icon={<AlertTriangle className="h-6 w-6 text-white" />}
           color="bg-red-500/10 text-red-600"
-          delay={0.2}
-          onClick={() => handleCardClick("Potential Breaches")}
-        />
-        
-        <MetricCard
-          title="Active Clients"
-          value={Array.isArray(clients) ? clients.length : 0}
-          change={5}
-          icon={<Users className="h-6 w-6 text-white" />}
-          color="bg-purple-500/10 text-purple-600"
           delay={0.3}
-          onClick={() => handleCardClick("Active Clients")}
+          onClick={() => handleCardClick("Potential Breaches")}
         />
       </div>
 
