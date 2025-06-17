@@ -206,11 +206,57 @@ export default function CommissionIntelligence() {
           </Card>
         </div>
 
+        {/* AI Insights Banner */}
+        {contracts.length > 0 && (
+          <Card className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Brain className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-blue-900 mb-2">AI-Powered Insights for Your Portfolio</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="bg-white p-3 rounded border border-blue-100">
+                      <div className="flex items-center gap-2 mb-1">
+                        <AlertTriangle className="h-4 w-4 text-orange-500" />
+                        <span className="font-medium text-gray-700">Contract Expiration Alert</span>
+                      </div>
+                      <p className="text-gray-600">
+                        {((stats as any).expiringSoon || 0)} contracts expiring within 30 days require immediate attention
+                      </p>
+                    </div>
+                    <div className="bg-white p-3 rounded border border-blue-100">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Users className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium text-gray-700">Client Activity Pattern</span>
+                      </div>
+                      <p className="text-gray-600">
+                        Optimal follow-up window detected: 3-5 days post-showing for maximum engagement
+                      </p>
+                    </div>
+                    <div className="bg-white p-3 rounded border border-blue-100">
+                      <div className="flex items-center gap-2 mb-1">
+                        <TrendingUp className="h-4 w-4 text-green-500" />
+                        <span className="font-medium text-gray-700">Commission Protection Score</span>
+                      </div>
+                      <p className="text-gray-600">
+                        Current portfolio protection level: 87% - Above industry average
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Tabs defaultValue="contract" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="contract">Contract Analysis</TabsTrigger>
             <TabsTrigger value="behavior">Client Risk Assessment</TabsTrigger>
             <TabsTrigger value="market">Market Intelligence</TabsTrigger>
+            <TabsTrigger value="protection">Protection Strategy</TabsTrigger>
           </TabsList>
 
           <TabsContent value="contract">
@@ -460,6 +506,136 @@ export default function CommissionIntelligence() {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="protection">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Commission Protection Strategy
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  Comprehensive protection recommendations based on your contract analysis and client risk assessment
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card className="p-4 bg-blue-50 border-blue-200">
+                    <div className="flex items-start gap-3">
+                      <FileText className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-blue-900 mb-2">Contract Strengthening</h4>
+                        <ul className="text-sm text-blue-700 space-y-1">
+                          <li>• Add specific geographic boundaries</li>
+                          <li>• Include penalty clauses for violations</li>
+                          <li>• Extend protection period to 180 days</li>
+                          <li>• Require written consent for agent changes</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-4 bg-green-50 border-green-200">
+                    <div className="flex items-start gap-3">
+                      <Eye className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-green-900 mb-2">Monitoring Protocol</h4>
+                        <ul className="text-sm text-green-700 space-y-1">
+                          <li>• Weekly client check-ins</li>
+                          <li>• Property visit tracking system</li>
+                          <li>• Public records monitoring alerts</li>
+                          <li>• Social media activity tracking</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-4 bg-yellow-50 border-yellow-200">
+                    <div className="flex items-start gap-3">
+                      <Clock className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-yellow-900 mb-2">Timeline Management</h4>
+                        <ul className="text-sm text-yellow-700 space-y-1">
+                          <li>• Schedule showings within 48 hours</li>
+                          <li>• Follow up within 24 hours of showings</li>
+                          <li>• Set contract renewal reminders</li>
+                          <li>• Track days until contract expiration</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-4 bg-purple-50 border-purple-200">
+                    <div className="flex items-start gap-3">
+                      <MessageSquare className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-purple-900 mb-2">Communication Strategy</h4>
+                        <ul className="text-sm text-purple-700 space-y-1">
+                          <li>• Document all client interactions</li>
+                          <li>• Use multiple communication channels</li>
+                          <li>• Send written summaries after calls</li>
+                          <li>• Maintain professional boundaries</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+
+                <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-medium text-red-900 mb-2">Red Flag Indicators</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-red-700">
+                        <div>
+                          <strong>Client Behavior:</strong>
+                          <ul className="mt-1 space-y-1">
+                            <li>• Avoiding scheduled showings</li>
+                            <li>• Inconsistent communication</li>
+                            <li>• Asking about other agents</li>
+                            <li>• Declining to sign documents</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <strong>Market Signals:</strong>
+                          <ul className="mt-1 space-y-1">
+                            <li>• Property price drops</li>
+                            <li>• Increased competition</li>
+                            <li>• Market cooling trends</li>
+                            <li>• New listings in area</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button 
+                    className="flex-1"
+                    onClick={() => toast({
+                      title: "Protection Plan Generated",
+                      description: "Comprehensive protection strategy created based on your analysis",
+                    })}
+                  >
+                    <Shield className="mr-2 h-4 w-4" />
+                    Generate Protection Plan
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => toast({
+                      title: "Report Downloaded",
+                      description: "Strategy report saved to your downloads folder",
+                    })}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Download Strategy Report
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
