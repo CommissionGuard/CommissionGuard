@@ -437,23 +437,33 @@ export default function AnimatedInsightsDashboard() {
       {/* Main Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
-          title="Active Contracts"
-          value={(dashboardStats as any)?.activeContracts || 0}
-          change={12}
-          icon={<FileText className="h-6 w-6 text-white" />}
-          color="bg-blue-500/10 text-blue-600"
-          delay={0}
-          onClick={() => handleCardClick("Active Contracts")}
-        />
-        
-        <MetricCard
           title="Active Clients"
           value={Array.isArray(clients) ? clients.length : 0}
           change={5}
           icon={<Users className="h-6 w-6 text-white" />}
           color="bg-purple-500/10 text-purple-600"
-          delay={0.1}
+          delay={0}
           onClick={() => handleCardClick("Active Clients")}
+        />
+        
+        <MetricCard
+          title="Active Contracts"
+          value={(dashboardStats as any)?.activeContracts || 0}
+          change={12}
+          icon={<FileText className="h-6 w-6 text-white" />}
+          color="bg-blue-500/10 text-blue-600"
+          delay={0.1}
+          onClick={() => handleCardClick("Active Contracts")}
+        />
+        
+        <MetricCard
+          title="Potential Breaches"
+          value={(dashboardStats as any)?.potentialBreaches || 0}
+          change={-15}
+          icon={<AlertTriangle className="h-6 w-6 text-white" />}
+          color="bg-red-500/10 text-red-600"
+          delay={0.2}
+          onClick={() => handleCardClick("Potential Breaches")}
         />
         
         <MetricCard
@@ -463,18 +473,8 @@ export default function AnimatedInsightsDashboard() {
           icon={<DollarSign className="h-6 w-6 text-white" />}
           color="bg-green-500/10 text-green-600"
           formatter={formatCurrency}
-          delay={0.2}
-          onClick={() => handleCardClick("Protected Commission")}
-        />
-        
-        <MetricCard
-          title="Potential Breaches"
-          value={(dashboardStats as any)?.potentialBreaches || 0}
-          change={-15}
-          icon={<AlertTriangle className="h-6 w-6 text-white" />}
-          color="bg-red-500/10 text-red-600"
           delay={0.3}
-          onClick={() => handleCardClick("Potential Breaches")}
+          onClick={() => handleCardClick("Protected Commission")}
         />
       </div>
 
