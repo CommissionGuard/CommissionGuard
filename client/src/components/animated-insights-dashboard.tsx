@@ -823,53 +823,6 @@ export default function AnimatedInsightsDashboard() {
           </Tooltip>
         </TooltipProvider>
 
-        {/* Market Analysis Widget */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                whileHover={{ y: -2, scale: 1.02 }}
-                className="bg-gradient-to-r from-white to-emerald-200 rounded-xl p-4 border border-emerald-200 cursor-pointer group"
-                onClick={() => setLocation("/reports")}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <motion.div
-                    className="bg-emerald-100 rounded-full p-2"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <TrendingUp className="h-5 w-5 text-emerald-600" />
-                  </motion.div>
-                  <motion.div
-                    animate={{ 
-                      y: [0, -3, 0],
-                      rotateX: [0, 180, 360]
-                    }}
-                    transition={{ 
-                      y: { duration: 2, repeat: Infinity, repeatDelay: 1 },
-                      rotateX: { duration: 5, repeat: Infinity, repeatDelay: 3 }
-                    }}
-                    className="opacity-20"
-                    style={{ filter: 'drop-shadow(0 0 1px black)' }}
-                  >
-                    <BarChart3 className="h-8 w-8 text-black" />
-                  </motion.div>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Market Trends</h3>
-                <p className="text-sm text-gray-600 mb-3">Analysis & insights</p>
-                <div className="text-2xl font-bold text-emerald-600 mb-1">Live</div>
-                <div className="text-xs text-gray-500">Market data</div>
-              </motion.div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Access comprehensive market analysis and property trends</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
         {/* Property Research Widget */}
         <TooltipProvider>
           <Tooltip>
@@ -877,7 +830,7 @@ export default function AnimatedInsightsDashboard() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
                 whileHover={{ y: -2, scale: 1.02 }}
                 className="bg-gradient-to-r from-white to-violet-200 rounded-xl p-4 border border-violet-200 cursor-pointer group"
                 onClick={() => setLocation("/commission-intelligence")}
@@ -913,6 +866,53 @@ export default function AnimatedInsightsDashboard() {
             </TooltipTrigger>
             <TooltipContent>
               <p>Research properties with AI-powered market insights</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* Market Analysis Widget */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-gradient-to-r from-white to-emerald-200 rounded-xl p-4 border border-emerald-200 cursor-pointer group"
+                onClick={() => setLocation("/reports")}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <motion.div
+                    className="bg-emerald-100 rounded-full p-2"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <TrendingUp className="h-5 w-5 text-emerald-600" />
+                  </motion.div>
+                  <motion.div
+                    animate={{ 
+                      y: [0, -3, 0],
+                      rotateX: [0, 180, 360]
+                    }}
+                    transition={{ 
+                      y: { duration: 2, repeat: Infinity, repeatDelay: 1 },
+                      rotateX: { duration: 5, repeat: Infinity, repeatDelay: 3 }
+                    }}
+                    className="opacity-20"
+                    style={{ filter: 'drop-shadow(0 0 1px black)' }}
+                  >
+                    <BarChart3 className="h-8 w-8 text-black" />
+                  </motion.div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Market Trends</h3>
+                <p className="text-sm text-gray-600 mb-3">Analysis & insights</p>
+                <div className="text-2xl font-bold text-emerald-600 mb-1">Live</div>
+                <div className="text-xs text-gray-500">Market data</div>
+              </motion.div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Access comprehensive market analysis and property trends</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
