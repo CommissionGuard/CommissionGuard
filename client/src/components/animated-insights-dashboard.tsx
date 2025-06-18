@@ -635,7 +635,7 @@ export default function AnimatedInsightsDashboard() {
           </Tooltip>
         </TooltipProvider>
 
-        {/* Potential Breaches Widget */}
+        {/* Showing Tracker Quick Access */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -644,37 +644,40 @@ export default function AnimatedInsightsDashboard() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 whileHover={{ y: -2, scale: 1.02 }}
-                className="bg-gradient-to-r from-white to-red-200 rounded-xl p-4 border border-red-200 cursor-pointer group"
-                onClick={() => handleCardClick("Potential Breaches")}
+                className="bg-gradient-to-r from-white to-orange-200 rounded-xl p-4 border border-orange-200 cursor-pointer group"
+                onClick={() => setLocation("/showing-tracker")}
               >
                 <div className="flex items-center justify-between mb-3">
                   <motion.div
-                    className="bg-red-100 rounded-full p-2"
+                    className="bg-orange-100 rounded-full p-2"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    <Calendar className="h-5 w-5 text-orange-600" />
                   </motion.div>
                   <motion.div
                     animate={{ 
-                      rotate: [0, 10, -10, 0],
-                      scale: [1, 1.1, 0.9, 1]
+                      rotate: [0, -10, 10, 0],
+                      scale: [1, 1.15, 1]
                     }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    transition={{ 
+                      rotate: { duration: 2, repeat: Infinity, repeatDelay: 2 },
+                      scale: { duration: 1.5, repeat: Infinity, repeatDelay: 3 }
+                    }}
                     className="opacity-20"
                     style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <AlertTriangle className="h-8 w-8 text-black" />
+                    <Clock className="h-8 w-8 text-black" />
                   </motion.div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Potential Breaches</h3>
-                <p className="text-sm text-gray-600 mb-3">Commission threats</p>
-                <div className="text-2xl font-bold text-red-600 mb-1">{(dashboardStats as any)?.potentialBreaches || 0}</div>
-                <div className="text-xs text-gray-500">-15% this month</div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Showings</h3>
+                <p className="text-sm text-gray-600 mb-3">Schedule & track</p>
+                <div className="text-2xl font-bold text-orange-600 mb-1">Quick</div>
+                <div className="text-xs text-gray-500">Access tracker</div>
               </motion.div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Warning signs of possible commission threats</p>
+              <p>Schedule showings and track property visits</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -823,7 +826,7 @@ export default function AnimatedInsightsDashboard() {
           </Tooltip>
         </TooltipProvider>
 
-        {/* Showing Tracker Quick Access */}
+        {/* Potential Breaches Widget */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -832,40 +835,37 @@ export default function AnimatedInsightsDashboard() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
                 whileHover={{ y: -2, scale: 1.02 }}
-                className="bg-gradient-to-r from-white to-orange-200 rounded-xl p-4 border border-orange-200 cursor-pointer group"
-                onClick={() => setLocation("/showing-tracker")}
+                className="bg-gradient-to-r from-white to-red-200 rounded-xl p-4 border border-red-200 cursor-pointer group"
+                onClick={() => handleCardClick("Potential Breaches")}
               >
                 <div className="flex items-center justify-between mb-3">
                   <motion.div
-                    className="bg-orange-100 rounded-full p-2"
+                    className="bg-red-100 rounded-full p-2"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Calendar className="h-5 w-5 text-orange-600" />
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
                   </motion.div>
                   <motion.div
                     animate={{ 
-                      rotate: [0, -10, 10, 0],
-                      scale: [1, 1.15, 1]
+                      rotate: [0, 10, -10, 0],
+                      scale: [1, 1.1, 0.9, 1]
                     }}
-                    transition={{ 
-                      rotate: { duration: 2, repeat: Infinity, repeatDelay: 2 },
-                      scale: { duration: 1.5, repeat: Infinity, repeatDelay: 3 }
-                    }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                     className="opacity-20"
                     style={{ filter: 'drop-shadow(0 0 1px black)' }}
                   >
-                    <Clock className="h-8 w-8 text-black" />
+                    <AlertTriangle className="h-8 w-8 text-black" />
                   </motion.div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Showings</h3>
-                <p className="text-sm text-gray-600 mb-3">Schedule & track</p>
-                <div className="text-2xl font-bold text-orange-600 mb-1">Quick</div>
-                <div className="text-xs text-gray-500">Access tracker</div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Potential Breaches</h3>
+                <p className="text-sm text-gray-600 mb-3">Commission threats</p>
+                <div className="text-2xl font-bold text-red-600 mb-1">{(dashboardStats as any)?.potentialBreaches || 0}</div>
+                <div className="text-xs text-gray-500">-15% this month</div>
               </motion.div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Schedule showings and track property visits</p>
+              <p>Warning signs of possible commission threats</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
