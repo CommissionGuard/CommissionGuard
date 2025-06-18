@@ -905,7 +905,7 @@ export default function AnimatedInsightsDashboard() {
                     <BarChart3 className="h-8 w-8 text-black" />
                   </motion.div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Market Trends</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Commission Reports</h3>
                 <p className="text-sm text-gray-600 mb-3">Analysis & insights</p>
                 <div className="text-2xl font-bold text-emerald-600 mb-1">Live</div>
                 <div className="text-xs text-gray-500">Market data</div>
