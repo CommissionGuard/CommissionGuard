@@ -258,13 +258,13 @@ export default function Navbar() {
                             <FileText className="h-4 w-4" />
                             All Contracts
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setLocation("/contracts?action=add")} className="flex items-center gap-2">
-                            <Plus className="h-4 w-4" />
-                            Add New Contract
-                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setLocation("/contracts?tab=reminders")} className="flex items-center gap-2">
                             <Bell className="h-4 w-4" />
                             Contract Reminders
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setLocation("/contracts?action=add")} className="flex items-center gap-2">
+                            <Plus className="h-4 w-4" />
+                            Add New Contract
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
