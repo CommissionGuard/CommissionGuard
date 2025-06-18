@@ -371,6 +371,31 @@ export default function Navbar() {
                   );
                 }
                 
+                // Special handling for Commission Intelligence tab
+                if (item.path === "/commission-intelligence") {
+                  return (
+                    <motion.button
+                      key={item.path}
+                      onClick={() => setLocation(item.path)}
+                      className={`whitespace-nowrap py-3 px-1 sm:px-2 border-b-2 font-medium text-xs transition-colors flex-shrink-0 flex flex-col sm:flex-row items-center gap-1 ${
+                        location === item.path
+                          ? "border-violet-600 text-violet-600"
+                          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      }`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1, duration: 0.3 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      title={item.label}
+                    >
+                      <IconComponent className="h-4 w-4 flex-shrink-0" />
+                      <span className="hidden lg:inline">{item.label}</span>
+                      <span className="lg:hidden">{item.shortLabel}</span>
+                    </motion.button>
+                  );
+                }
+                
                 // Regular navigation items
                 return (
                   <motion.button
