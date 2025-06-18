@@ -275,24 +275,26 @@ export default function CommissionIntelligence() {
         )}
 
         <Tabs defaultValue="contract" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-1">
-            <TabsTrigger value="contract" className="text-xs sm:text-sm px-2 py-2">
-              <span className="hidden sm:inline">Contract Analysis</span>
-              <span className="sm:hidden">Contract</span>
-            </TabsTrigger>
-            <TabsTrigger value="behavior" className="text-xs sm:text-sm px-2 py-2">
-              <span className="hidden sm:inline">Client Risk Assessment</span>
-              <span className="sm:hidden">Risk</span>
-            </TabsTrigger>
-            <TabsTrigger value="market" className="text-xs sm:text-sm px-2 py-2">
-              <span className="hidden sm:inline">Market Intelligence</span>
-              <span className="sm:hidden">Market</span>
-            </TabsTrigger>
-            <TabsTrigger value="protection" className="text-xs sm:text-sm px-2 py-2">
-              <span className="hidden sm:inline">Protection Strategy</span>
-              <span className="sm:hidden">Strategy</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-hidden">
+            <TabsList className="grid w-full grid-cols-4 h-auto p-1">
+              <TabsTrigger value="contract" className="text-xs px-1 py-1.5 min-w-0 flex-shrink">
+                <span className="hidden md:inline">Contract Analysis</span>
+                <span className="md:hidden">Contract</span>
+              </TabsTrigger>
+              <TabsTrigger value="behavior" className="text-xs px-1 py-1.5 min-w-0 flex-shrink">
+                <span className="hidden md:inline">Client Risk</span>
+                <span className="md:hidden">Risk</span>
+              </TabsTrigger>
+              <TabsTrigger value="market" className="text-xs px-1 py-1.5 min-w-0 flex-shrink">
+                <span className="hidden md:inline">Market Intel</span>
+                <span className="md:hidden">Market</span>
+              </TabsTrigger>
+              <TabsTrigger value="protection" className="text-xs px-1 py-1.5 min-w-0 flex-shrink">
+                <span className="hidden md:inline">Protection</span>
+                <span className="md:hidden">Guard</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="contract">
             <Card>
