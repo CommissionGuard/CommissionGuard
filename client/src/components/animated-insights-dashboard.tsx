@@ -998,23 +998,51 @@ export default function AnimatedInsightsDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              <ProgressRing
-                percentage={85}
-                size={80}
-                strokeWidth={6}
-                color="#10b981"
-                label="Secured Deals"
-                delay={0.7}
-              />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <ProgressRing
+                        percentage={85}
+                        size={80}
+                        strokeWidth={6}
+                        color="#10b981"
+                        label="Secured Deals"
+                        delay={0.7}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="center">
+                    <p className="max-w-xs text-sm">
+                      Percentage of deals successfully closed with commission protection in place. 
+                      This metric tracks your conversion rate for contracts under monitoring.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               
-              <ProgressRing
-                percentage={92}
-                size={80}
-                strokeWidth={6}
-                color="#3b82f6"
-                label="Client Satisfaction"
-                delay={0.9}
-              />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <ProgressRing
+                        percentage={92}
+                        size={80}
+                        strokeWidth={6}
+                        color="#3b82f6"
+                        label="Client Satisfaction"
+                        delay={0.9}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="center">
+                    <p className="max-w-xs text-sm">
+                      Client satisfaction score based on communication frequency, contract adherence, 
+                      and successful deal completion. Higher scores indicate stronger client relationships.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </CardContent>
         </Card>
