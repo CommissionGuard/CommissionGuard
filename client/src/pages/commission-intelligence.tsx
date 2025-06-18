@@ -45,20 +45,32 @@ export default function CommissionIntelligence() {
   const [marketInsights, setMarketInsights] = useState<any>(null);
 
   // Load dashboard data
-  const { data: stats = {}, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({
     queryKey: ["/api/dashboard/stats"],
     enabled: isAuthenticated,
   });
 
-  const { data: contracts = [], isLoading: contractsLoading } = useQuery({
+  // Provide safe defaults for stats
+  const safeStats = {
+    activeContracts: (stats as any)?.activeContracts || 0,
+    expiringSoon: (stats as any)?.expiringSoon || 0,
+    potentialBreaches: (stats as any)?.potentialBreaches || 0,
+    protectedCommission: (stats as any)?.protectedCommission || 0,
+  };
+
+  const { data: contracts, isLoading: contractsLoading } = useQuery({
     queryKey: ["/api/contracts"],
     enabled: isAuthenticated,
   });
 
-  const { data: clients = [], isLoading: clientsLoading } = useQuery({
+  const { data: clients, isLoading: clientsLoading } = useQuery({
     queryKey: ["/api/clients"],
     enabled: isAuthenticated,
   });
+
+  // Safe defaults for arrays
+  const safeContracts = (contracts as any[]) || [];
+  const safeClients = (clients as any[]) || [];
 
   const analyzeContract = useMutation({
     mutationFn: async (contractText: string) => {
@@ -167,7 +179,7 @@ export default function CommissionIntelligence() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Active Contracts</p>
-                  <p className="text-2xl font-bold text-gray-900">{(stats as any).activeContracts || 0}</p>
+                  <p className="text-2xl font-bold text-gray-900">{safeStats.activeContracts}</p>
                 </div>
                 <Shield className="h-8 w-8 text-blue-600" />
               </div>
@@ -197,7 +209,7 @@ export default function CommissionIntelligence() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Protected Commission</p>
-                  <p className="text-2xl font-bold text-green-600">${((stats as any).protectedCommission || 0).toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-green-600">${safeStats.protectedCommission.toLocaleString()}</p>
                 </div>
                 <Target className="h-8 w-8 text-green-600" />
               </div>
@@ -218,7 +230,7 @@ export default function CommissionIntelligence() {
         </div>
 
         {/* AI Insights Banner */}
-        {contracts.length > 0 && (
+        {safeContracts.length > 0 && (
           <Card className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
