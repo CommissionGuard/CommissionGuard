@@ -192,7 +192,7 @@ export default function Navbar() {
                           <motion.button
                             className={`whitespace-nowrap py-3 px-1 sm:px-2 border-b-2 font-medium text-xs transition-colors flex flex-col sm:flex-row items-center gap-1 ${
                               location === item.path
-                                ? "border-primary text-primary"
+                                ? "border-purple-600 text-purple-600"
                                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                             }`}
                             whileHover={{ scale: 1.02 }}
