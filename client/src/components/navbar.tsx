@@ -66,20 +66,21 @@ export default function Navbar() {
         animate={{ y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        {/* Top brand bar */}
+        {/* Enhanced Top brand bar */}
         <motion.div 
-          className="bg-gradient-to-r from-primary to-primary/90 text-white relative overflow-hidden"
+          className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white relative overflow-hidden shadow-lg"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent"
             animate={{ x: [-100, 400] }}
-            transition={{ duration: 3, repeat: Infinity, repeatDelay: 5 }}
+            transition={{ duration: 4, repeat: Infinity, repeatDelay: 6 }}
           />
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIgZmlsbD0iIzAwMCIgZmlsbC1vcGFjaXR5PSIwLjEiLz4KPC9nPgo8L3N2Zz4=')] opacity-20"></div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="flex items-center justify-between h-12">
+            <div className="flex items-center justify-between h-14">
               <motion.div 
                 className="flex items-center space-x-2 cursor-pointer"
                 onClick={() => setLocation("/")}
