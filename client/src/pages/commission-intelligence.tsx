@@ -276,20 +276,32 @@ export default function CommissionIntelligence() {
 
         <Tabs defaultValue="contract" className="space-y-6">
           <div className="overflow-hidden">
-            <TabsList className="grid w-full grid-cols-4 h-auto p-1">
-              <TabsTrigger value="contract" className="text-xs px-1 py-1.5 min-w-0 flex-shrink">
+            <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-gray-100">
+              <TabsTrigger 
+                value="contract" 
+                className="text-xs px-1 py-1.5 min-w-0 flex-shrink data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:border-blue-300 border border-transparent"
+              >
                 <span className="hidden md:inline">Contract Analysis</span>
                 <span className="md:hidden">Contract</span>
               </TabsTrigger>
-              <TabsTrigger value="behavior" className="text-xs px-1 py-1.5 min-w-0 flex-shrink">
+              <TabsTrigger 
+                value="behavior" 
+                className="text-xs px-1 py-1.5 min-w-0 flex-shrink data-[state=active]:bg-red-100 data-[state=active]:text-red-700 data-[state=active]:border-red-300 border border-transparent"
+              >
                 <span className="hidden md:inline">Client Risk</span>
                 <span className="md:hidden">Risk</span>
               </TabsTrigger>
-              <TabsTrigger value="market" className="text-xs px-1 py-1.5 min-w-0 flex-shrink">
+              <TabsTrigger 
+                value="market" 
+                className="text-xs px-1 py-1.5 min-w-0 flex-shrink data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 data-[state=active]:border-violet-300 border border-transparent"
+              >
                 <span className="hidden md:inline">Market Intel</span>
                 <span className="md:hidden">Market</span>
               </TabsTrigger>
-              <TabsTrigger value="protection" className="text-xs px-1 py-1.5 min-w-0 flex-shrink">
+              <TabsTrigger 
+                value="protection" 
+                className="text-xs px-1 py-1.5 min-w-0 flex-shrink data-[state=active]:bg-green-100 data-[state=active]:text-green-700 data-[state=active]:border-green-300 border border-transparent"
+              >
                 <span className="hidden md:inline">Protection</span>
                 <span className="md:hidden">Guard</span>
               </TabsTrigger>
