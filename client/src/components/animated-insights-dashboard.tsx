@@ -533,7 +533,7 @@ export default function AnimatedInsightsDashboard() {
           </div>
           
           <div className="flex items-center gap-3">
-            <HelpButton onClick={() => handleOpenHelp('dashboard')} />
+            <HelpButton onStartTour={() => setShowOnboarding(true)} />
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

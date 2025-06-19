@@ -3,15 +3,16 @@ import { HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface HelpButtonProps {
-  onClick: () => void;
+  onClick?: () => void;
+  onStartTour?: () => void;
 }
 
-export function HelpButton({ onClick }: HelpButtonProps) {
+export function HelpButton({ onClick, onStartTour }: HelpButtonProps) {
   return (
     <Button 
       variant="ghost" 
       size="sm"
-      onClick={onClick}
+      onClick={onStartTour || onClick}
       className="flex items-center gap-2 hover:scale-105 hover:bg-blue-50 transition-all duration-200"
       data-tour-id="help-button"
     >
