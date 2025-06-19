@@ -97,21 +97,23 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
         height: rect.height + 8
       });
       
-      // Update tour card position
+      // Update tour card position - always relative to highlight position
       let top = rect.bottom + 20;
       let left = rect.left;
       
       // Adjust position based on step.position
       switch (step.position) {
         case 'top':
-          top = rect.top - 300;
+          top = rect.top - 280; // Adjusted to be closer to highlight
+          left = rect.left;
           break;
         case 'bottom':
           top = rect.bottom + 20;
+          left = rect.left;
           break;
         case 'left':
           top = rect.top;
-          left = rect.left - 320;
+          left = rect.left - 340;
           break;
         case 'right':
           top = rect.top;
@@ -119,20 +121,30 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           break;
       }
       
-      // Keep tour card within viewport
+      // Keep tour card within viewport but maintain relative positioning
       const cardWidth = 320;
-      const cardHeight = 200;
+      const cardHeight = 280;
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       
-      if (left + cardWidth > viewportWidth) {
+      // Horizontal adjustments
+      if (left + cardWidth > viewportWidth - 20) {
         left = viewportWidth - cardWidth - 20;
       }
       if (left < 20) {
         left = 20;
       }
-      if (top + cardHeight > viewportHeight) {
-        top = viewportHeight - cardHeight - 20;
+      
+      // Vertical adjustments - prefer to stay near the highlight
+      if (top + cardHeight > viewportHeight - 20) {
+        // If card would go below viewport, try positioning above the element
+        const aboveTop = rect.top - cardHeight - 20;
+        if (aboveTop >= 20) {
+          top = aboveTop;
+        } else {
+          // If neither above nor below works, position at bottom of viewport
+          top = viewportHeight - cardHeight - 20;
+        }
       }
       if (top < 20) {
         top = 20;
@@ -224,7 +236,8 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             style={{
               top: targetElement ? tourPosition.top : '50%',
               left: targetElement ? tourPosition.left : '50%',
-              transform: !targetElement ? 'translate(-50%, -50%)' : 'none'
+              transform: !targetElement ? 'translate(-50%, -50%)' : 'none',
+              transition: 'all 0.15s ease-out'
             }}
           >
             <Card className="w-80 shadow-2xl border-2 border-blue-200 max-h-96 overflow-y-auto">
@@ -321,8 +334,8 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
                 height: highlightPosition.height,
                 border: '3px solid #3b82f6',
                 borderRadius: '12px',
-                boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.3)',
-                transition: 'all 0.1s ease-out'
+                boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.2)',
+                transition: 'all 0.15s ease-out'
               }}
             />
           )}
