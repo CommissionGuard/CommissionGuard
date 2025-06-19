@@ -225,7 +225,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
         });
       } else if (step.target === 'dashboard-tab') {
         setHighlightPosition({
-          top: rect.top - 20, // Move dashboard tab highlight up more
+          top: rect.top - 30, // Move dashboard tab highlight up higher
           left: rect.left - 10, // Center the box over the dashboard tab
           width: rect.width + 20, // Expand width for better centering
           height: rect.height + 20 // Expand height for better coverage
