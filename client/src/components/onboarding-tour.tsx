@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -82,12 +82,22 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
   const [currentStep, setCurrentStep] = useState(0);
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
   const [tourPosition, setTourPosition] = useState({ top: 0, left: 0 });
+  const [highlightPosition, setHighlightPosition] = useState({ top: 0, left: 0, width: 0, height: 0 });
 
-  const updateTourPosition = () => {
+  const updatePositions = useCallback(() => {
     if (targetElement) {
       const rect = targetElement.getBoundingClientRect();
       const step = tourSteps[currentStep];
       
+      // Update highlight position
+      setHighlightPosition({
+        top: rect.top - 4,
+        left: rect.left - 4,
+        width: rect.width + 8,
+        height: rect.height + 8
+      });
+      
+      // Update tour card position
       let top = rect.bottom + 20;
       let left = rect.left;
       
@@ -130,7 +140,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       
       setTourPosition({ top, left });
     }
-  };
+  }, [targetElement, currentStep]);
 
   useEffect(() => {
     if (isOpen && tourSteps[currentStep]) {
@@ -141,21 +151,21 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         // Update position after scroll animation
         setTimeout(() => {
-          updateTourPosition();
+          updatePositions();
         }, 500);
       }
     }
-  }, [isOpen, currentStep]);
+  }, [isOpen, currentStep, updatePositions]);
 
   useEffect(() => {
     if (targetElement) {
-      updateTourPosition();
+      updatePositions();
       
       // Update position on scroll and resize
-      const handleScroll = () => updateTourPosition();
-      const handleResize = () => updateTourPosition();
+      const handleScroll = () => updatePositions();
+      const handleResize = () => updatePositions();
       
-      window.addEventListener('scroll', handleScroll);
+      window.addEventListener('scroll', handleScroll, { passive: true });
       window.addEventListener('resize', handleResize);
       
       return () => {
@@ -163,7 +173,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
         window.removeEventListener('resize', handleResize);
       };
     }
-  }, [targetElement, currentStep]);
+  }, [targetElement, updatePositions]);
 
   const nextStep = () => {
     if (currentStep < tourSteps.length - 1) {
@@ -305,13 +315,14 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
               exit={{ opacity: 0 }}
               className="fixed z-40 pointer-events-none"
               style={{
-                top: targetElement.getBoundingClientRect().top - 4,
-                left: targetElement.getBoundingClientRect().left - 4,
-                width: targetElement.getBoundingClientRect().width + 8,
-                height: targetElement.getBoundingClientRect().height + 8,
+                top: highlightPosition.top,
+                left: highlightPosition.left,
+                width: highlightPosition.width,
+                height: highlightPosition.height,
                 border: '3px solid #3b82f6',
                 borderRadius: '12px',
-                boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.3)'
+                boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.3)',
+                transition: 'all 0.1s ease-out'
               }}
             />
           )}
