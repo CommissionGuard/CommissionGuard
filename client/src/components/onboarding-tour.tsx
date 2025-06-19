@@ -230,10 +230,10 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           width: rect.width,
           height: rect.height
         });
-      } else if (step.target === 'dashboard-tab') {
+      } else if (step.target === 'dashboard-tab' || step.target === 'nav-commission-protection') {
         setHighlightPosition({
-          top: rect.top, // Align with actual dashboard tab top
-          left: rect.left - 10, // Center the box over the dashboard tab
+          top: rect.top, // Align with actual tab top
+          left: rect.left - 10, // Center the box over the tab
           width: rect.width + 20, // Expand width for better centering
           height: rect.height - 30 // Reduce height to move bottom higher
         });
