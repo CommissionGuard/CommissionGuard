@@ -197,10 +197,10 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       // Special handling for dashboard header to fit text better
       if (step.target === 'dashboard-header') {
         setHighlightPosition({
-          top: rect.top,
+          top: rect.top - 10, // Move highlight box up above the text
           left: rect.left,
           width: Math.min(rect.width, 500), // Limit width to fit text better
-          height: rect.height
+          height: rect.height + 15 // Increase height to accommodate upward shift
         });
       } else {
         setHighlightPosition({
