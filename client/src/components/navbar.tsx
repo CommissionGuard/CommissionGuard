@@ -143,7 +143,7 @@ export default function Navbar() {
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" data-tour-id="profile-menu">
                     <DropdownMenuItem onClick={() => setShowProfileSettings(true)}>
                       Profile Settings
                     </DropdownMenuItem>
@@ -420,6 +420,7 @@ export default function Navbar() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       title={item.label}
+                      data-tour-id="nav-reports"
                     >
                       <IconComponent className="h-4 w-4 flex-shrink-0" />
                       <span className="hidden lg:inline">{item.label}</span>
@@ -444,6 +445,7 @@ export default function Navbar() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     title={item.label}
+                    data-tour-id={item.path === "/" ? "nav-dashboard" : `nav-${item.path.replace('/', '').replace('-', '')}`}
                   >
                     <IconComponent className="h-4 w-4 flex-shrink-0" />
                     <span className="hidden lg:inline">{item.label}</span>

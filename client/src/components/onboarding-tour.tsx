@@ -157,6 +157,13 @@ const tourSteps: TourStep[] = [
     description: 'Access your profile, subscription settings, and account management options.',
     target: 'profile-dropdown',
     position: 'bottom'
+  },
+  {
+    id: 'profile-menu',
+    title: 'Profile Menu Options',
+    description: 'Click on your profile to access settings, subscription management, support, and sign out options.',
+    target: 'profile-menu',
+    position: 'bottom'
   }
 ];
 
@@ -206,6 +213,18 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
   };
 
   const nextStep = () => {
+    // Special handling for profile dropdown step - open the dropdown
+    if (currentStep === tourSteps.length - 2) {
+      const profileButton = document.querySelector('[data-tour-id="profile-dropdown"]');
+      if (profileButton) {
+        (profileButton as HTMLElement).click();
+        setTimeout(() => {
+          setCurrentStep(currentStep + 1);
+        }, 300);
+        return;
+      }
+    }
+    
     if (currentStep < tourSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
