@@ -397,6 +397,8 @@ export default function AnimatedInsightsDashboard() {
 
   // Check if user is new and should see onboarding
   useEffect(() => {
+    // Force start the onboarding tour for demonstration
+    setShowOnboarding(true);
     const hasSeenOnboarding = localStorage.getItem('commission-guard-onboarding-completed');
     if (!hasSeenOnboarding && !isLoading) {
       const timer = setTimeout(() => setShowOnboarding(true), 2000);
