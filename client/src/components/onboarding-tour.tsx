@@ -96,13 +96,13 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       const elementVisible = rect.bottom > 0 && rect.top < viewportHeight && rect.right > 0 && rect.left < viewportWidth;
       setIsElementVisible(elementVisible);
       
-      // Precisely match widget container bounds - widgets have rounded-xl (12px) corners
-      const offset = 2; // Minimal offset to show highlight outside widget border
+      // Create highlight that extends slightly beyond widget bounds for visibility
+      const margin = 6;
       setHighlightPosition({
-        top: rect.top - offset,
-        left: rect.left - offset,
-        width: rect.width + (offset * 2),
-        height: rect.height + (offset * 2)
+        top: rect.top - margin,
+        left: rect.left - margin,
+        width: rect.width + (margin * 2),
+        height: rect.height + (margin * 2)
       });
       
       // Determine if widget is in top or bottom row based on vertical position
@@ -146,6 +146,11 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
         const bounds = element.getBoundingClientRect();
         console.log('Element bounds:', bounds);
         console.log('Element classes:', element.className);
+        console.log('Computed styles:', {
+          borderRadius: window.getComputedStyle(element).borderRadius,
+          padding: window.getComputedStyle(element).padding,
+          margin: window.getComputedStyle(element).margin
+        });
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         // Update position after scroll animation
         setTimeout(() => {
@@ -324,9 +329,9 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
                 left: highlightPosition.left,
                 width: highlightPosition.width,
                 height: highlightPosition.height,
-                border: '2px solid #3b82f6',
-                borderRadius: '16px', // Match widget rounded-xl (12px) + small buffer
-                boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.5)',
+                border: '4px solid #2563eb',
+                borderRadius: '18px', // Slightly larger to encompass widget corners
+                boxShadow: '0 0 0 2px rgba(37, 99, 235, 0.3), 0 0 20px rgba(37, 99, 235, 0.4)',
                 transition: 'all 0.15s ease-out'
               }}
             />
