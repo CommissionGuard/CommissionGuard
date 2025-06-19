@@ -228,7 +228,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           top: rect.top - 50, // Move dashboard tab highlight to maximum height
           left: rect.left - 10, // Center the box over the dashboard tab
           width: rect.width + 20, // Expand width for better centering
-          height: rect.height - 20 // Reduce height further to move bottom higher
+          height: rect.height - 30 // Reduce height even more to move bottom higher
         });
       } else {
         setHighlightPosition({
