@@ -194,12 +194,22 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
     if (element) {
       const rect = element.getBoundingClientRect();
       
-      setHighlightPosition({
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height
-      });
+      // Special handling for dashboard header to fit text better
+      if (step.target === 'dashboard-header') {
+        setHighlightPosition({
+          top: rect.top,
+          left: rect.left,
+          width: Math.min(rect.width, 500), // Limit width to fit text better
+          height: rect.height
+        });
+      } else {
+        setHighlightPosition({
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height
+        });
+      }
 
       // Scroll element into view if needed
       if (rect.top < 100 || rect.bottom > window.innerHeight - 100) {
@@ -265,13 +275,13 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             exit={{ opacity: 0 }}
             className="fixed z-50 pointer-events-none"
             style={{
-              top: highlightPosition.top - 8,
-              left: highlightPosition.left - 8,
-              width: highlightPosition.width + 16,
-              height: highlightPosition.height + 16,
+              top: highlightPosition.top - 6,
+              left: highlightPosition.left - 6,
+              width: highlightPosition.width + 12,
+              height: highlightPosition.height + 12,
               outline: '3px solid #3B82F6',
-              outlineOffset: '4px',
-              borderRadius: '8px',
+              outlineOffset: '2px',
+              borderRadius: '6px',
               boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
               background: 'transparent',
               transition: 'all 0.3s ease-out'
