@@ -3172,6 +3172,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Onboarding status endpoints
+  app.get("/api/auth/onboarding-status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUserById(userId);
+      res.json({ onboardingCompleted: user?.onboardingCompleted || false });
+    } catch (error) {
+      console.error("Error fetching onboarding status:", error);
+      res.status(500).json({ message: "Failed to fetch onboarding status" });
+    }
+  });
+
+  app.post("/api/auth/complete-onboarding", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.updateUserOnboardingStatus(userId, true);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating onboarding status:", error);
+      res.status(500).json({ message: "Failed to update onboarding status" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

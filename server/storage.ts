@@ -1965,6 +1965,39 @@ export class DatabaseStorage implements IStorage {
       };
     }
   }
+
+  async getUserById(userId: string): Promise<User | null> {
+    try {
+      const result = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      return result[0] || null;
+    } catch (error) {
+      console.error("Error fetching user by ID:", error);
+      return null;
+    }
+  }
+
+  async updateUserOnboardingStatus(userId: string, completed: boolean) {
+    try {
+      const result = await db
+        .update(users)
+        .set({
+          onboardingCompleted: completed,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId))
+        .returning();
+
+      return result[0];
+    } catch (error) {
+      console.error("Error updating user onboarding status:", error);
+      throw error;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

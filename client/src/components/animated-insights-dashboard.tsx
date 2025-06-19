@@ -365,6 +365,7 @@ export default function AnimatedInsightsDashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [helpContext, setHelpContext] = useState('');
+  const [hasCheckedOnboarding, setHasCheckedOnboarding] = useState(false);
 
   // Function to restart onboarding tour
   const restartOnboarding = () => {
@@ -411,6 +412,10 @@ export default function AnimatedInsightsDashboard() {
     queryKey: ["/api/clients"],
   });
 
+  const { data: onboardingStatus } = useQuery({
+    queryKey: ["/api/auth/onboarding-status"],
+  });
+
   const handleCardClick = (cardTitle: string) => {
     switch (cardTitle) {
       case "Active Contracts":
@@ -432,20 +437,39 @@ export default function AnimatedInsightsDashboard() {
 
 
 
-  // Check if user is new and should see onboarding
+  // Check if user should see onboarding tour on first load
   useEffect(() => {
-    // Clear localStorage for testing purposes
-    localStorage.removeItem('commission-guard-onboarding-completed');
-    // Force start the onboarding tour for demonstration
-    const timer = setTimeout(() => {
-      setShowOnboarding(true);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (onboardingStatus && !hasCheckedOnboarding) {
+      setHasCheckedOnboarding(true);
+      
+      // Show onboarding tour only if not completed
+      if (!onboardingStatus?.onboardingCompleted) {
+        const timer = setTimeout(() => {
+          setShowOnboarding(true);
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [onboardingStatus, hasCheckedOnboarding]);
 
-  const handleOnboardingComplete = () => {
-    localStorage.setItem('commission-guard-onboarding-completed', 'true');
+  const handleOnboardingComplete = async () => {
     setShowOnboarding(false);
+    
+    // Mark onboarding as completed in the database
+    try {
+      const response = await fetch("/api/auth/complete-onboarding", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to mark onboarding as completed");
+      }
+    } catch (error) {
+      console.error("Error marking onboarding as completed:", error);
+    }
   };
 
   const handleOpenHelp = (context: string) => {
