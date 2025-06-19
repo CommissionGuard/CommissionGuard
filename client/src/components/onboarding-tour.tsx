@@ -239,12 +239,12 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           height: rect.height - 30 // Reduce height to move bottom higher
         });
       } else if (step.target === 'profile-dropdown') {
-        // Regular box format for profile dropdown (step 21)
+        // Full box format with four walls for profile dropdown (step 21)
         setHighlightPosition({
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-          height: rect.height
+          top: rect.top - 5,
+          left: rect.left - 5,
+          width: rect.width + 10,
+          height: rect.height + 10
         });
       } else {
         setHighlightPosition({
@@ -267,14 +267,12 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
   };
 
   const nextStep = () => {
-    // Special handling for profile dropdown step - open the dropdown
+    // Special handling for profile dropdown step - open the dropdown without moving to next step immediately
     if (currentStep === tourSteps.length - 2) {
       const profileButton = document.querySelector('[data-tour-id="profile-dropdown"]');
       if (profileButton) {
-        (profileButton as HTMLElement).click();
-        setTimeout(() => {
-          setCurrentStep(currentStep + 1);
-        }, 300);
+        // Don't click the button, just move to step 21 to highlight it
+        setCurrentStep(currentStep + 1);
         return;
       }
     }
@@ -323,19 +321,25 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
               left: highlightPosition.left - 6,
               width: highlightPosition.width + 12,
               height: highlightPosition.height + 12,
-              outline: (currentStep >= 11 && currentStep <= 20) ? 'none' : '3px solid #3B82F6', // Remove outline for navigation tabs and profile steps
+              outline: (currentStep >= 11 && currentStep <= 19) ? 'none' : '3px solid #3B82F6', // Remove outline for navigation tabs only
               outlineOffset: '2px',
               borderRadius: '6px',
               boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
               background: 'transparent',
               transition: 'all 0.3s ease-out',
-              // Create U-shape border for navigation tabs (steps 12-21)
-              ...((currentStep >= 11 && currentStep <= 20) && {
+              // Create U-shape border for navigation tabs (steps 12-20)
+              ...((currentStep >= 11 && currentStep <= 19) && {
                 borderLeft: '3px solid #3B82F6',
                 borderRight: '3px solid #3B82F6',
                 borderBottom: '3px solid #3B82F6',
                 borderTop: 'none',
                 borderRadius: '0 0 6px 6px' // Square top corners, rounded bottom
+              }),
+              // Full box border for profile dropdown (step 21)
+              ...(currentStep === 20 && {
+                border: '3px solid #3B82F6',
+                borderRadius: '6px',
+                outline: 'none'
               })
             }}
           />
