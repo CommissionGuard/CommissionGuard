@@ -202,6 +202,13 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           width: Math.min(rect.width, 500), // Limit width to fit text better
           height: rect.height + 5 // Bring bottom extremely close to text
         });
+      } else if (step.target === 'clients-widget') {
+        setHighlightPosition({
+          top: rect.top - 25, // Move Active Clients widget highlight higher
+          left: rect.left,
+          width: rect.width,
+          height: rect.height + 30 // Add more height to compensate
+        });
       } else {
         setHighlightPosition({
           top: rect.top,
