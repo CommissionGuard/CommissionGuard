@@ -200,7 +200,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           top: rect.top - 30, // Move highlight box up even higher above the text
           left: rect.left,
           width: Math.min(rect.width, 500), // Limit width to fit text better
-          height: rect.height + 35 // Increase height to accommodate upward shift
+          height: rect.height + 60 // Increase height to 60px additional coverage
         });
       } else {
         setHighlightPosition({
