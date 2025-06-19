@@ -29,6 +29,7 @@ import { aiCommunicationService } from "./aiCommunicationService";
 import { notificationService } from "./notificationService";
 import { calendarService } from "./calendarService";
 import { aiSupportService } from "./aiSupportService";
+import { achievementService } from "./achievementService";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
@@ -3192,6 +3193,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating onboarding status:", error);
       res.status(500).json({ message: "Failed to update onboarding status" });
+    }
+  });
+
+  // Achievement System Routes
+  app.get("/api/achievements/progress", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const progress = await achievementService.getUserProgress(userId);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error fetching user progress:", error);
+      res.status(500).json({ message: "Failed to fetch progress" });
+    }
+  });
+
+  app.get("/api/achievements/categories", isAuthenticated, async (req: any, res) => {
+    try {
+      const categories = await achievementService.getAchievementCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching achievement categories:", error);
+      res.status(500).json({ message: "Failed to fetch categories" });
+    }
+  });
+
+  app.post("/api/achievements/check", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const newAchievements = await achievementService.checkAchievements(userId);
+      res.json({ newAchievements });
+    } catch (error) {
+      console.error("Error checking achievements:", error);
+      res.status(500).json({ message: "Failed to check achievements" });
+    }
+  });
+
+  app.post("/api/achievements/update-login", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      await achievementService.updateLoginStreak(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating login streak:", error);
+      res.status(500).json({ message: "Failed to update login streak" });
     }
   });
 

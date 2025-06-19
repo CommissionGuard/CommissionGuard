@@ -28,6 +28,7 @@ import { OnboardingTour } from '@/components/onboarding-tour';
 import { ContextualHelp } from '@/components/contextual-help';
 import { QuickActionsPanel } from '@/components/quick-actions-panel';
 import { HelpButton } from '@/components/help-button';
+import { AchievementProgressWidget } from '@/components/achievement-progress-widget';
 import {
   TrendingUp,
   TrendingDown,
@@ -52,7 +53,10 @@ import {
   Search,
   Home,
   HelpCircle,
-  Brain
+  Brain,
+  Trophy,
+  Award,
+  Star
 } from "lucide-react";
 
 interface AnimatedCounterProps {

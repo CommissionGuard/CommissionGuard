@@ -647,8 +647,64 @@ export type PurchaseDetectionAlert = typeof purchaseDetectionAlerts.$inferSelect
 export type InsertPropertyMonitoring = z.infer<typeof insertPropertyMonitoringSchema>;
 export type InsertPurchaseDetectionAlert = z.infer<typeof insertPurchaseDetectionAlertSchema>;
 
+// Achievement badges system
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull().unique(),
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  icon: varchar("icon").notNull(), // lucide icon name
+  category: varchar("category").notNull(), // onboarding, clients, contracts, milestones, engagement
+  tier: varchar("tier").notNull().default("bronze"), // bronze, silver, gold, platinum
+  points: numeric("points").notNull().default("10"), // points awarded
+  criteria: jsonb("criteria").notNull(), // requirements to unlock
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  achievementId: serial("achievement_id").notNull(),
+  unlockedAt: timestamp("unlocked_at").defaultNow(),
+  progress: jsonb("progress"), // current progress toward achievement
+  isCompleted: boolean("is_completed").default(true),
+  notificationSent: boolean("notification_sent").default(false),
+});
+
+export const userStats = pgTable("user_stats", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().unique(),
+  totalPoints: numeric("total_points").default("0"),
+  level: numeric("level").default("1"),
+  experiencePoints: numeric("experience_points").default("0"),
+  clientsAdded: numeric("clients_added").default("0"),
+  contractsUploaded: numeric("contracts_uploaded").default("0"),
+  showingsScheduled: numeric("showings_scheduled").default("0"),
+  breachesResolved: numeric("breaches_resolved").default("0"),
+  daysActive: numeric("days_active").default("0"),
+  consecutiveLoginDays: numeric("consecutive_login_days").default("0"),
+  lastLoginDate: date("last_login_date"),
+  longestStreak: numeric("longest_streak").default("0"),
+  commissionProtected: numeric("commission_protected").default("0"),
+  alertsActioned: numeric("alerts_actioned").default("0"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Zod schemas for achievements
+export const insertAchievementSchema = createInsertSchema(achievements);
+export const insertUserAchievementSchema = createInsertSchema(userAchievements);
+export const insertUserStatsSchema = createInsertSchema(userStats);
+
+export type Achievement = typeof achievements.$inferSelect;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type UserStats = typeof userStats.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
+
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   clients: many(clients),
   contracts: many(contracts),
   alerts: many(alerts),
@@ -660,6 +716,33 @@ export const usersRelations = relations(users, ({ many }) => ({
   dripCampaigns: many(dripCampaigns),
   clientCommunications: many(clientCommunications),
   aiConversations: many(aiConversations),
+  userAchievements: many(userAchievements),
+  userStats: one(userStats, {
+    fields: [users.id],
+    references: [userStats.userId],
+  }),
+}));
+
+export const achievementsRelations = relations(achievements, ({ many }) => ({
+  userAchievements: many(userAchievements),
+}));
+
+export const userAchievementsRelations = relations(userAchievements, ({ one }) => ({
+  user: one(users, {
+    fields: [userAchievements.userId],
+    references: [users.id],
+  }),
+  achievement: one(achievements, {
+    fields: [userAchievements.achievementId],
+    references: [achievements.id],
+  }),
+}));
+
+export const userStatsRelations = relations(userStats, ({ one }) => ({
+  user: one(users, {
+    fields: [userStats.userId],
+    references: [users.id],
+  }),
 }));
 
 export const dripCampaignsRelations = relations(dripCampaigns, ({ one, many }) => ({
