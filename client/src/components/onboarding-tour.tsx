@@ -241,7 +241,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       } else if (step.target === 'profile-dropdown') {
         // Full box format with four walls for profile dropdown (step 21) - keep it stationary
         setHighlightPosition({
-          top: rect.top - 15,
+          top: rect.top - 30,
           left: rect.left - 2,
           width: rect.width + 4,
           height: rect.height + 4
