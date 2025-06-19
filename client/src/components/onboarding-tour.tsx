@@ -239,12 +239,12 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           height: rect.height - 30 // Reduce height to move bottom higher
         });
       } else if (step.target === 'profile-dropdown') {
-        // Full box format with four walls for profile dropdown (step 21)
+        // Full box format with four walls for profile dropdown (step 21) - keep it stationary
         setHighlightPosition({
-          top: rect.top - 5,
-          left: rect.left - 5,
-          width: rect.width + 10,
-          height: rect.height + 10
+          top: rect.top - 2,
+          left: rect.left - 2,
+          width: rect.width + 4,
+          height: rect.height + 4
         });
       } else {
         setHighlightPosition({
@@ -255,8 +255,8 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
         });
       }
 
-      // Scroll element into view if needed
-      if (rect.top < 100 || rect.bottom > window.innerHeight - 100) {
+      // Scroll element into view if needed (skip for profile dropdown to prevent movement)
+      if (step.target !== 'profile-dropdown' && (rect.top < 100 || rect.bottom > window.innerHeight - 100)) {
         element.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
