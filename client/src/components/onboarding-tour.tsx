@@ -204,10 +204,10 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
         });
       } else if (step.target === 'clients-widget') {
         setHighlightPosition({
-          top: rect.top - 25, // Move Active Clients widget highlight higher
+          top: rect.top - 30, // Move Active Clients widget highlight even higher
           left: rect.left,
           width: rect.width,
-          height: rect.height + 30 // Add more height to compensate
+          height: rect.height - 5 // Bring bottom even closer to widget top
         });
       } else {
         setHighlightPosition({
