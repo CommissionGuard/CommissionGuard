@@ -230,7 +230,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           width: rect.width,
           height: rect.height
         });
-      } else if (step.target === 'dashboard-tab' || step.target === 'nav-clients' || step.target === 'nav-contracts' || step.target === 'nav-showings' || step.target === 'nav-commission-protection' || step.target === 'nav-alerts' || step.target === 'nav-records' || step.target === 'nav-intelligence' || step.target === 'nav-reports') {
+      } else if (step.target === 'nav-dashboard' || step.target === 'nav-clients' || step.target === 'nav-contracts' || step.target === 'nav-showings' || step.target === 'nav-commission-protection' || step.target === 'nav-alerts' || step.target === 'nav-records' || step.target === 'nav-intelligence' || step.target === 'nav-reports') {
         // Uniform positioning for all navigation tabs (steps 12-20)
         setHighlightPosition({
           top: rect.top, // Align with actual tab top
