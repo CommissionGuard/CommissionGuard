@@ -503,9 +503,8 @@ export default function AnimatedInsightsDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="flex items-center justify-between"
-          data-tour-id="dashboard-header"
         >
-          <div>
+          <div data-tour-id="dashboard-header">
             <h1 className="text-3xl font-bold text-gray-900">Commission Protection Dashboard</h1>
             <p className="text-gray-600 mt-1">Protect your commissions and track your success</p>
           </div>
@@ -746,6 +745,7 @@ export default function AnimatedInsightsDashboard() {
                 whileHover={{ y: -2, scale: 1.02 }}
                 className="bg-gradient-to-r from-white to-green-200 rounded-xl p-4 border border-green-200 cursor-pointer group"
                 onClick={() => handleCardClick("Protected Commission")}
+                data-tour-id="protected-commission-widget"
               >
                 <div className="flex items-center justify-between mb-3">
                   <motion.div

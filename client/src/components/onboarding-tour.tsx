@@ -47,10 +47,10 @@ const tourSteps: TourStep[] = [
     position: 'top'
   },
   {
-    id: 'reports-widget',
-    title: 'Commission Reports',
-    description: 'View detailed reports and analytics on your commission protection and recovery efforts.',
-    target: 'reports-widget',
+    id: 'protected-commission-widget',
+    title: 'Protected Commission',
+    description: 'Track the total value of commissions you have protected through proper documentation and monitoring.',
+    target: 'protected-commission-widget',
     position: 'top'
   },
   {
@@ -72,6 +72,13 @@ const tourSteps: TourStep[] = [
     title: 'Commission Intelligence',
     description: 'Get AI-powered insights and recommendations for protecting your commissions.',
     target: 'commission-widget',
+    position: 'top'
+  },
+  {
+    id: 'reports-widget',
+    title: 'Commission Reports',
+    description: 'View detailed reports and analytics on your commission protection and recovery efforts.',
+    target: 'reports-widget',
     position: 'top'
   },
   {
@@ -229,7 +236,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40"
+            className="fixed inset-0 bg-black/50 z-40 pointer-events-none"
           />
 
           {/* Highlight Box */}
