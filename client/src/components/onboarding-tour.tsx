@@ -63,12 +63,12 @@ const tourSteps: TourStep[] = [
     action: 'Monitor records'
   },
   {
-    id: 'ai-assistant',
-    title: 'AI Support Chat',
-    content: 'Get instant help with commission protection strategies, contract analysis, and platform guidance.',
-    target: 'ai-chat-button',
-    position: 'left',
-    action: 'Try AI chat'
+    id: 'help-system',
+    title: 'Help & Support',
+    content: 'Access contextual help throughout the platform. Click Help buttons for step-by-step guidance on any feature.',
+    target: 'dashboard-header',
+    position: 'bottom',
+    action: 'Use help system'
   }
 ];
 
@@ -81,6 +81,56 @@ interface OnboardingTourProps {
 export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
+  const [tourPosition, setTourPosition] = useState({ top: 0, left: 0 });
+
+  const updateTourPosition = () => {
+    if (targetElement) {
+      const rect = targetElement.getBoundingClientRect();
+      const step = tourSteps[currentStep];
+      
+      let top = rect.bottom + 20;
+      let left = rect.left;
+      
+      // Adjust position based on step.position
+      switch (step.position) {
+        case 'top':
+          top = rect.top - 300;
+          break;
+        case 'bottom':
+          top = rect.bottom + 20;
+          break;
+        case 'left':
+          top = rect.top;
+          left = rect.left - 320;
+          break;
+        case 'right':
+          top = rect.top;
+          left = rect.right + 20;
+          break;
+      }
+      
+      // Keep tour card within viewport
+      const cardWidth = 320;
+      const cardHeight = 200;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      if (left + cardWidth > viewportWidth) {
+        left = viewportWidth - cardWidth - 20;
+      }
+      if (left < 20) {
+        left = 20;
+      }
+      if (top + cardHeight > viewportHeight) {
+        top = viewportHeight - cardHeight - 20;
+      }
+      if (top < 20) {
+        top = 20;
+      }
+      
+      setTourPosition({ top, left });
+    }
+  };
 
   useEffect(() => {
     if (isOpen && tourSteps[currentStep]) {
@@ -89,9 +139,31 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Update position after scroll animation
+        setTimeout(() => {
+          updateTourPosition();
+        }, 500);
       }
     }
   }, [isOpen, currentStep]);
+
+  useEffect(() => {
+    if (targetElement) {
+      updateTourPosition();
+      
+      // Update position on scroll and resize
+      const handleScroll = () => updateTourPosition();
+      const handleResize = () => updateTourPosition();
+      
+      window.addEventListener('scroll', handleScroll);
+      window.addEventListener('resize', handleResize);
+      
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('resize', handleResize);
+      };
+    }
+  }, [targetElement, currentStep]);
 
   const nextStep = () => {
     if (currentStep < tourSteps.length - 1) {
@@ -140,12 +212,12 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             exit={{ opacity: 0, scale: 0.9 }}
             className="fixed z-50"
             style={{
-              top: targetElement ? targetElement.offsetTop + targetElement.offsetHeight + 20 : '50%',
-              left: targetElement ? targetElement.offsetLeft : '50%',
+              top: targetElement ? tourPosition.top : '50%',
+              left: targetElement ? tourPosition.left : '50%',
               transform: !targetElement ? 'translate(-50%, -50%)' : 'none'
             }}
           >
-            <Card className="w-80 shadow-2xl border-2 border-blue-200">
+            <Card className="w-80 shadow-2xl border-2 border-blue-200 max-h-96 overflow-y-auto">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <Badge variant="secondary" className="text-xs">
@@ -233,10 +305,10 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
               exit={{ opacity: 0 }}
               className="fixed z-40 pointer-events-none"
               style={{
-                top: targetElement.offsetTop - 4,
-                left: targetElement.offsetLeft - 4,
-                width: targetElement.offsetWidth + 8,
-                height: targetElement.offsetHeight + 8,
+                top: targetElement.getBoundingClientRect().top - 4,
+                left: targetElement.getBoundingClientRect().left - 4,
+                width: targetElement.getBoundingClientRect().width + 8,
+                height: targetElement.getBoundingClientRect().height + 8,
                 border: '3px solid #3b82f6',
                 borderRadius: '12px',
                 boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.3)'
