@@ -223,6 +223,13 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           width: rect.width,
           height: rect.height
         });
+      } else if (step.target === 'dashboard-tab') {
+        setHighlightPosition({
+          top: rect.top - 10,
+          left: rect.left - 10, // Center the box over the dashboard tab
+          width: rect.width + 20, // Expand width for better centering
+          height: rect.height + 20 // Expand height for better coverage
+        });
       } else {
         setHighlightPosition({
           top: rect.top,
