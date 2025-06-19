@@ -307,14 +307,14 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
               left: highlightPosition.left - 6,
               width: highlightPosition.width + 12,
               height: highlightPosition.height + 12,
-              outline: currentStep === 11 ? 'none' : '3px solid #3B82F6', // Remove outline for step 12 (index 11)
+              outline: (currentStep === 11 || currentStep === 12 || currentStep === 13 || currentStep === 14) ? 'none' : '3px solid #3B82F6', // Remove outline for steps 12-15
               outlineOffset: '2px',
               borderRadius: '6px',
               boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
               background: 'transparent',
               transition: 'all 0.3s ease-out',
-              // Create U-shape border for step 12
-              ...(currentStep === 11 && {
+              // Create U-shape border for steps 12-15
+              ...((currentStep === 11 || currentStep === 12 || currentStep === 13 || currentStep === 14) && {
                 borderLeft: '3px solid #3B82F6',
                 borderRight: '3px solid #3B82F6',
                 borderBottom: '3px solid #3B82F6',
