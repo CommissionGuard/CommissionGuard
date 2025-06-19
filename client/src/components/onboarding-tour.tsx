@@ -202,12 +202,12 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           width: Math.min(rect.width, 500), // Limit width to fit text better
           height: rect.height + 5 // Bring bottom extremely close to text
         });
-      } else if (step.target === 'clients-widget') {
+      } else if (step.target === 'clients-widget' || step.target === 'contracts-widget' || step.target === 'showing-widget' || step.target === 'protected-commission-widget') {
         setHighlightPosition({
-          top: rect.top - 30, // Move Active Clients widget highlight even higher
+          top: rect.top - 30, // Move widget highlights higher
           left: rect.left,
           width: rect.width,
-          height: rect.height - 5 // Bring bottom even closer to widget top
+          height: rect.height - 5 // Bring bottom closer to widget top
         });
       } else {
         setHighlightPosition({
@@ -302,7 +302,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             exit={{ opacity: 0, scale: 0.9 }}
             className="fixed z-50 bg-white rounded-lg shadow-2xl p-4 max-w-xs w-full mx-4"
             style={{
-              top: currentTourStep.position === 'bottom' || currentStep === 1 ? 
+              top: currentTourStep.position === 'bottom' || currentStep === 1 || currentStep === 2 || currentStep === 3 || currentStep === 4 ? 
                 Math.min(window.innerHeight - 280, highlightPosition.top + highlightPosition.height + 20) :
                 currentTourStep.position === 'top' ? 
                 Math.max(20, highlightPosition.top - 260) :
