@@ -81,14 +81,13 @@ interface OnboardingTourProps {
 export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
-  const [tourPosition, setTourPosition] = useState({ top: 0, left: 0 });
   const [highlightPosition, setHighlightPosition] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const [isElementVisible, setIsElementVisible] = useState(true);
+  const [isBottomRow, setIsBottomRow] = useState(false);
 
   const updatePositions = useCallback(() => {
     if (targetElement) {
       const rect = targetElement.getBoundingClientRect();
-      const step = tourSteps[currentStep];
       
       // Check if element is visible in viewport
       const viewportHeight = window.innerHeight;
@@ -96,42 +95,23 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       const elementVisible = rect.bottom > 0 && rect.top < viewportHeight && rect.right > 0 && rect.left < viewportWidth;
       setIsElementVisible(elementVisible);
       
-      // Position highlight around widget with proper margin
+      // Center the highlight box with the widget center (top-bottom and left-right)
       const highlightMargin = 8;
+      const widgetCenterX = rect.left + (rect.width / 2);
+      const widgetCenterY = rect.top + (rect.height / 2);
+      const highlightWidth = rect.width + (highlightMargin * 2);
+      const highlightHeight = rect.height + (highlightMargin * 2);
+      
       setHighlightPosition({
-        top: rect.top - highlightMargin,
-        left: rect.left - highlightMargin,
-        width: rect.width + (highlightMargin * 2),
-        height: rect.height + (highlightMargin * 2)
+        top: widgetCenterY - (highlightHeight / 2),
+        left: widgetCenterX - (highlightWidth / 2),
+        width: highlightWidth,
+        height: highlightHeight
       });
       
-      // Determine if widget is in top or bottom row based on vertical position
-      const isTopRow = rect.top < viewportHeight / 2;
-      
-      // Position tour card based on widget location
-      let top: number;
-      let left = rect.left;
-      
-      if (isTopRow) {
-        // Top row widgets: show card below
-        top = rect.bottom + 20;
-      } else {
-        // Bottom row widgets: show card above
-        top = rect.top - 300;
-      }
-      
-      // Center the card horizontally with the widget when possible
-      const cardWidth = 320;
-      left = rect.left + (rect.width / 2) - (cardWidth / 2);
-      
-      // Ensure card stays within viewport horizontally
-      if (left < 20) {
-        left = 20;
-      } else if (left + cardWidth > viewportWidth - 20) {
-        left = viewportWidth - cardWidth - 20;
-      }
-      
-      setTourPosition({ top, left });
+      // Determine if widget is in bottom row for card positioning
+      const isInBottomRow = widgetCenterY > (viewportHeight / 2);
+      setIsBottomRow(isInBottomRow);
     }
   }, [targetElement, currentStep]);
 
@@ -229,11 +209,10 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed z-50 pointer-events-auto"
+            className="fixed z-20 pointer-events-auto"
             style={{
-              top: targetElement ? tourPosition.top : '50%',
-              left: targetElement ? tourPosition.left : '50%',
-              transform: !targetElement ? 'translate(-50%, -50%)' : 'none',
+              top: isBottomRow ? Math.max(50, (highlightPosition?.top || 0) - 280) : Math.min(window.innerHeight - 320, (highlightPosition?.top || 0) + (highlightPosition?.height || 0) + 20),
+              left: Math.min(window.innerWidth - 400, Math.max(20, (highlightPosition?.left || 0))),
               transition: 'all 0.15s ease-out'
             }}
           >
@@ -323,7 +302,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed z-40 pointer-events-none"
+              className="fixed z-20 pointer-events-none"
               style={{
                 top: highlightPosition.top,
                 left: highlightPosition.left,
