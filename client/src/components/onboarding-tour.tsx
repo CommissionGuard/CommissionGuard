@@ -246,6 +246,14 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           width: rect.width + 4,
           height: rect.height + 4
         });
+      } else if (step.target === 'profile-menu') {
+        // Full box format for dropdown menu (step 22)
+        setHighlightPosition({
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height
+        });
       } else {
         setHighlightPosition({
           top: rect.top,
@@ -267,12 +275,14 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
   };
 
   const nextStep = () => {
-    // Special handling for profile dropdown step - open the dropdown without moving to next step immediately
+    // Special handling for profile dropdown step - open the dropdown for step 22
     if (currentStep === tourSteps.length - 2) {
       const profileButton = document.querySelector('[data-tour-id="profile-dropdown"]');
       if (profileButton) {
-        // Don't click the button, just move to step 21 to highlight it
-        setCurrentStep(currentStep + 1);
+        (profileButton as HTMLElement).click();
+        setTimeout(() => {
+          setCurrentStep(currentStep + 1);
+        }, 300);
         return;
       }
     }
@@ -335,8 +345,8 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
                 borderTop: 'none',
                 borderRadius: '0 0 6px 6px' // Square top corners, rounded bottom
               }),
-              // Full box border for profile dropdown (step 21)
-              ...(currentStep === 20 && {
+              // Full box border for profile dropdown (step 21) and profile menu (step 22)
+              ...((currentStep === 20 || currentStep === 21) && {
                 border: '3px solid #3B82F6',
                 borderRadius: '6px',
                 outline: 'none'
