@@ -318,7 +318,8 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
                 borderLeft: '3px solid #3B82F6',
                 borderRight: '3px solid #3B82F6',
                 borderBottom: '3px solid #3B82F6',
-                borderTop: 'none'
+                borderTop: 'none',
+                borderRadius: '0 0 6px 6px' // Square top corners, rounded bottom
               })
             }}
           />
