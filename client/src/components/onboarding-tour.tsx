@@ -96,14 +96,12 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       const elementVisible = rect.bottom > 0 && rect.top < viewportHeight && rect.right > 0 && rect.left < viewportWidth;
       setIsElementVisible(elementVisible);
       
-      // Position highlight box to align with widget perimeter
-      const topMargin = 8; // Extra space above widget
-      const sideMargin = 6;
+      // Exact widget boundary alignment with no offset
       setHighlightPosition({
-        top: rect.top - topMargin,
-        left: rect.left - sideMargin,
-        width: rect.width + (sideMargin * 2),
-        height: rect.height + topMargin + sideMargin
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height
       });
       
       // Determine if widget is in top or bottom row based on vertical position
@@ -330,9 +328,10 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
                 left: highlightPosition.left,
                 width: highlightPosition.width,
                 height: highlightPosition.height,
-                border: '4px solid #2563eb',
-                borderRadius: '18px', // Slightly larger to encompass widget corners
-                boxShadow: '0 0 0 2px rgba(37, 99, 235, 0.3), 0 0 20px rgba(37, 99, 235, 0.4)',
+                outline: '3px solid #2563eb',
+                outlineOffset: '3px',
+                borderRadius: '12px',
+                boxShadow: '0 0 15px rgba(37, 99, 235, 0.4)',
                 transition: 'all 0.15s ease-out'
               }}
             />
