@@ -238,6 +238,14 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           width: rect.width + 20, // Expand width for better centering
           height: rect.height - 30 // Reduce height to move bottom higher
         });
+      } else if (step.target === 'profile-dropdown') {
+        // Regular box format for profile dropdown (step 21)
+        setHighlightPosition({
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height
+        });
       } else {
         setHighlightPosition({
           top: rect.top,
