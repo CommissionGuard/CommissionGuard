@@ -111,9 +111,14 @@ function MetricCard({ title, value, change, icon, color, formatter, delay = 0, o
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
       whileHover={{ 
-        scale: 1.02, 
-        boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-        transition: { duration: 0.2 }
+        scale: 1.05, 
+        y: -4,
+        boxShadow: "0 12px 30px rgba(0,0,0,0.15)",
+        transition: { duration: 0.2, ease: "easeOut" }
+      }}
+      whileTap={{ 
+        scale: 0.98,
+        transition: { duration: 0.1 }
       }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
@@ -228,7 +233,13 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
-              whileHover={{ scale: 1.02, backgroundColor: "rgba(0,0,0,0.02)" }}
+              whileHover={{ 
+                scale: 1.02, 
+                x: 4,
+                backgroundColor: "rgba(59, 130, 246, 0.03)",
+                transition: { duration: 0.2 }
+              }}
+              whileTap={{ scale: 0.98 }}
               className="p-4 border rounded-lg cursor-pointer transition-colors"
               onClick={() => handleActivityClick(activity)}
             >
@@ -397,14 +408,15 @@ export default function AnimatedInsightsDashboard() {
 
   // Check if user is new and should see onboarding
   useEffect(() => {
-    // Force start the onboarding tour for demonstration
-    setShowOnboarding(true);
-    const hasSeenOnboarding = localStorage.getItem('commission-guard-onboarding-completed');
-    if (!hasSeenOnboarding && !isLoading) {
-      const timer = setTimeout(() => setShowOnboarding(true), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
+    // Clear localStorage for testing purposes
+    localStorage.removeItem('commission-guard-onboarding-completed');
+    // Force start the onboarding tour for demonstration with delay
+    const timer = setTimeout(() => {
+      setShowOnboarding(true);
+      console.log('Onboarding tour started');
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleOnboardingComplete = () => {
     localStorage.setItem('commission-guard-onboarding-completed', 'true');

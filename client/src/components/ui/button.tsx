@@ -44,7 +44,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(
+          buttonVariants({ variant, size, className }),
+          "btn-click-scale color-transition ripple-effect focus-glow",
+          "hover:transform hover:scale-105 transition-all duration-200 ease-in-out"
+        )}
         ref={ref}
         {...props}
       />

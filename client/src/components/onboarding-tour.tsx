@@ -135,15 +135,19 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
 
   useEffect(() => {
     if (isOpen && tourSteps[currentStep]) {
+      console.log(`Looking for element with data-tour-id: ${tourSteps[currentStep].target}`);
       const element = document.querySelector(`[data-tour-id="${tourSteps[currentStep].target}"]`) as HTMLElement;
       setTargetElement(element);
       
       if (element) {
+        console.log(`Found element for step ${currentStep}: ${tourSteps[currentStep].target}`);
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         // Update position after scroll animation
         setTimeout(() => {
           updatePositions();
         }, 500);
+      } else {
+        console.warn(`Element not found for step ${currentStep}: ${tourSteps[currentStep].target}`);
       }
     }
   }, [isOpen, currentStep, updatePositions]);
@@ -167,9 +171,12 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
   }, [targetElement, updatePositions]);
 
   const nextStep = () => {
+    console.log(`Current step: ${currentStep}, Total steps: ${tourSteps.length}`);
     if (currentStep < tourSteps.length - 1) {
       setCurrentStep(currentStep + 1);
+      console.log(`Advanced to step: ${currentStep + 1}`);
     } else {
+      console.log('Completing tour');
       handleComplete();
     }
   };
@@ -181,6 +188,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
   };
 
   const handleComplete = () => {
+    localStorage.setItem('commission-guard-onboarding-completed', 'true');
     onComplete();
     onClose();
   };
@@ -202,7 +210,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50"
+            className="fixed inset-0 bg-black/40 z-20"
             onClick={skipTour}
           />
 
@@ -211,7 +219,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed z-30"
+            className="fixed z-50 pointer-events-auto"
             style={{
               top: targetElement ? tourPosition.top : '50%',
               left: targetElement ? tourPosition.left : '50%',
@@ -220,8 +228,8 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             }}
           >
             <Card className="w-80 shadow-2xl border-2 border-blue-200 max-h-96 overflow-y-auto">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
+              <CardContent className="p-6 pointer-events-auto">
+                <div className="flex items-center justify-between mb-4 pointer-events-auto">
                   <Badge variant="secondary" className="text-xs">
                     Step {currentStep + 1} of {tourSteps.length}
                   </Badge>
@@ -253,19 +261,19 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between pt-4">
+                  <div className="flex items-center justify-between pt-4 pointer-events-auto">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={prevStep}
                       disabled={currentStep === 0}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 pointer-events-auto"
                     >
                       <ArrowLeft className="h-4 w-4" />
                       Previous
                     </Button>
 
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 pointer-events-auto">
                       {tourSteps.map((_, index) => (
                         <div
                           key={index}
@@ -279,7 +287,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
                     <Button
                       size="sm"
                       onClick={nextStep}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 pointer-events-auto"
                     >
                       {currentStep === tourSteps.length - 1 ? (
                         <>
@@ -305,7 +313,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed z-30 pointer-events-none"
+              className="fixed z-40 pointer-events-none"
               style={{
                 top: highlightPosition.top,
                 left: highlightPosition.left,

@@ -12,9 +12,9 @@ export function HelpButton({ onClick }: HelpButtonProps) {
       variant="ghost" 
       size="sm"
       onClick={onClick}
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 hover:scale-105 hover:bg-blue-50 transition-all duration-200"
     >
-      <HelpCircle className="h-4 w-4" />
+      <HelpCircle className="h-4 w-4 transition-transform duration-200 hover:rotate-12" />
       Help
     </Button>
   );
