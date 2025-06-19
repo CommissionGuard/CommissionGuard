@@ -211,7 +211,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
         });
       } else if (step.target === 'help-button') {
         setHighlightPosition({
-          top: rect.top - 35, // Move help button highlight up even more
+          top: rect.top - 30, // Move help button highlight down slightly
           left: rect.left,
           width: rect.width,
           height: rect.height - 5 // Slightly increase height from bottom
