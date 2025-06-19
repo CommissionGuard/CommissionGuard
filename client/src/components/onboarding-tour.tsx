@@ -27,7 +27,7 @@ const tourSteps: TourStep[] = [
     title: 'Client Management',
     content: 'Add and manage your clients here. Track their contact info, representation history, and monitor their activity for potential risks.',
     target: 'clients-widget',
-    position: 'top',
+    position: 'bottom',
     action: 'Click to view clients'
   },
   {
@@ -35,7 +35,7 @@ const tourSteps: TourStep[] = [
     title: 'Contract Protection',
     content: 'Upload and analyze your representation agreements. Our AI will identify risks and track expiration dates automatically.',
     target: 'contracts-widget',
-    position: 'top',
+    position: 'bottom',
     action: 'Manage contracts'
   },
   {
@@ -43,7 +43,7 @@ const tourSteps: TourStep[] = [
     title: 'Showing Tracker',
     content: 'Track all property showings and client interactions. This creates a paper trail that helps prove your representation relationship.',
     target: 'showing-widget',
-    position: 'top',
+    position: 'bottom',
     action: 'Track showings'
   },
   {
@@ -96,39 +96,40 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       const elementVisible = rect.bottom > 0 && rect.top < viewportHeight && rect.right > 0 && rect.left < viewportWidth;
       setIsElementVisible(elementVisible);
       
-      // Always update highlight position regardless of visibility
+      // Update highlight position to perfectly surround the widget with better padding
       setHighlightPosition({
-        top: rect.top - 4,
-        left: rect.left - 4,
-        width: rect.width + 8,
-        height: rect.height + 8
+        top: rect.top - 6,
+        left: rect.left - 6,
+        width: rect.width + 12,
+        height: rect.height + 12
       });
       
-      // Update tour card position - follow highlight exactly, no viewport constraints
-      let top = rect.bottom + 20;
+      // Determine if widget is in top or bottom row based on vertical position
+      const isTopRow = rect.top < viewportHeight / 2;
+      
+      // Position tour card based on widget location
+      let top: number;
       let left = rect.left;
       
-      // Adjust position based on step.position
-      switch (step.position) {
-        case 'top':
-          top = rect.top - 280;
-          left = rect.left;
-          break;
-        case 'bottom':
-          top = rect.bottom + 20;
-          left = rect.left;
-          break;
-        case 'left':
-          top = rect.top;
-          left = rect.left - 340;
-          break;
-        case 'right':
-          top = rect.top;
-          left = rect.right + 20;
-          break;
+      if (isTopRow) {
+        // Top row widgets: show card below
+        top = rect.bottom + 20;
+      } else {
+        // Bottom row widgets: show card above
+        top = rect.top - 300;
       }
       
-      // No viewport constraints at all - tour card moves with highlight regardless of screen bounds
+      // Center the card horizontally with the widget when possible
+      const cardWidth = 320;
+      left = rect.left + (rect.width / 2) - (cardWidth / 2);
+      
+      // Ensure card stays within viewport horizontally
+      if (left < 20) {
+        left = 20;
+      } else if (left + cardWidth > viewportWidth - 20) {
+        left = viewportWidth - cardWidth - 20;
+      }
+      
       setTourPosition({ top, left });
     }
   }, [targetElement, currentStep]);
@@ -319,9 +320,9 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
                 left: highlightPosition.left,
                 width: highlightPosition.width,
                 height: highlightPosition.height,
-                border: '3px solid #3b82f6',
-                borderRadius: '12px',
-                boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.2)',
+                border: '4px solid #3b82f6',
+                borderRadius: '16px',
+                boxShadow: '0 0 0 6px rgba(59, 130, 246, 0.25), 0 0 30px rgba(59, 130, 246, 0.3)',
                 transition: 'all 0.15s ease-out'
               }}
             />
