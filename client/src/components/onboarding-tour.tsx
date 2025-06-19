@@ -180,22 +180,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
 
   useEffect(() => {
     if (isOpen) {
-      // Special handling for step 22 - open the profile dropdown
-      if (currentStep === 21) { // Step 22 (0-indexed as 21)
-        const profileButton = document.querySelector('[data-tour-id="profile-dropdown"]');
-        if (profileButton) {
-          // Force click the dropdown to open it
-          (profileButton as HTMLElement).click();
-          // Wait longer for dropdown to fully render before positioning
-          setTimeout(() => {
-            updateHighlightPosition();
-          }, 200);
-        } else {
-          updateHighlightPosition();
-        }
-      } else {
-        updateHighlightPosition();
-      }
+      updateHighlightPosition();
       
       // Add scroll listener to update position during scroll
       const handleScroll = () => updateHighlightPosition();
@@ -291,7 +276,18 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
 
   const nextStep = () => {
     if (currentStep < tourSteps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      const nextStepIndex = currentStep + 1;
+      setCurrentStep(nextStepIndex);
+      
+      // Immediately open dropdown when entering step 22
+      if (nextStepIndex === 21) { // Step 22 (0-indexed as 21)
+        setTimeout(() => {
+          const profileButton = document.querySelector('[data-tour-id="profile-dropdown"]') as HTMLElement;
+          if (profileButton) {
+            profileButton.click();
+          }
+        }, 50);
+      }
     } else {
       onComplete();
     }
