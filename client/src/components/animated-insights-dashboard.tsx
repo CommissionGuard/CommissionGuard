@@ -543,7 +543,7 @@ export default function AnimatedInsightsDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-6 space-y-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -552,8 +552,8 @@ export default function AnimatedInsightsDashboard() {
           className="flex items-center justify-between"
         >
           <div data-tour-id="dashboard-header">
-            <h1 className="text-3xl font-bold text-gray-900">Commission Protection Dashboard</h1>
-            <p className="text-gray-600 mt-1">Protect your commissions and track your success</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Commission Protection Dashboard</h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">Protect your commissions and track your success</p>
           </div>
           
           <div className="flex items-center gap-3">
@@ -562,7 +562,7 @@ export default function AnimatedInsightsDashboard() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button variant="outline" className="flex items-center gap-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                 <BarChart3 className="h-4 w-4" />
                 Export Report
               </Button>
