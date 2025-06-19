@@ -96,12 +96,13 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       const elementVisible = rect.bottom > 0 && rect.top < viewportHeight && rect.right > 0 && rect.left < viewportWidth;
       setIsElementVisible(elementVisible);
       
-      // Update highlight position to perfectly surround the widget with better padding
+      // Precisely match widget container bounds - widgets have rounded-xl (12px) corners
+      const offset = 2; // Minimal offset to show highlight outside widget border
       setHighlightPosition({
-        top: rect.top - 6,
-        left: rect.left - 6,
-        width: rect.width + 12,
-        height: rect.height + 12
+        top: rect.top - offset,
+        left: rect.left - offset,
+        width: rect.width + (offset * 2),
+        height: rect.height + (offset * 2)
       });
       
       // Determine if widget is in top or bottom row based on vertical position
@@ -142,6 +143,9 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       
       if (element) {
         console.log(`Found element for step ${currentStep}: ${tourSteps[currentStep].target}`);
+        const bounds = element.getBoundingClientRect();
+        console.log('Element bounds:', bounds);
+        console.log('Element classes:', element.className);
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         // Update position after scroll animation
         setTimeout(() => {
@@ -320,9 +324,9 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
                 left: highlightPosition.left,
                 width: highlightPosition.width,
                 height: highlightPosition.height,
-                border: '4px solid #3b82f6',
-                borderRadius: '16px',
-                boxShadow: '0 0 0 6px rgba(59, 130, 246, 0.25), 0 0 30px rgba(59, 130, 246, 0.3)',
+                border: '2px solid #3b82f6',
+                borderRadius: '16px', // Match widget rounded-xl (12px) + small buffer
+                boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.5)',
                 transition: 'all 0.15s ease-out'
               }}
             />
