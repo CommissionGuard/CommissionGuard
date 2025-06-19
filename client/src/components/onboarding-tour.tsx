@@ -124,6 +124,13 @@ const tourSteps: TourStep[] = [
     position: 'bottom'
   },
   {
+    id: 'nav-commission-protection',
+    title: 'Commission Protection',
+    description: 'Access commission protection tools and monitoring systems.',
+    target: 'nav-commission-protection',
+    position: 'bottom'
+  },
+  {
     id: 'nav-alerts',
     title: 'Alert System',
     description: 'Monitor and respond to potential commission breach alerts.',
@@ -307,14 +314,14 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
               left: highlightPosition.left - 6,
               width: highlightPosition.width + 12,
               height: highlightPosition.height + 12,
-              outline: (currentStep >= 11 && currentStep <= 19) ? 'none' : '3px solid #3B82F6', // Remove outline for navigation tabs and profile steps
+              outline: (currentStep >= 11 && currentStep <= 20) ? 'none' : '3px solid #3B82F6', // Remove outline for navigation tabs and profile steps
               outlineOffset: '2px',
               borderRadius: '6px',
               boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
               background: 'transparent',
               transition: 'all 0.3s ease-out',
-              // Create U-shape border for navigation tabs (steps 12-19)
-              ...((currentStep >= 11 && currentStep <= 19) && {
+              // Create U-shape border for navigation tabs (steps 12-21)
+              ...((currentStep >= 11 && currentStep <= 20) && {
                 borderLeft: '3px solid #3B82F6',
                 borderRight: '3px solid #3B82F6',
                 borderBottom: '3px solid #3B82F6',
