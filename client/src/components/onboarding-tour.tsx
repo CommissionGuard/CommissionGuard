@@ -275,8 +275,8 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
   };
 
   const nextStep = () => {
-    // Special handling for profile dropdown step - open the dropdown for step 22
-    if (currentStep === tourSteps.length - 2) {
+    // Special handling when moving from step 21 to step 22 - open the dropdown
+    if (currentStep === 20) { // Step 21 (0-indexed as 20)
       const profileButton = document.querySelector('[data-tour-id="profile-dropdown"]');
       if (profileButton) {
         (profileButton as HTMLElement).click();
