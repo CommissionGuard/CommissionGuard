@@ -214,7 +214,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           top: rect.top - 35, // Move help button highlight up even more
           left: rect.left,
           width: rect.width,
-          height: rect.height + 40 // Add more height for better coverage
+          height: rect.height - 10 // Reduce height further to bring bottom closer to top
         });
       } else {
         setHighlightPosition({
