@@ -295,7 +295,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             exit={{ opacity: 0, scale: 0.9 }}
             className="fixed z-50 bg-white rounded-lg shadow-2xl p-4 max-w-xs w-full mx-4"
             style={{
-              top: currentTourStep.position === 'bottom' ? 
+              top: currentTourStep.position === 'bottom' || currentStep === 1 ? 
                 Math.min(window.innerHeight - 280, highlightPosition.top + highlightPosition.height + 20) :
                 currentTourStep.position === 'top' ? 
                 Math.max(20, highlightPosition.top - 260) :
