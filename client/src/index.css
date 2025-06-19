@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark mode transitions */
-* {
-  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 /* Real Estate Themed Loading Animations */
 @keyframes houseFloat {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -427,78 +419,50 @@
 
 :root {
   --background: 210 11% 98%; /* #F5F7FA */
-  --foreground: 222.2 84% 4.9%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222.2 84% 4.9%;
-
-  --muted: 210 40% 96%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-
-  --accent: 210 40% 96%;
-  --accent-foreground: 222.2 84% 4.9%;
-
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
-
-  --radius: 0.75rem;
-  
-  /* Commission Guard Custom Variables */
-  --commission-primary: 221.2 83.2% 53.3%; /* Blue */
-  --commission-success: 142.1 76.2% 36.3%; /* Green */
-  --commission-warning: 47.9 95.8% 53.1%; /* Yellow */
-  --commission-danger: 0 84.2% 60.2%; /* Red */
-  --commission-info: 204 94% 94%; /* Light Blue */
+  --foreground: 220 14% 10%; /* #1A1D23 */
+  --muted: 210 8% 95%; /* #F1F3F5 */
+  --muted-foreground: 220 9% 46%; /* #6B7280 */
+  --popover: 0 0% 100%; /* #FFFFFF */
+  --popover-foreground: 220 14% 10%; /* #1A1D23 */
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 220 14% 10%; /* #1A1D23 */
+  --border: 220 13% 91%; /* #E5E7EB */
+  --input: 220 13% 91%; /* #E5E7EB */
+  --primary: 210 79% 46%; /* #1976D2 */
+  --primary-foreground: 210 100% 99%; /* #FAFBFF */
+  --secondary: 220 15% 25%; /* #424242 */
+  --secondary-foreground: 0 0% 98%; /* #FAFAFA */
+  --accent: 14 100% 57%; /* #FF6B35 */
+  --accent-foreground: 0 0% 98%; /* #FAFAFA */
+  --destructive: 0 84% 60%; /* #EF4444 */
+  --destructive-foreground: 60 9% 98%; /* #FEFEFE */
+  --success: 142 71% 45%; /* #4CAF50 */
+  --warning: 38 92% 50%; /* #FF9800 */
+  --ring: 210 79% 46%; /* #1976D2 */
+  --radius: 0.5rem;
 }
 
 .dark {
-  --background: 222.2 84% 4.9%; /* Dark background */
-  --foreground: 210 40% 98%; /* Light text */
-
-  --card: 217.2 32.6% 15.5%; /* Dark card background */
-  --card-foreground: 210 40% 98%;
-
-  --popover: 217.2 32.6% 15.5%;
-  --popover-foreground: 210 40% 98%;
-
-  --primary: 217.2 91.2% 59.8%; /* Bright blue for dark mode */
-  --primary-foreground: 222.2 84% 4.9%;
-
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-
-  --destructive: 0 62.8% 50.6%; /* Softer red for dark mode */
-  --destructive-foreground: 210 40% 98%;
-
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 94.1%;
-  
-  /* Commission Guard Dark Mode Custom Variables */
-  --commission-primary: 217.2 91.2% 59.8%; /* Bright Blue */
-  --commission-success: 142.1 70.6% 45.3%; /* Brighter Green */
-  --commission-warning: 47.9 95.8% 63.1%; /* Brighter Yellow */
-  --commission-danger: 0 72.2% 50.6%; /* Softer Red */
-  --commission-info: 204 100% 20%; /* Dark Blue */
+  --background: 220 15% 4%; /* #0F1419 */
+  --foreground: 0 0% 98%; /* #FAFAFA */
+  --muted: 220 13% 8%; /* #1F2937 */
+  --muted-foreground: 220 9% 64%; /* #9CA3AF */
+  --popover: 220 15% 6%; /* #151B23 */
+  --popover-foreground: 0 0% 98%; /* #FAFAFA */
+  --card: 220 15% 6%; /* #151B23 */
+  --card-foreground: 0 0% 98%; /* #FAFAFA */
+  --border: 220 13% 15%; /* #374151 */
+  --input: 220 13% 15%; /* #374151 */
+  --primary: 210 79% 46%; /* #1976D2 */
+  --primary-foreground: 210 100% 99%; /* #FAFBFF */
+  --secondary: 220 13% 15%; /* #374151 */
+  --secondary-foreground: 0 0% 98%; /* #FAFAFA */
+  --accent: 14 100% 57%; /* #FF6B35 */
+  --accent-foreground: 0 0% 98%; /* #FAFAFA */
+  --destructive: 0 62% 31%; /* #7F1D1D */
+  --destructive-foreground: 0 0% 98%; /* #FAFAFA */
+  --ring: 210 79% 46%; /* #1976D2 */
+  --radius: 0.5rem;
 }
 
 @layer base {

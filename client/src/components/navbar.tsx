@@ -30,7 +30,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ProfileSettingsModal from "./profile-settings-modal";
-import { ThemeSwitcher } from "./theme-switcher";
 
 export default function Navbar() {
   const { user } = useAuth();
@@ -99,8 +98,6 @@ export default function Navbar() {
               </motion.div>
               
               <div className="flex items-center space-x-3">
-                <ThemeSwitcher />
-                
                 <motion.button 
                   className="relative p-1.5 text-white/80 hover:text-white transition-colors"
                   onClick={() => setLocation("/alerts")}
