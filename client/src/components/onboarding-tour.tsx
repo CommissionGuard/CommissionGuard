@@ -160,6 +160,16 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
   useEffect(() => {
     if (isOpen) {
       updateHighlightPosition();
+      
+      // Add scroll listener to update position during scroll
+      const handleScroll = () => updateHighlightPosition();
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('resize', handleScroll, { passive: true });
+      
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('resize', handleScroll);
+      };
     }
   }, [isOpen, currentStep]);
 
@@ -169,22 +179,22 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
     
     if (element) {
       const rect = element.getBoundingClientRect();
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
       
       setHighlightPosition({
-        top: rect.top + scrollTop,
-        left: rect.left + scrollLeft,
+        top: rect.top,
+        left: rect.left,
         width: rect.width,
         height: rect.height
       });
 
       // Scroll element into view if needed
-      element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'center'
-      });
+      if (rect.top < 100 || rect.bottom > window.innerHeight - 100) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center'
+        });
+      }
     }
   };
 
@@ -237,7 +247,8 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
               outlineOffset: '4px',
               borderRadius: '8px',
               boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
-              background: 'transparent'
+              background: 'transparent',
+              transition: 'all 0.3s ease-out'
             }}
           />
 
@@ -246,79 +257,80 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className={`fixed z-50 bg-white rounded-lg shadow-2xl p-6 max-w-sm w-full mx-4 ${
-              currentTourStep.position === 'top' ? 'mb-4' :
-              currentTourStep.position === 'bottom' ? 'mt-4' :
-              currentTourStep.position === 'left' ? 'mr-4' :
-              'ml-4'
-            }`}
+            className="fixed z-50 bg-white rounded-lg shadow-2xl p-4 max-w-xs w-full mx-4"
             style={{
-              top: currentTourStep.position === 'bottom' ? highlightPosition.top + highlightPosition.height + 20 :
-                   currentTourStep.position === 'top' ? Math.max(20, highlightPosition.top - 200) :
-                   highlightPosition.top + (highlightPosition.height / 2) - 100,
-              left: currentTourStep.position === 'right' ? highlightPosition.left + highlightPosition.width + 20 :
-                    currentTourStep.position === 'left' ? Math.max(20, highlightPosition.left - 360) :
-                    Math.max(20, Math.min(window.innerWidth - 400, highlightPosition.left + (highlightPosition.width / 2) - 175))
+              top: currentTourStep.position === 'bottom' ? 
+                Math.min(window.innerHeight - 280, highlightPosition.top + highlightPosition.height + 20) :
+                currentTourStep.position === 'top' ? 
+                Math.max(20, highlightPosition.top - 260) :
+                Math.max(20, Math.min(window.innerHeight - 260, highlightPosition.top + (highlightPosition.height / 2) - 130)),
+              left: currentTourStep.position === 'right' ? 
+                Math.min(window.innerWidth - 320, highlightPosition.left + highlightPosition.width + 20) :
+                currentTourStep.position === 'left' ? 
+                Math.max(20, highlightPosition.left - 340) :
+                Math.max(20, Math.min(window.innerWidth - 320, highlightPosition.left + (highlightPosition.width / 2) - 160)),
+              transition: 'all 0.3s ease-out'
             }}
           >
             {/* Close Button */}
             <button
               onClick={skipTour}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors z-10"
             >
               <X className="h-4 w-4" />
             </button>
 
             {/* Content */}
-            <div className="pr-8">
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
+            <div className="pr-6">
+              <h2 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
                 {currentTourStep.title}
               </h2>
-              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-600 mb-3 leading-relaxed line-clamp-3">
                 {currentTourStep.description}
               </p>
             </div>
 
-            {/* Footer */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-1">
-                {tourSteps.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      index === currentStep ? 'bg-blue-600' : 'bg-gray-300'
-                    }`}
-                  />
-                ))}
-              </div>
-
-              <div className="flex items-center space-x-2">
-                {currentStep > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={prevStep}
-                    className="flex items-center gap-1"
-                  >
-                    <ChevronLeft className="h-3 w-3" />
-                    Back
-                  </Button>
-                )}
-                
-                <Button
-                  size="sm"
-                  onClick={nextStep}
-                  className="flex items-center gap-1"
-                >
-                  {currentStep === tourSteps.length - 1 ? 'Complete' : 'Next'}
-                  {currentStep < tourSteps.length - 1 && <ChevronRight className="h-3 w-3" />}
-                </Button>
-              </div>
+            {/* Step Counter */}
+            <div className="text-xs text-gray-500 mb-3 text-center">
+              Step {currentStep + 1} of {tourSteps.length}
             </div>
 
-            {/* Step Counter */}
-            <div className="text-xs text-gray-500 mt-3 text-center">
-              Step {currentStep + 1} of {tourSteps.length}
+            {/* Progress Dots */}
+            <div className="flex justify-center items-center space-x-1 mb-3">
+              {tourSteps.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                    index === currentStep ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between">
+              {currentStep > 0 ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={prevStep}
+                  className="flex items-center gap-1 text-xs px-3 py-1.5"
+                >
+                  <ChevronLeft className="h-3 w-3" />
+                  Back
+                </Button>
+              ) : (
+                <div></div>
+              )}
+              
+              <Button
+                size="sm"
+                onClick={nextStep}
+                className="flex items-center gap-1 text-xs px-3 py-1.5"
+              >
+                {currentStep === tourSteps.length - 1 ? 'Complete' : 'Next'}
+                {currentStep < tourSteps.length - 1 && <ChevronRight className="h-3 w-3" />}
+              </Button>
             </div>
           </motion.div>
         </>
