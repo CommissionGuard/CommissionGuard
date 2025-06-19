@@ -202,7 +202,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           width: Math.min(rect.width, 500), // Limit width to fit text better
           height: rect.height + 5 // Bring bottom extremely close to text
         });
-      } else if (step.target === 'clients-widget' || step.target === 'contracts-widget' || step.target === 'showing-widget' || step.target === 'protected-commission-widget') {
+      } else if (step.target === 'clients-widget' || step.target === 'contracts-widget' || step.target === 'showing-widget' || step.target === 'protected-commission-widget' || step.target === 'alerts-widget' || step.target === 'records-widget' || step.target === 'commission-widget' || step.target === 'reports-widget') {
         setHighlightPosition({
           top: rect.top - 30, // Move widget highlights higher
           left: rect.left,
@@ -302,7 +302,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             exit={{ opacity: 0, scale: 0.9 }}
             className="fixed z-50 bg-white rounded-lg shadow-2xl p-4 max-w-xs w-full mx-4"
             style={{
-              top: currentTourStep.position === 'bottom' || currentStep === 1 || currentStep === 2 || currentStep === 3 || currentStep === 4 ? 
+              top: currentTourStep.position === 'bottom' || currentStep === 1 || currentStep === 2 || currentStep === 3 || currentStep === 4 || currentStep === 5 || currentStep === 6 || currentStep === 7 || currentStep === 8 ? 
                 Math.min(window.innerHeight - 280, highlightPosition.top + highlightPosition.height + 20) :
                 currentTourStep.position === 'top' ? 
                 Math.max(20, highlightPosition.top - 260) :
