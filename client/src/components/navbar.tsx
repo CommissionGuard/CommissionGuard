@@ -127,7 +127,7 @@ export default function Navbar() {
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="flex items-center space-x-2 p-1 text-white hover:bg-white/10">
+                    <Button variant="ghost" size="sm" className="flex items-center space-x-2 p-1 text-white hover:bg-white/10" data-tour-id="profile-dropdown">
                       <Avatar className="h-6 w-6">
                         <AvatarImage 
                           src={user?.profileImageUrl || undefined} 
@@ -199,6 +199,7 @@ export default function Navbar() {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             title={item.label}
+                            data-tour-id="nav-clients"
                           >
                             <div className="flex items-center gap-1">
                               <IconComponent className="h-4 w-4 flex-shrink-0" />
@@ -244,6 +245,7 @@ export default function Navbar() {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             title={item.label}
+                            data-tour-id="nav-contracts"
                           >
                             <div className="flex items-center gap-1">
                               <IconComponent className="h-4 w-4 flex-shrink-0" />
@@ -314,6 +316,7 @@ export default function Navbar() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       title={item.label}
+                      data-tour-id="nav-alerts"
                     >
                       <IconComponent className="h-4 w-4 flex-shrink-0" />
                       <span className="hidden lg:inline">{item.label}</span>
@@ -339,6 +342,7 @@ export default function Navbar() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       title={item.label}
+                      data-tour-id="nav-showings"
                     >
                       <IconComponent className="h-4 w-4 flex-shrink-0" />
                       <span className="hidden lg:inline">{item.label}</span>
@@ -364,6 +368,7 @@ export default function Navbar() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       title={item.label}
+                      data-tour-id="nav-records"
                     >
                       <IconComponent className="h-4 w-4 flex-shrink-0" />
                       <span className="hidden lg:inline">{item.label}</span>
@@ -389,6 +394,7 @@ export default function Navbar() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       title={item.label}
+                      data-tour-id="nav-intelligence"
                     >
                       <IconComponent className="h-4 w-4 flex-shrink-0" />
                       <span className="hidden lg:inline">{item.label}</span>

@@ -24,6 +24,7 @@ import {
   ButtonSpinner
 } from "@/components/ui/loading-animations";
 
+import { OnboardingTour } from '@/components/onboarding-tour';
 import { ContextualHelp } from '@/components/contextual-help';
 import { QuickActionsPanel } from '@/components/quick-actions-panel';
 import { HelpButton } from '@/components/help-button';
@@ -361,6 +362,7 @@ function ProgressRing({ percentage, size, strokeWidth, color, label, delay = 0 }
 export default function AnimatedInsightsDashboard() {
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [location, setLocation] = useLocation();
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [helpContext, setHelpContext] = useState('');
 
@@ -406,6 +408,22 @@ export default function AnimatedInsightsDashboard() {
   };
 
 
+
+  // Check if user is new and should see onboarding
+  useEffect(() => {
+    // Clear localStorage for testing purposes
+    localStorage.removeItem('commission-guard-onboarding-completed');
+    // Force start the onboarding tour for demonstration
+    const timer = setTimeout(() => {
+      setShowOnboarding(true);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('commission-guard-onboarding-completed', 'true');
+    setShowOnboarding(false);
+  };
 
   const handleOpenHelp = (context: string) => {
     setHelpContext(context);
@@ -962,6 +980,7 @@ export default function AnimatedInsightsDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
+          data-tour-id="activity-stream"
         >
           <Card>
             <CardHeader>
@@ -1159,6 +1178,12 @@ export default function AnimatedInsightsDashboard() {
         </motion.div>
 
         {/* User Guidance Components */}
+        <OnboardingTour
+          isOpen={showOnboarding}
+          onClose={() => setShowOnboarding(false)}
+          onComplete={handleOnboardingComplete}
+        />
+        
         <ContextualHelp
           isOpen={showHelp}
           onClose={() => setShowHelp(false)}
