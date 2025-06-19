@@ -213,7 +213,7 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
         Recent Activity
       </h3>
       
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="space-y-3 max-h-96 overflow-y-auto overflow-x-hidden">
         <AnimatePresence>
           {activities.map((activity, index) => (
             <motion.div
@@ -226,20 +226,22 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
               className="p-4 border rounded-lg cursor-pointer transition-colors"
               onClick={() => handleActivityClick(activity)}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    {activity.type === 'breach' && <AlertTriangle className="h-4 w-4 text-red-500" />}
-                    {activity.type === 'contract' && <FileText className="h-4 w-4 text-blue-500" />}
-                    {activity.type === 'showing' && <Calendar className="h-4 w-4 text-green-500" />}
-                    {activity.type === 'alert' && <Shield className="h-4 w-4 text-orange-500" />}
-                    
-                    <span className="font-medium text-gray-900">{activity.title}</span>
+              <div className="w-full">
+                <div className="w-full">
+                  <div className="flex items-start gap-2 mb-1 flex-wrap">
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {activity.type === 'breach' && <AlertTriangle className="h-4 w-4 text-red-500" />}
+                      {activity.type === 'contract' && <FileText className="h-4 w-4 text-blue-500" />}
+                      {activity.type === 'showing' && <Calendar className="h-4 w-4 text-green-500" />}
+                      {activity.type === 'alert' && <Shield className="h-4 w-4 text-orange-500" />}
+                      
+                      <span className="font-medium text-gray-900 break-words">{activity.title}</span>
+                    </div>
                     
                     <TooltipProvider delayDuration={0} skipDelayDuration={0}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="inline-block cursor-help">
+                          <div className="inline-block cursor-help flex-shrink-0">
                             <Badge 
                               variant={
                                 activity.priority === 'high' ? 'destructive' : 
@@ -262,7 +264,7 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
                     </TooltipProvider>
                   </div>
                   
-                  <p className="text-sm text-gray-600 mb-2">{activity.description}</p>
+                  <p className="text-sm text-gray-600 mb-2 break-words">{activity.description}</p>
                   
                   <p className="text-xs text-gray-400">{activity.timestamp}</p>
                 </div>
