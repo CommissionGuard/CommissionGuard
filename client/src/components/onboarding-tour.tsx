@@ -216,6 +216,13 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           width: rect.width,
           height: rect.height - 5 // Slightly increase height from bottom
         });
+      } else if (step.target === 'activity-stream') {
+        setHighlightPosition({
+          top: rect.top - 25, // Move activity stream highlight up more
+          left: rect.left,
+          width: rect.width,
+          height: rect.height
+        });
       } else {
         setHighlightPosition({
           top: rect.top,
