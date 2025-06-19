@@ -184,12 +184,14 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       if (currentStep === 21) { // Step 22 (0-indexed as 21)
         const profileButton = document.querySelector('[data-tour-id="profile-dropdown"]');
         if (profileButton) {
+          // Force click the dropdown to open it
+          (profileButton as HTMLElement).click();
+          // Wait longer for dropdown to fully render before positioning
           setTimeout(() => {
-            (profileButton as HTMLElement).click();
-            setTimeout(() => {
-              updateHighlightPosition();
-            }, 100);
-          }, 100);
+            updateHighlightPosition();
+          }, 200);
+        } else {
+          updateHighlightPosition();
         }
       } else {
         updateHighlightPosition();
