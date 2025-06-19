@@ -367,29 +367,6 @@ export default function AnimatedInsightsDashboard() {
   const [helpContext, setHelpContext] = useState('');
   const [hasCheckedOnboarding, setHasCheckedOnboarding] = useState(false);
 
-  // Function to restart onboarding tour
-  const restartOnboarding = () => {
-    setShowOnboarding(true);
-  };
-
-  // Add global function and event listener for restarting onboarding
-  useEffect(() => {
-    const handleRestartOnboarding = () => {
-      setShowOnboarding(true);
-    };
-
-    // Make function globally accessible
-    (window as any).restartOnboarding = handleRestartOnboarding;
-    
-    // Add event listener for custom event
-    window.addEventListener('restart-onboarding', handleRestartOnboarding);
-
-    return () => {
-      window.removeEventListener('restart-onboarding', handleRestartOnboarding);
-      delete (window as any).restartOnboarding;
-    };
-  }, []);
-
   const { data: dashboardStats, isLoading } = useQuery<{
     activeContracts: number;
     expiringSoon: number;
@@ -416,6 +393,44 @@ export default function AnimatedInsightsDashboard() {
     queryKey: ["/api/auth/onboarding-status"],
   });
 
+  // Function to restart onboarding tour
+  const restartOnboarding = () => {
+    setShowOnboarding(true);
+  };
+
+  // Add global function and event listener for restarting onboarding
+  useEffect(() => {
+    const handleRestartOnboarding = () => {
+      setShowOnboarding(true);
+    };
+
+    // Make function globally accessible
+    (window as any).restartOnboarding = handleRestartOnboarding;
+    
+    // Add event listener for custom event
+    window.addEventListener('restart-onboarding', handleRestartOnboarding);
+
+    return () => {
+      window.removeEventListener('restart-onboarding', handleRestartOnboarding);
+      delete (window as any).restartOnboarding;
+    };
+  }, []);
+
+  // Check if user should see onboarding tour on first load
+  useEffect(() => {
+    if (onboardingStatus && !hasCheckedOnboarding) {
+      setHasCheckedOnboarding(true);
+      
+      // Show onboarding tour only if not completed
+      if (!onboardingStatus?.onboardingCompleted) {
+        const timer = setTimeout(() => {
+          setShowOnboarding(true);
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [onboardingStatus, hasCheckedOnboarding]);
+
   const handleCardClick = (cardTitle: string) => {
     switch (cardTitle) {
       case "Active Contracts":
@@ -434,23 +449,6 @@ export default function AnimatedInsightsDashboard() {
         break;
     }
   };
-
-
-
-  // Check if user should see onboarding tour on first load
-  useEffect(() => {
-    if (onboardingStatus && !hasCheckedOnboarding) {
-      setHasCheckedOnboarding(true);
-      
-      // Show onboarding tour only if not completed
-      if (!onboardingStatus?.onboardingCompleted) {
-        const timer = setTimeout(() => {
-          setShowOnboarding(true);
-        }, 1000);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [onboardingStatus, hasCheckedOnboarding]);
 
   const handleOnboardingComplete = async () => {
     setShowOnboarding(false);
