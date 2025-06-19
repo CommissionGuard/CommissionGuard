@@ -23,6 +23,10 @@ import {
   FloatingDollar,
   ButtonSpinner
 } from "@/components/ui/loading-animations";
+import { OnboardingTour } from '@/components/onboarding-tour';
+import { ContextualHelp } from '@/components/contextual-help';
+import { QuickActionsPanel } from '@/components/quick-actions-panel';
+import { HelpButton } from '@/components/help-button';
 import {
   TrendingUp,
   TrendingDown,
@@ -45,7 +49,9 @@ import {
   LineChart,
   Bell,
   Search,
-  Home
+  Home,
+  HelpCircle,
+  Brain
 } from "lucide-react";
 
 interface AnimatedCounterProps {
@@ -344,6 +350,9 @@ function ProgressRing({ percentage, size, strokeWidth, color, label, delay = 0 }
 export default function AnimatedInsightsDashboard() {
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [location, setLocation] = useLocation();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [helpContext, setHelpContext] = useState('');
 
   const { data: dashboardStats, isLoading } = useQuery<{
     activeContracts: number;
@@ -384,6 +393,25 @@ export default function AnimatedInsightsDashboard() {
       default:
         break;
     }
+  };
+
+  // Check if user is new and should see onboarding
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem('commission-guard-onboarding-completed');
+    if (!hasSeenOnboarding && !isLoading) {
+      const timer = setTimeout(() => setShowOnboarding(true), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('commission-guard-onboarding-completed', 'true');
+    setShowOnboarding(false);
+  };
+
+  const handleOpenHelp = (context: string) => {
+    setHelpContext(context);
+    setShowHelp(true);
   };
 
   const formatCurrency = (value: number) => {
@@ -453,32 +481,36 @@ export default function AnimatedInsightsDashboard() {
 
   return (
     <div className="p-6 space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="flex items-center justify-between"
-      >
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Commission Protection Dashboard</h1>
-          <p className="text-gray-600 mt-1">Protect your commissions and track your success</p>
-        </div>
-        
+        {/* Header */}
         <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-between"
+          data-tour-id="dashboard-header"
         >
-          <Button variant="outline" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Export Report
-          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Commission Protection Dashboard</h1>
+            <p className="text-gray-600 mt-1">Protect your commissions and track your success</p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <HelpButton onClick={() => handleOpenHelp('dashboard')} />
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button variant="outline" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Export Report
+              </Button>
+            </motion.div>
+          </div>
         </motion.div>
-      </motion.div>
 
-      {/* Success Pathway Guide */}
-      {Array.isArray(clients) && clients.length === 0 && (
-        <motion.div
+        {/* Success Pathway Guide */}
+        {Array.isArray(clients) && clients.length === 0 && (
+          <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -543,14 +575,14 @@ export default function AnimatedInsightsDashboard() {
                 Schedule Showing
               </Button>
             </div>
-          </div>
-        </motion.div>
-      )}
+            </div>
+          </motion.div>
+        )}
 
-      {/* All Widgets - Unified Format */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Active Clients Widget */}
-        <TooltipProvider>
+        {/* All Widgets - Unified Format */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Active Clients Widget */}
+          <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <motion.div
@@ -560,6 +592,7 @@ export default function AnimatedInsightsDashboard() {
                 whileHover={{ y: -2, scale: 1.02 }}
                 className="bg-gradient-to-r from-white to-purple-200 rounded-xl p-4 border border-purple-200 cursor-pointer group"
                 onClick={() => handleCardClick("Active Clients")}
+                data-tour-id="clients-widget"
               >
                 <div className="flex items-center justify-between mb-3">
                   <motion.div
@@ -604,6 +637,7 @@ export default function AnimatedInsightsDashboard() {
                 whileHover={{ y: -2, scale: 1.02 }}
                 className="bg-gradient-to-r from-white to-blue-200 rounded-xl p-4 border border-blue-200 cursor-pointer group"
                 onClick={() => handleCardClick("Active Contracts")}
+                data-tour-id="contracts-widget"
               >
                 <div className="flex items-center justify-between mb-3">
                   <motion.div
@@ -648,6 +682,7 @@ export default function AnimatedInsightsDashboard() {
                 whileHover={{ y: -2, scale: 1.02 }}
                 className="bg-gradient-to-r from-white to-orange-200 rounded-xl p-4 border border-orange-200 cursor-pointer group"
                 onClick={() => setLocation("/showing-tracker")}
+                data-tour-id="showing-widget"
               >
                 <div className="flex items-center justify-between mb-3">
                   <motion.div
@@ -729,13 +764,13 @@ export default function AnimatedInsightsDashboard() {
               <p>Total commission value secured with evidence</p>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
-      </div>
+          </TooltipProvider>
+        </div>
 
-      {/* Second Row - Records & Market Integration */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Potential Breaches Widget */}
-        <TooltipProvider>
+        {/* Second Row - Records & Market Integration */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Potential Breaches Widget */}
+          <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <motion.div
@@ -745,6 +780,7 @@ export default function AnimatedInsightsDashboard() {
                 whileHover={{ y: -2, scale: 1.02 }}
                 className="bg-gradient-to-r from-white to-red-200 rounded-xl p-4 border border-red-200 cursor-pointer group"
                 onClick={() => setLocation("/alerts")}
+                data-tour-id="alerts-widget"
               >
                 <div className="flex items-center justify-between mb-3">
                   <motion.div
@@ -789,6 +825,7 @@ export default function AnimatedInsightsDashboard() {
                 whileHover={{ y: -2, scale: 1.02 }}
                 className="bg-gradient-to-r from-white to-indigo-200 rounded-xl p-4 border border-indigo-200 cursor-pointer group"
                 onClick={() => setLocation("/public-records")}
+                data-tour-id="records-widget"
               >
                 <div className="flex items-center justify-between mb-3">
                   <motion.div
@@ -917,77 +954,77 @@ export default function AnimatedInsightsDashboard() {
               <p>Access comprehensive market analysis and property trends</p>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
-      </div>
+          </TooltipProvider>
+        </div>
 
-      {/* Activity Feed */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle>Real-Time Activity Stream</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ActivityFeed activities={sampleActivities} />
-          </CardContent>
-        </Card>
-      </motion.div>
+        {/* Activity Feed */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle>Real-Time Activity Stream</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ActivityFeed activities={sampleActivities} />
+            </CardContent>
+          </Card>
+        </motion.div>
 
-      {/* Performance Overview */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-      >
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <LineChart className="h-5 w-5" />
-              Commission Protection Effectiveness
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Contract Compliance</span>
-                <span className="text-sm text-gray-600">94%</span>
+        {/* Performance Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        >
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LineChart className="h-5 w-5" />
+                Commission Protection Effectiveness
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Contract Compliance</span>
+                  <span className="text-sm text-gray-600">94%</span>
+                </div>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "94%" }}
+                  transition={{ duration: 1.5, delay: 1.0 }}
+                  className="h-2 bg-green-500 rounded-full"
+                  style={{ width: "94%" }}
+                />
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Breach Prevention</span>
+                  <span className="text-sm text-gray-600">87%</span>
+                </div>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "87%" }}
+                  transition={{ duration: 1.5, delay: 1.2 }}
+                  className="h-2 bg-blue-500 rounded-full"
+                  style={{ width: "87%" }}
+                />
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Client Retention</span>
+                  <span className="text-sm text-gray-600">91%</span>
+                </div>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "91%" }}
+                  transition={{ duration: 1.5, delay: 1.4 }}
+                  className="h-2 bg-purple-500 rounded-full"
+                  style={{ width: "91%" }}
+                />
               </div>
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: "94%" }}
-                transition={{ duration: 1.5, delay: 1.0 }}
-                className="h-2 bg-green-500 rounded-full"
-                style={{ width: "94%" }}
-              />
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Breach Prevention</span>
-                <span className="text-sm text-gray-600">87%</span>
-              </div>
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: "87%" }}
-                transition={{ duration: 1.5, delay: 1.2 }}
-                className="h-2 bg-blue-500 rounded-full"
-                style={{ width: "87%" }}
-              />
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Client Retention</span>
-                <span className="text-sm text-gray-600">91%</span>
-              </div>
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: "91%" }}
-                transition={{ duration: 1.5, delay: 1.4 }}
-                className="h-2 bg-purple-500 rounded-full"
-                style={{ width: "91%" }}
-              />
-            </div>
           </CardContent>
         </Card>
 
@@ -1117,20 +1154,35 @@ export default function AnimatedInsightsDashboard() {
               <h3 className="font-semibold mb-2">View Reports</h3>
               <p className="text-sm text-gray-600">Analyze protection performance</p>
             </CardContent>
-          </Card>
+            </Card>
+          </motion.div>
         </motion.div>
-      </motion.div>
 
-      {/* Floating Action Notifications - Side Tab */}
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, x: -100 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -100 }}
-          transition={{ duration: 0.5, delay: 2 }}
-          className="fixed bottom-6 left-0 z-50 group"
-        >
+        {/* User Guidance Components */}
+        <OnboardingTour
+          isOpen={showOnboarding}
+          onClose={() => setShowOnboarding(false)}
+          onComplete={handleOnboardingComplete}
+        />
+        
+        <ContextualHelp
+          isOpen={showHelp}
+          onClose={() => setShowHelp(false)}
+          context={helpContext}
+        />
+        
+        <QuickActionsPanel onOpenHelp={handleOpenHelp} />
+
+        {/* Floating Action Notifications - Side Tab */}
+        <AnimatePresence>
           <motion.div
+            initial={{ opacity: 0, x: -100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ duration: 0.5, delay: 2 }}
+            className="fixed bottom-6 left-0 z-50 group"
+          >
+            <motion.div
             animate={{ 
               boxShadow: [
                 "0 0 20px rgba(59, 130, 246, 0.5)",
@@ -1172,10 +1224,10 @@ export default function AnimatedInsightsDashboard() {
                 <p className="text-sm font-medium text-gray-900">Live Monitoring Active</p>
                 <p className="text-xs text-gray-600">Commission protection is running</p>
               </div>
+              </motion.div>
             </motion.div>
           </motion.div>
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
+        </AnimatePresence>
+      </div>
+    );
 }
