@@ -96,13 +96,14 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       const elementVisible = rect.bottom > 0 && rect.top < viewportHeight && rect.right > 0 && rect.left < viewportWidth;
       setIsElementVisible(elementVisible);
       
-      // Create highlight that extends slightly beyond widget bounds for visibility
-      const margin = 6;
+      // Position highlight box to align with widget perimeter
+      const topMargin = 8; // Extra space above widget
+      const sideMargin = 6;
       setHighlightPosition({
-        top: rect.top - margin,
-        left: rect.left - margin,
-        width: rect.width + (margin * 2),
-        height: rect.height + (margin * 2)
+        top: rect.top - topMargin,
+        left: rect.left - sideMargin,
+        width: rect.width + (sideMargin * 2),
+        height: rect.height + topMargin + sideMargin
       });
       
       // Determine if widget is in top or bottom row based on vertical position
