@@ -282,11 +282,29 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
       // Immediately open dropdown when entering step 22
       if (nextStepIndex === 21) { // Step 22 (0-indexed as 21)
         setTimeout(() => {
+          // Try multiple methods to trigger the dropdown
           const profileButton = document.querySelector('[data-tour-id="profile-dropdown"]') as HTMLElement;
           if (profileButton) {
-            profileButton.click();
+            // Simulate mouse events to properly trigger the dropdown
+            const mouseEvent = new MouseEvent('click', {
+              view: window,
+              bubbles: true,
+              cancelable: true,
+            });
+            profileButton.dispatchEvent(mouseEvent);
+            
+            // Also try focus + enter key
+            profileButton.focus();
+            setTimeout(() => {
+              const enterEvent = new KeyboardEvent('keydown', {
+                key: 'Enter',
+                code: 'Enter',
+                bubbles: true
+              });
+              profileButton.dispatchEvent(enterEvent);
+            }, 10);
           }
-        }, 50);
+        }, 100);
       }
     } else {
       onComplete();
