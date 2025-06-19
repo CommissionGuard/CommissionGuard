@@ -302,9 +302,9 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             exit={{ opacity: 0, scale: 0.9 }}
             className="fixed z-50 bg-white rounded-lg shadow-2xl p-4 max-w-xs w-full mx-4"
             style={{
-              top: currentTourStep.position === 'bottom' || currentStep === 1 || currentStep === 2 || currentStep === 3 || currentStep === 4 || currentStep === 5 || currentStep === 6 || currentStep === 7 || currentStep === 8 ? 
+              top: currentTourStep.position === 'bottom' || currentStep === 1 || currentStep === 2 || currentStep === 3 || currentStep === 4 ? 
                 Math.min(window.innerHeight - 280, highlightPosition.top + highlightPosition.height + 20) :
-                currentTourStep.position === 'top' ? 
+                currentTourStep.position === 'top' || currentStep === 5 || currentStep === 6 || currentStep === 7 || currentStep === 8 ? 
                 Math.max(20, highlightPosition.top - 260) :
                 Math.max(20, Math.min(window.innerHeight - 260, highlightPosition.top + (highlightPosition.height / 2) - 130)),
               left: currentTourStep.position === 'right' ? 
