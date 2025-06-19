@@ -366,6 +366,29 @@ export default function AnimatedInsightsDashboard() {
   const [showHelp, setShowHelp] = useState(false);
   const [helpContext, setHelpContext] = useState('');
 
+  // Function to restart onboarding tour
+  const restartOnboarding = () => {
+    setShowOnboarding(true);
+  };
+
+  // Add global function and event listener for restarting onboarding
+  useEffect(() => {
+    const handleRestartOnboarding = () => {
+      setShowOnboarding(true);
+    };
+
+    // Make function globally accessible
+    (window as any).restartOnboarding = handleRestartOnboarding;
+    
+    // Add event listener for custom event
+    window.addEventListener('restart-onboarding', handleRestartOnboarding);
+
+    return () => {
+      window.removeEventListener('restart-onboarding', handleRestartOnboarding);
+      delete (window as any).restartOnboarding;
+    };
+  }, []);
+
   const { data: dashboardStats, isLoading } = useQuery<{
     activeContracts: number;
     expiringSoon: number;
