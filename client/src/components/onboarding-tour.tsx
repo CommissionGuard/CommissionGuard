@@ -83,13 +83,20 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
   const [tourPosition, setTourPosition] = useState({ top: 0, left: 0 });
   const [highlightPosition, setHighlightPosition] = useState({ top: 0, left: 0, width: 0, height: 0 });
+  const [isElementVisible, setIsElementVisible] = useState(true);
 
   const updatePositions = useCallback(() => {
     if (targetElement) {
       const rect = targetElement.getBoundingClientRect();
       const step = tourSteps[currentStep];
       
-      // Update highlight position
+      // Check if element is visible in viewport
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      const elementVisible = rect.bottom > 0 && rect.top < viewportHeight && rect.right > 0 && rect.left < viewportWidth;
+      setIsElementVisible(elementVisible);
+      
+      // Always update highlight position regardless of visibility
       setHighlightPosition({
         top: rect.top - 4,
         left: rect.left - 4,
@@ -97,14 +104,14 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
         height: rect.height + 8
       });
       
-      // Update tour card position - always relative to highlight position
+      // Update tour card position - follow highlight exactly, no viewport constraints
       let top = rect.bottom + 20;
       let left = rect.left;
       
       // Adjust position based on step.position
       switch (step.position) {
         case 'top':
-          top = rect.top - 280; // Adjusted to be closer to highlight
+          top = rect.top - 280;
           left = rect.left;
           break;
         case 'bottom':
@@ -121,35 +128,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           break;
       }
       
-      // Keep tour card within viewport but maintain relative positioning
-      const cardWidth = 320;
-      const cardHeight = 280;
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      
-      // Horizontal adjustments
-      if (left + cardWidth > viewportWidth - 20) {
-        left = viewportWidth - cardWidth - 20;
-      }
-      if (left < 20) {
-        left = 20;
-      }
-      
-      // Vertical adjustments - prefer to stay near the highlight
-      if (top + cardHeight > viewportHeight - 20) {
-        // If card would go below viewport, try positioning above the element
-        const aboveTop = rect.top - cardHeight - 20;
-        if (aboveTop >= 20) {
-          top = aboveTop;
-        } else {
-          // If neither above nor below works, position at bottom of viewport
-          top = viewportHeight - cardHeight - 20;
-        }
-      }
-      if (top < 20) {
-        top = 20;
-      }
-      
+      // No viewport constraints at all - tour card moves with highlight regardless of screen bounds
       setTourPosition({ top, left });
     }
   }, [targetElement, currentStep]);
