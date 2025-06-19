@@ -63,12 +63,28 @@ const tourSteps: TourStep[] = [
     action: 'Monitor records'
   },
   {
-    id: 'help-system',
+    id: 'commission-intelligence',
+    title: 'Commission Intelligence',
+    content: 'AI-powered commission protection analysis with contract risk assessment, client behavior monitoring, and market intelligence insights.',
+    target: 'commission-widget',
+    position: 'top',
+    action: 'Advanced protection strategies'
+  },
+  {
+    id: 'reports',
+    title: 'Reports & Analytics',
+    content: 'Generate comprehensive reports on client activity, contract performance, and commission protection metrics for your business insights.',
+    target: 'reports-widget',
+    position: 'top',
+    action: 'Track your protection success'
+  },
+  {
+    id: 'help-support',
     title: 'Help & Support',
-    content: 'Access contextual help throughout the platform. Click Help buttons for step-by-step guidance on any feature.',
-    target: 'dashboard-header',
+    content: 'Access our comprehensive support system including legal assistance, technical help, and real estate expertise whenever you need it.',
+    target: 'help-button',
     position: 'bottom',
-    action: 'Use help system'
+    action: 'Get help when you need it most'
   }
 ];
 

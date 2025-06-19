@@ -887,6 +887,7 @@ export default function AnimatedInsightsDashboard() {
                 whileHover={{ y: -2, scale: 1.02 }}
                 className="bg-gradient-to-r from-white to-violet-200 rounded-xl p-4 border border-violet-200 cursor-pointer group"
                 onClick={() => setLocation("/commission-intelligence")}
+                data-tour-id="commission-widget"
               >
                 <div className="flex items-center justify-between mb-3">
                   <motion.div
@@ -934,6 +935,7 @@ export default function AnimatedInsightsDashboard() {
                 whileHover={{ y: -2, scale: 1.02 }}
                 className="bg-gradient-to-r from-white to-emerald-200 rounded-xl p-4 border border-emerald-200 cursor-pointer group"
                 onClick={() => setLocation("/reports")}
+                data-tour-id="reports-widget"
               >
                 <div className="flex items-center justify-between mb-3">
                   <motion.div
