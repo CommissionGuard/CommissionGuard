@@ -209,6 +209,13 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
           width: rect.width,
           height: rect.height - 5 // Bring bottom closer to widget top
         });
+      } else if (step.target === 'help-button') {
+        setHighlightPosition({
+          top: rect.top - 35, // Move help button highlight up even more
+          left: rect.left,
+          width: rect.width,
+          height: rect.height + 40 // Add more height for better coverage
+        });
       } else {
         setHighlightPosition({
           top: rect.top,
