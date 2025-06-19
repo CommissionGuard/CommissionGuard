@@ -211,7 +211,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed z-50"
+            className="fixed z-30"
             style={{
               top: targetElement ? tourPosition.top : '50%',
               left: targetElement ? tourPosition.left : '50%',
@@ -305,7 +305,7 @@ export function OnboardingTour({ isOpen, onClose, onComplete }: OnboardingTourPr
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed z-40 pointer-events-none"
+              className="fixed z-30 pointer-events-none"
               style={{
                 top: highlightPosition.top,
                 left: highlightPosition.left,
