@@ -27,7 +27,7 @@ import PublicRecordsMonitor from "@/pages/public-records-monitor";
 import PublicRecords from "@/pages/public-records";
 import Subscription from "@/pages/subscription";
 import Support from "@/pages/support";
-import Achievements from "@/pages/achievements";
+
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();

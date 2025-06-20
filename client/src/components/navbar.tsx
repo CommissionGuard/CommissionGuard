@@ -19,7 +19,7 @@ import {
   UserPlus,
   Plus,
   Brain,
-  Trophy
+
 } from "lucide-react";
 import logoIcon from "@/assets/commission-guard-icon.svg";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,7 @@ export default function Navbar() {
     { path: "/alerts", label: "Alerts", icon: AlertTriangle, shortLabel: "Alerts", description: "Stay informed about potential issues" },
     { path: "/public-records", label: "Public Records Monitor", icon: Search, shortLabel: "Records", description: "Watch for unauthorized transactions" },
     { path: "/commission-intelligence", label: "Commission Intelligence", icon: Brain, shortLabel: "AI Intel", description: "AI-powered contract analysis and risk assessment" },
-    { path: "/achievements", label: "Achievements", icon: Trophy, shortLabel: "Progress", description: "Track your milestones and earn badges" },
+
     { path: "/reports", label: "Reports", icon: FileSpreadsheet, shortLabel: "Reports", description: "Generate commission protection reports" },
     ...(user?.role === 'admin' ? [{ path: "/breach-management", label: "Breach Management", icon: ShieldAlert, shortLabel: "Breach", description: "Manage commission breach cases" }] : []),
   ];
