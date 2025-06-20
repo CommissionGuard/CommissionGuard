@@ -62,7 +62,6 @@ function Router() {
         <Route path="/support" component={isAuthenticated ? Support : Landing} />
         <Route path="/public-records" component={isAuthenticated ? PublicRecordsMonitor : Landing} />
         <Route path="/public-records-search" component={isAuthenticated ? PublicRecords : Landing} />
-        <Route path="/achievements" component={isAuthenticated ? Achievements : Landing} />
         <Route component={NotFound} />
       </Switch>
       {isAuthenticated && (
