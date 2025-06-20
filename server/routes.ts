@@ -3199,7 +3199,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Achievement System Routes
   app.get("/api/achievements/progress", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims?.sub || req.user.id;
+      console.log("Fetching progress for user:", userId);
       const progress = await achievementService.getUserProgress(userId);
       res.json(progress);
     } catch (error) {
@@ -3220,7 +3221,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/achievements/check", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims?.sub || req.user.id;
+      console.log("Checking achievements for user:", userId);
       const newAchievements = await achievementService.checkAchievements(userId);
       res.json({ newAchievements });
     } catch (error) {
@@ -3231,12 +3233,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/achievements/update-login", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims?.sub || req.user.id;
+      console.log("Updating login streak for user:", userId);
       await achievementService.updateLoginStreak(userId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error updating login streak:", error);
       res.status(500).json({ message: "Failed to update login streak" });
+    }
+  });
+
+  // Initialize user achievements on first login
+  app.post("/api/achievements/initialize", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub || req.user.id;
+      console.log("Initializing achievements for user:", userId);
+      await achievementService.initializeUserStats(userId);
+      await achievementService.updateLoginStreak(userId);
+      const progress = await achievementService.getUserProgress(userId);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error initializing achievements:", error);
+      res.status(500).json({ message: "Failed to initialize achievements" });
+    }
+  });
+
+  // Demo route to simulate progress and unlock achievements
+  app.post("/api/achievements/demo", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub || req.user.id;
+      console.log("Running achievement demo for user:", userId);
+      
+      // Initialize user stats if not exists
+      await achievementService.initializeUserStats(userId);
+      
+      // Simulate user progress
+      await achievementService.updateUserStats(userId, {
+        clientsAdded: 3,
+        contractsUploaded: 2,
+        showingsScheduled: 5,
+        commissionProtected: 15000,
+        alertsActioned: 2
+      });
+      
+      // Update login streak
+      await achievementService.updateLoginStreak(userId);
+      
+      // Check for new achievements
+      const newAchievements = await achievementService.checkAchievements(userId);
+      
+      // Get updated progress
+      const progress = await achievementService.getUserProgress(userId);
+      
+      res.json({
+        success: true,
+        newAchievements,
+        progress,
+        message: "Demo completed! Check your progress and achievements."
+      });
+    } catch (error) {
+      console.error("Error running achievement demo:", error);
+      res.status(500).json({ message: "Failed to run demo" });
     }
   });
 

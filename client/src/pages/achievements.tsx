@@ -1,4 +1,5 @@
 import { AchievementBadges } from "@/components/achievement-badges";
+import { AchievementDemo } from "@/components/achievement-demo";
 import Navbar from "@/components/navbar";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -28,7 +29,11 @@ export default function Achievements() {
           <h1 className="text-3xl font-bold text-gray-900">Achievements & Progress</h1>
           <p className="text-gray-600 mt-2">Track your milestones and unlock badges as you build your real estate business.</p>
         </div>
-        <AchievementBadges />
+        
+        <div className="space-y-6">
+          <AchievementDemo />
+          <AchievementBadges />
+        </div>
       </div>
     </div>
   );
