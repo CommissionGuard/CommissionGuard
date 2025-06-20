@@ -26,9 +26,9 @@ import {
 
 import { OnboardingTour } from '@/components/onboarding-tour';
 import { ContextualHelp } from '@/components/contextual-help';
-import { QuickActionsPanel } from '@/components/quick-actions-panel';
+
 import { HelpButton } from '@/components/help-button';
-import { AchievementProgressWidget } from '@/components/achievement-progress-widget';
+
 import {
   TrendingUp,
   TrendingDown,
@@ -1239,7 +1239,7 @@ export default function AnimatedInsightsDashboard() {
           context={helpContext}
         />
         
-        <QuickActionsPanel onOpenHelp={handleOpenHelp} />
+
 
         {/* Floating Action Notifications - Side Tab */}
         <AnimatePresence>
