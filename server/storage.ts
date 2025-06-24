@@ -1509,16 +1509,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Admin methods for enhanced admin interface
-  async getAllUsers(): Promise<User[]> {
-    try {
-      const usersData = await db.select().from(users);
-      return usersData;
-    } catch (error) {
-      console.error("Error fetching all users:", error);
-      return [];
-    }
-  }
+
 
   async getAllContracts(): Promise<Contract[]> {
     try {
@@ -1723,26 +1714,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getExpiringContracts(daysAhead: number = 30): Promise<Contract[]> {
-    try {
-      const futureDate = new Date();
-      futureDate.setDate(futureDate.getDate() + daysAhead);
-      
-      const expiringContracts = await db
-        .select()
-        .from(contracts)
-        .where(
-          and(
-            eq(contracts.status, "active"),
-            lte(contracts.endDate, futureDate.toISOString())
-          )
-        );
-      return expiringContracts;
-    } catch (error) {
-      console.error("Error fetching expiring contracts:", error);
-      return [];
-    }
-  }
+  // Removed duplicate getExpiringContracts method - keeping the agent-specific version at line 539
 
   // Breach management methods
   async getPotentialBreaches() {
