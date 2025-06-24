@@ -31,15 +31,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ProfileSettingsModal from "./profile-settings-modal";
-import AddClientForm from "./add-client-form";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Navbar() {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
   const [showProfileSettings, setShowProfileSettings] = useState(false);
-  const [showClientsDropdown, setShowClientsDropdown] = useState(false);
-  const [showAddClientModal, setShowAddClientModal] = useState(false);
   
   const { data: unreadCount } = useQuery({
     queryKey: ["/api/alerts/unread/count"],
@@ -189,70 +185,43 @@ export default function Navbar() {
                   return (
                     <motion.div
                       key={item.path}
-                      className="flex-shrink-0 relative"
+                      className="flex-shrink-0"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
-                      onMouseEnter={() => setShowClientsDropdown(true)}
-                      onMouseLeave={() => setShowClientsDropdown(false)}
                     >
-                      <motion.button
-                        onClick={() => setLocation(item.path)}
-                        className={`whitespace-nowrap py-3 px-1 sm:px-2 border-b-2 font-medium text-xs transition-colors flex flex-col sm:flex-row items-center gap-1 ${
-                          location === item.path
-                            ? "border-purple-600 text-purple-600"
-                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                        }`}
-                        whileHover={{ y: -1 }}
-                        whileTap={{ y: 0 }}
-                        title={item.label}
-                        data-tour-id="nav-clients"
-                      >
-                        <div className="flex items-center gap-1">
-                          <IconComponent className="h-4 w-4 flex-shrink-0" />
-                          <motion.div
-                            animate={{ rotate: showClientsDropdown ? 180 : 0 }}
-                            transition={{ duration: 0.2 }}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <motion.button
+                            className={`whitespace-nowrap py-3 px-1 sm:px-2 border-b-2 font-medium text-xs transition-colors flex flex-col sm:flex-row items-center gap-1 ${
+                              location === item.path
+                                ? "border-purple-600 text-purple-600"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                            }`}
+                            whileHover={{ y: -1 }}
+                            whileTap={{ y: 0 }}
+                            title={item.label}
+                            data-tour-id="nav-clients"
                           >
-                            <ChevronDown className="h-3 w-3" />
-                          </motion.div>
-                        </div>
-                        <span className="hidden lg:inline">{item.label}</span>
-                        <span className="lg:hidden">{item.shortLabel}</span>
-                      </motion.button>
-                      
-                      {/* Hover dropdown */}
-                      <AnimatePresence>
-                        {showClientsDropdown && (
-                          <motion.div
-                            className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 w-48 z-50"
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <div className="bg-white rounded-md shadow-lg border border-gray-200 py-1">
-                              <button
-                                onClick={() => setLocation("/clients")}
-                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
-                              >
-                                <Users className="h-4 w-4" />
-                                All Clients
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setShowAddClientModal(true);
-                                  setShowClientsDropdown(false);
-                                }}
-                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
-                              >
-                                <UserPlus className="h-4 w-4" />
-                                Add New Client
-                              </button>
+                            <div className="flex items-center gap-1">
+                              <IconComponent className="h-4 w-4 flex-shrink-0" />
+                              <ChevronDown className="h-3 w-3" />
                             </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                            <span className="hidden lg:inline">{item.label}</span>
+                            <span className="lg:hidden">{item.shortLabel}</span>
+                          </motion.button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="center" className="w-48">
+                          <DropdownMenuItem onClick={() => setLocation("/clients")} className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            All Clients
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setLocation("/clients?action=add")} className="flex items-center gap-2">
+                            <UserPlus className="h-4 w-4" />
+                            Add New Client
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </motion.div>
                   );
                 }
