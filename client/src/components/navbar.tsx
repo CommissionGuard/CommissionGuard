@@ -182,15 +182,17 @@ export default function Navbar() {
                 
                 // Special handling for Clients tab with dropdown
                 if (item.path === "/clients") {
+                  const [showDropdown, setShowDropdown] = useState(false);
+                  
                   return (
                     <motion.div
                       key={item.path}
-                      className="flex-shrink-0 group relative"
+                      className="flex-shrink-0 relative"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
-                      onMouseEnter={() => {}}
-                      onMouseLeave={() => {}}
+                      onMouseEnter={() => setShowDropdown(true)}
+                      onMouseLeave={() => setShowDropdown(false)}
                     >
                       <motion.button
                         onClick={() => setLocation(item.path)}
@@ -206,31 +208,46 @@ export default function Navbar() {
                       >
                         <div className="flex items-center gap-1">
                           <IconComponent className="h-4 w-4 flex-shrink-0" />
-                          <ChevronDown className="h-3 w-3 transition-transform group-hover:rotate-180" />
+                          <motion.div
+                            animate={{ rotate: showDropdown ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <ChevronDown className="h-3 w-3" />
+                          </motion.div>
                         </div>
                         <span className="hidden lg:inline">{item.label}</span>
                         <span className="lg:hidden">{item.shortLabel}</span>
                       </motion.button>
                       
                       {/* Hover dropdown */}
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 group-hover:delay-75">
-                        <div className="py-1">
-                          <button
-                            onClick={() => setLocation("/clients")}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
+                      <AnimatePresence>
+                        {showDropdown && (
+                          <motion.div
+                            className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 w-48 z-50"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
                           >
-                            <Users className="h-4 w-4" />
-                            All Clients
-                          </button>
-                          <button
-                            onClick={() => setLocation("/clients?action=add")}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
-                          >
-                            <UserPlus className="h-4 w-4" />
-                            Add New Client
-                          </button>
-                        </div>
-                      </div>
+                            <div className="bg-white rounded-md shadow-lg border border-gray-200 py-1">
+                              <button
+                                onClick={() => setLocation("/clients")}
+                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
+                              >
+                                <Users className="h-4 w-4" />
+                                All Clients
+                              </button>
+                              <button
+                                onClick={() => setLocation("/clients?action=add")}
+                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
+                              >
+                                <UserPlus className="h-4 w-4" />
+                                Add New Client
+                              </button>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   );
                 }
