@@ -36,6 +36,7 @@ export default function Navbar() {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
   const [showProfileSettings, setShowProfileSettings] = useState(false);
+  const [showClientsDropdown, setShowClientsDropdown] = useState(false);
   
   const { data: unreadCount } = useQuery({
     queryKey: ["/api/alerts/unread/count"],
@@ -182,8 +183,6 @@ export default function Navbar() {
                 
                 // Special handling for Clients tab with dropdown
                 if (item.path === "/clients") {
-                  const [showDropdown, setShowDropdown] = useState(false);
-                  
                   return (
                     <motion.div
                       key={item.path}
@@ -191,8 +190,8 @@ export default function Navbar() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
-                      onMouseEnter={() => setShowDropdown(true)}
-                      onMouseLeave={() => setShowDropdown(false)}
+                      onMouseEnter={() => setShowClientsDropdown(true)}
+                      onMouseLeave={() => setShowClientsDropdown(false)}
                     >
                       <motion.button
                         onClick={() => setLocation(item.path)}
@@ -209,7 +208,7 @@ export default function Navbar() {
                         <div className="flex items-center gap-1">
                           <IconComponent className="h-4 w-4 flex-shrink-0" />
                           <motion.div
-                            animate={{ rotate: showDropdown ? 180 : 0 }}
+                            animate={{ rotate: showClientsDropdown ? 180 : 0 }}
                             transition={{ duration: 0.2 }}
                           >
                             <ChevronDown className="h-3 w-3" />
@@ -221,7 +220,7 @@ export default function Navbar() {
                       
                       {/* Hover dropdown */}
                       <AnimatePresence>
-                        {showDropdown && (
+                        {showClientsDropdown && (
                           <motion.div
                             className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 w-48 z-50"
                             initial={{ opacity: 0, y: -10 }}
