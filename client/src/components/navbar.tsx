@@ -198,8 +198,8 @@ export default function Navbar() {
                                 ? "border-purple-600 text-purple-600"
                                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                             }`}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                            whileHover={{ y: -1 }}
+                            whileTap={{ y: 0 }}
                             title={item.label}
                             data-tour-id="nav-clients"
                           >
@@ -244,8 +244,8 @@ export default function Navbar() {
                                 ? "border-blue-600 text-blue-600"
                                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                             }`}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                            whileHover={{ y: -1 }}
+                            whileTap={{ y: 0 }}
                             title={item.label}
                             data-tour-id="nav-contracts"
                           >
@@ -290,8 +290,8 @@ export default function Navbar() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ y: -1 }}
+                      whileTap={{ y: 0 }}
                       title={item.label}
                       data-tour-id="nav-commission-protection"
                     >
@@ -316,8 +316,8 @@ export default function Navbar() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ y: -1 }}
+                      whileTap={{ y: 0 }}
                       title={item.label}
                       data-tour-id="nav-alerts"
                     >
@@ -342,8 +342,8 @@ export default function Navbar() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ y: -1 }}
+                      whileTap={{ y: 0 }}
                       title={item.label}
                       data-tour-id="nav-showings"
                     >
@@ -368,8 +368,8 @@ export default function Navbar() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ y: -1 }}
+                      whileTap={{ y: 0 }}
                       title={item.label}
                       data-tour-id="nav-records"
                     >
@@ -394,8 +394,8 @@ export default function Navbar() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ y: -1 }}
+                      whileTap={{ y: 0 }}
                       title={item.label}
                       data-tour-id="nav-intelligence"
                     >
@@ -420,8 +420,8 @@ export default function Navbar() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ y: -1 }}
+                      whileTap={{ y: 0 }}
                       title={item.label}
                       data-tour-id="nav-reports"
                     >
@@ -445,8 +445,8 @@ export default function Navbar() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1, duration: 0.3 }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ y: -1 }}
+                    whileTap={{ y: 0 }}
                     title={item.label}
                     data-tour-id={item.path === "/" ? "nav-dashboard" : `nav-${item.path.replace('/', '').replace('-', '')}`}
                   >
