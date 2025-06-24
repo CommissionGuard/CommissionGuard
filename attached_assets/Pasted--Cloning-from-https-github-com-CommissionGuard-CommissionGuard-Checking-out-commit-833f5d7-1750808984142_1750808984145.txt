@@ -1,0 +1,83 @@
+==> Cloning from https://github.com/CommissionGuard/CommissionGuard
+==> Checking out commit 833f5d7cb1dd62add9c1871eefb200e614d4d76f in branch main
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Using Bun version 1.1.0 (default)
+==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+==> Running build command 'npm install; npm run build'...
+added 578 packages, and audited 579 packages in 14s
+74 packages are looking for funding
+  run `npm fund` for details
+9 vulnerabilities (1 low, 7 moderate, 1 high)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.14 building for production...
+transforming...
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2428 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                   0.63 kB │ gzip:   0.38 kB
+../dist/public/assets/index-HXheWI7b.css  123.20 kB │ gzip:  19.61 kB
+../dist/public/assets/index-TaldTF4I.js   952.87 kB │ gzip: 255.05 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 7.57s
+▲ [WARNING] Duplicate member "getAllUsers" in class body [duplicate-class-member]
+    server/storage.ts:1513:8:
+      1513 │   async getAllUsers(): Promise<User[]> {
+           ╵         ~~~~~~~~~~~
+  The original member "getAllUsers" is here:
+    server/storage.ts:262:8:
+      262 │   async getAllUsers(): Promise<User[]> {
+          ╵         ~~~~~~~~~~~
+▲ [WARNING] Duplicate member "getExpiringContracts" in class body [duplicate-class-member]
+    server/storage.ts:1726:8:
+      1726 │   async getExpiringContracts(daysAhead: number = 30): Promise<Co...
+           ╵         ~~~~~~~~~~~~~~~~~~~~
+  The original member "getExpiringContracts" is here:
+    server/storage.ts:539:8:
+      539 │   async getExpiringContracts(agentId: string, daysAhead: number):...
+          ╵         ~~~~~~~~~~~~~~~~~~~~
+2 warnings
+  dist/index.js  326.5kb
+⚡ Done in 20ms
+==> Uploading build...
+==> Uploaded in 8.6s. Compression took 4.1s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'npm run start'
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+file:///opt/render/project/src/dist/index.js:2609
+  throw new Error("Environment variable REPLIT_DOMAINS not provided");
+        ^
+Error: Environment variable REPLIT_DOMAINS not provided
+    at file:///opt/render/project/src/dist/index.js:2609:9
+    at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Node.js v22.16.0
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+==> Running 'npm run start'
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+file:///opt/render/project/src/dist/index.js:2609
+  throw new Error("Environment variable REPLIT_DOMAINS not provided");
+        ^
+Error: Environment variable REPLIT_DOMAINS not provided
+    at file:///opt/render/project/src/dist/index.js:2609:9
+    at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Node.js v22.16.0
