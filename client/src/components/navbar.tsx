@@ -185,43 +185,52 @@ export default function Navbar() {
                   return (
                     <motion.div
                       key={item.path}
-                      className="flex-shrink-0"
+                      className="flex-shrink-0 group relative"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
+                      onMouseEnter={() => {}}
+                      onMouseLeave={() => {}}
                     >
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <motion.button
-                            className={`whitespace-nowrap py-3 px-1 sm:px-2 border-b-2 font-medium text-xs transition-colors flex flex-col sm:flex-row items-center gap-1 ${
-                              location === item.path
-                                ? "border-purple-600 text-purple-600"
-                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                            }`}
-                            whileHover={{ y: -1 }}
-                            whileTap={{ y: 0 }}
-                            title={item.label}
-                            data-tour-id="nav-clients"
+                      <motion.button
+                        onClick={() => setLocation(item.path)}
+                        className={`whitespace-nowrap py-3 px-1 sm:px-2 border-b-2 font-medium text-xs transition-colors flex flex-col sm:flex-row items-center gap-1 ${
+                          location === item.path
+                            ? "border-purple-600 text-purple-600"
+                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        }`}
+                        whileHover={{ y: -1 }}
+                        whileTap={{ y: 0 }}
+                        title={item.label}
+                        data-tour-id="nav-clients"
+                      >
+                        <div className="flex items-center gap-1">
+                          <IconComponent className="h-4 w-4 flex-shrink-0" />
+                          <ChevronDown className="h-3 w-3 transition-transform group-hover:rotate-180" />
+                        </div>
+                        <span className="hidden lg:inline">{item.label}</span>
+                        <span className="lg:hidden">{item.shortLabel}</span>
+                      </motion.button>
+                      
+                      {/* Hover dropdown */}
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 group-hover:delay-75">
+                        <div className="py-1">
+                          <button
+                            onClick={() => setLocation("/clients")}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
                           >
-                            <div className="flex items-center gap-1">
-                              <IconComponent className="h-4 w-4 flex-shrink-0" />
-                              <ChevronDown className="h-3 w-3" />
-                            </div>
-                            <span className="hidden lg:inline">{item.label}</span>
-                            <span className="lg:hidden">{item.shortLabel}</span>
-                          </motion.button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="center" className="w-48">
-                          <DropdownMenuItem onClick={() => setLocation("/clients")} className="flex items-center gap-2">
                             <Users className="h-4 w-4" />
                             All Clients
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setLocation("/clients?action=add")} className="flex items-center gap-2">
+                          </button>
+                          <button
+                            onClick={() => setLocation("/clients?action=add")}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
+                          >
                             <UserPlus className="h-4 w-4" />
                             Add New Client
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          </button>
+                        </div>
+                      </div>
                     </motion.div>
                   );
                 }
