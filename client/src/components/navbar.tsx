@@ -31,12 +31,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ProfileSettingsModal from "./profile-settings-modal";
+import AddClientForm from "./add-client-form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Navbar() {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   const [showClientsDropdown, setShowClientsDropdown] = useState(false);
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
   
   const { data: unreadCount } = useQuery({
     queryKey: ["/api/alerts/unread/count"],
@@ -237,7 +240,10 @@ export default function Navbar() {
                                 All Clients
                               </button>
                               <button
-                                onClick={() => setLocation("/clients?action=add")}
+                                onClick={() => {
+                                  setShowAddClientModal(true);
+                                  setShowClientsDropdown(false);
+                                }}
                                 className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
                               >
                                 <UserPlus className="h-4 w-4" />
