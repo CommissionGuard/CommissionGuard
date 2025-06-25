@@ -17,7 +17,7 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
 }
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 
 export class NotificationService {
   
@@ -182,6 +182,16 @@ export class NotificationService {
       },
       "sms": "SMS message here (keep under 160 characters)"
     }`;
+    
+    if (!openai) {
+      return {
+        email: {
+          subject: `Showing Reminder - ${timeFrame} Notice`,
+          text: `Hello ${client.fullName},\n\nThis is a reminder that you have a property showing scheduled in ${timeFrame}.\n\nDetails:\nDate & Time: ${showingDate}\nAgent: ${agent.firstName} ${agent.lastName}\n\nPlease contact us if you need to reschedule.\n\nBest regards,\n${agent.firstName}`
+        },
+        sms: `Hi ${client.fullName}, reminder: showing in ${timeFrame} on ${showingDate}. Contact ${agent.firstName} if changes needed.`
+      };
+    }
     
     try {
       const response = await openai.chat.completions.create({
@@ -384,7 +394,7 @@ export class NotificationService {
 
   // Process client response using AI to understand context and intent
   private async processClientResponse(messageBody: string, clientAgent: any) {
-       if (!openai) {
+    if (!process.env.OPENAI_API_KEY) {
       return {
         category: "general",
         intent: "unknown",
@@ -394,6 +404,7 @@ export class NotificationService {
         summary: messageBody
       };
     }
+
     try {
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
