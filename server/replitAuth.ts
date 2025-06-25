@@ -8,14 +8,14 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-// Check if we're in a Replit environment
-const isReplitEnvironment = process.env.REPLIT_DOMAINS && process.env.REPL_ID;
+const isReplitEnvironment = !!(process.env.REPLIT_DOMAINS && process.env.REPL_ID);
+
+if (!process.env.REPLIT_DOMAINS) {
+  console.log("REPLIT_DOMAINS not found - using production authentication mode");
+}
 
 const getOidcConfig = memoize(
   async () => {
-    if (!isReplitEnvironment) {
-      return null;
-    }
     return await client.discovery(
       new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
       process.env.REPL_ID!
@@ -26,21 +26,6 @@ const getOidcConfig = memoize(
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  
-  if (!isReplitEnvironment || !process.env.DATABASE_URL) {
-    // Use memory store for demo/development
-    return session({
-      secret: process.env.SESSION_SECRET || 'demo-secret-key-not-for-production',
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        secure: false,
-        maxAge: sessionTtl,
-      },
-    });
-  }
-
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
@@ -48,7 +33,6 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
-  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
@@ -88,11 +72,10 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Only setup Replit auth if in Replit environment
   if (isReplitEnvironment) {
+    // Replit authentication setup
     try {
       const config = await getOidcConfig();
-      if (!config) return;
 
       const verify: VerifyFunction = async (
         tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
@@ -147,91 +130,58 @@ export async function setupAuth(app: Express) {
     } catch (error) {
       console.warn("Replit auth setup failed, using demo mode:", error.message);
     }
-} else {
-  // Production authentication routes - require explicit login
-  app.get("/api/login", async (req, res) => {
-    try {
-      // Create demo user in database if doesn't exist
-      let user = await storage.getUser("demo-user-001");
-      if (!user) {
-        user = await storage.upsertUser({
-          id: "demo-user-001",
-          email: "demo@commissionguard.com",
-          firstName: "Demo",
-          lastName: "User",
-          profileImageUrl: null,
-        });
-      }} else {
-  // Production authentication routes - require explicit login
-  app.get("/api/login", async (req, res) => {
-    try {
-      // Create demo user in database if doesn't exist
-      let user = await storage.getUser("demo-user-001");
-      if (!user) {
-        user = await storage.upsertUser({
-          id: "demo-user-001",
-          email: "demo@commissionguard.com",
-          firstName: "Demo",
-          lastName: "User",
-          profileImageUrl: null,
-        });
+  } else {
+    // Production authentication routes - require explicit login
+    app.get("/api/login", async (req, res) => {
+      try {
+        // Create demo user in database if doesn't exist
+        let user = await storage.getUser("demo-user-001");
+        if (!user) {
+          user = await storage.upsertUser({
+            id: "demo-user-001",
+            email: "demo@commissionguard.com",
+            firstName: "Demo",
+            lastName: "User",
+            profileImageUrl: null,
+          });
+        }
+        
+        // Set session to mark user as logged in
+        if (req.session) {
+          (req.session as any).user = user;
+        }
+        
+        res.redirect("/dashboard");
+      } catch (error) {
+        console.error("Login error:", error);
+        res.redirect("/?error=login_failed");
       }
-      
-      // Set session to mark user as logged in
-      if (req.session) {
-        (req.session as any).user = user;
-      }
-      
-      res.redirect("/dashboard");
-    } catch (error) {
-      console.error("Login error:", error);
-      res.redirect("/?error=login_failed");
-    }
-  });
+    });
 
-  app.get("/api/logout", (req, res) => {
-    if (req.session) {
-      req.session.destroy(() => {
-        res.redirect("/");
-      });
-    } else {
-      res.redirect("/");
-    }
-  });
-}
-      
-      // Set session to mark user as logged in
+    app.get("/api/logout", (req, res) => {
       if (req.session) {
-        (req.session as any).user = user;
-      }
-      
-      res.redirect("/dashboard");
-    } catch (error) {
-      console.error("Login error:", error);
-      res.redirect("/?error=login_failed");
-    }
-  });
-
-  app.get("/api/logout", (req, res) => {
-    if (req.session) {
-      req.session.destroy(() => {
+        req.session.destroy(() => {
+          res.redirect("/");
+        });
+      } else {
         res.redirect("/");
-      });
-    } else {
-      res.redirect("/");
-    }
-  });
+      }
+    });
+  }
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  // In non-Replit environments, use demo authentication
+  // In non-Replit environments, check for session-based login
   if (!isReplitEnvironment) {
-    return next();
+    if (req.session?.user) {
+      return next();
+    }
+    return res.status(401).json({ message: "Please login to access this resource" });
   }
 
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user?.expires_at) {
+  if (!req.isAuthenticated() || !user.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
@@ -248,9 +198,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
 
   try {
     const config = await getOidcConfig();
-    if (!config) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
     const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
     updateUserSession(user, tokenResponse);
     return next();
@@ -261,11 +208,42 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
 };
 
 export const isAuthenticatedOrDemo: RequestHandler = async (req, res, next) => {
-  // In production/non-Replit environments, always allow access
-  if (!isReplitEnvironment) {
+  // In production/non-Replit environments, always allow with demo user
+  if (!process.env.REPLIT_DOMAINS || !process.env.REPL_ID) {
+    try {
+      // Get or create demo user from Neon database
+      let user = await storage.getUser("demo-user-001");
+      if (!user) {
+        user = await storage.upsertUser({
+          id: "demo-user-001",
+          email: "demo@commissionguard.com",
+          firstName: "Demo",
+          lastName: "User",
+          profileImageUrl: null,
+        });
+      }
+      (req as any).user = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role || "agent",
+        claims: { sub: user.id }
+      };
+    } catch (error) {
+      console.error("Demo auth error:", error);
+      (req as any).user = {
+        id: "demo-user-001",
+        email: "demo@commissionguard.com",
+        firstName: "Demo",
+        lastName: "User",
+        role: "agent",
+        claims: { sub: "demo-user-001" }
+      };
+    }
     return next();
   }
 
-  // In Replit environment, use normal authentication
+  // In Replit environment, use real authentication
   return isAuthenticated(req, res, next);
 };
