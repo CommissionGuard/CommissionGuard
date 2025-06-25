@@ -51,20 +51,14 @@ export async function setupVite(app: Express, server: Server) {
         "client",
         "index.html",
       );
-      let template = fs.readFileSync(clientTemplate, "utf-8");
 
-      template = await vite.transformIndexHtml(url, template);
-
-      const clientEntryPoint = path.resolve(
-        import.meta.dirname,
-        "..",
-        "client",
-        "src",
-        "main.tsx",
+      let template = await fs.promises.readFile(clientTemplate, "utf-8");
+      template = template.replace(
+        `src="/src/main.tsx"`,
+        `src="/src/main.tsx?v=${nanoid()}"`,
       );
-      const { render } = await vite.ssrLoadModule(clientEntryPoint);
-
-      res.status(200).set({ "Content-Type": "text/html" }).end(template);
+      const page = await vite.transformIndexHtml(url, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
       next(e);
@@ -73,7 +67,7 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "..", "dist", "public");
+  const distPath = path.resolve(import.meta.dirname, "../dist");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
@@ -81,24 +75,13 @@ export function serveStatic(app: Express) {
     );
   }
 
- import { Express } from "express";
-import express from "express";
-import path from "path";
+  app.use(express.static(distPath));
 
-export function registerVite(app: Express) {
-  const __dirname = path.dirname(new URL(import.meta.url).pathname);
-  
-  // Serve static files from dist directory (Render compatibility)
-  app.use(express.static(path.join(__dirname, "../dist")));
-  
-  // SPA fallback - serve index.html for all non-API routes
-  app.get("*", (req, res) => {
-    // Skip API routes
+  app.use("*", (req, res) => {
     if (req.path.startsWith("/api/")) {
       return res.status(404).json({ error: "API endpoint not found" });
     }
     
-    // Serve index.html for all other routes (client-side routing)
-    res.sendFile(path.join(__dirname, "../dist", "index.html"));
+    res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
