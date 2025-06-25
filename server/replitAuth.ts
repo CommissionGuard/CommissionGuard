@@ -1,19 +1,15 @@
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
-
 import passport from "passport";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
-
 const isReplitEnvironment = !!(process.env.REPLIT_DOMAINS && process.env.REPL_ID);
-
 if (!process.env.REPLIT_DOMAINS) {
   console.log("REPLIT_DOMAINS not found - using production authentication mode");
 }
-
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
@@ -23,7 +19,6 @@ const getOidcConfig = memoize(
   },
   { maxAge: 3600 * 1000 }
 );
-
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);
@@ -34,7 +29,7 @@ export function getSession() {
     tableName: "sessions",
   });
   return session({
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || "commission-guard-fallback-secret-key-2025",
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
@@ -45,7 +40,6 @@ export function getSession() {
     },
   });
 }
-
 function updateUserSession(
   user: any,
   tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers
@@ -55,7 +49,6 @@ function updateUserSession(
   user.refresh_token = tokens.refresh_token;
   user.expires_at = user.claims?.exp;
 }
-
 async function upsertUser(claims: any) {
   await storage.upsertUser({
     id: claims["sub"],
@@ -65,18 +58,15 @@ async function upsertUser(claims: any) {
     profileImageUrl: claims["profile_image_url"],
   });
 }
-
 export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
-
   if (isReplitEnvironment) {
     // Replit authentication setup
     try {
       const config = await getOidcConfig();
-
       const verify: VerifyFunction = async (
         tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
         verified: passport.AuthenticateCallback
@@ -86,7 +76,6 @@ export async function setupAuth(app: Express) {
         await upsertUser(tokens.claims());
         verified(null, user);
       };
-
       for (const domain of process.env.REPLIT_DOMAINS!.split(",")) {
         const strategy = new Strategy(
           {
@@ -99,24 +88,20 @@ export async function setupAuth(app: Express) {
         );
         passport.use(strategy);
       }
-
       passport.serializeUser((user: Express.User, cb) => cb(null, user));
       passport.deserializeUser((user: Express.User, cb) => cb(null, user));
-
       app.get("/api/login", (req, res, next) => {
         passport.authenticate(`replitauth:${req.hostname}`, {
           prompt: "login consent",
           scope: ["openid", "email", "profile", "offline_access"],
         })(req, res, next);
       });
-
       app.get("/api/callback", (req, res, next) => {
         passport.authenticate(`replitauth:${req.hostname}`, {
           successReturnToOrRedirect: "/",
           failureRedirect: "/api/login",
         })(req, res, next);
       });
-
       app.get("/api/logout", (req, res) => {
         req.logout(() => {
           res.redirect(
@@ -157,7 +142,6 @@ export async function setupAuth(app: Express) {
         res.redirect("/?error=login_failed");
       }
     });
-
     app.get("/api/logout", (req, res) => {
       if (req.session) {
         req.session.destroy(() => {
@@ -169,7 +153,6 @@ export async function setupAuth(app: Express) {
     });
   }
 }
-
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   // In non-Replit environments, check for session-based login
   if (!isReplitEnvironment) {
@@ -178,24 +161,19 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     }
     return res.status(401).json({ message: "Please login to access this resource" });
   }
-
   const user = req.user as any;
-
   if (!req.isAuthenticated() || !user.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
   }
-
   const now = Math.floor(Date.now() / 1000);
   if (now <= user.expires_at) {
     return next();
   }
-
   const refreshToken = user.refresh_token;
   if (!refreshToken) {
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
-
   try {
     const config = await getOidcConfig();
     const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
@@ -206,7 +184,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return;
   }
 };
-
 export const isAuthenticatedOrDemo: RequestHandler = async (req, res, next) => {
   // In production/non-Replit environments, always allow with demo user
   if (!process.env.REPLIT_DOMAINS || !process.env.REPL_ID) {
@@ -243,7 +220,6 @@ export const isAuthenticatedOrDemo: RequestHandler = async (req, res, next) => {
     }
     return next();
   }
-
   // In Replit environment, use real authentication
   return isAuthenticated(req, res, next);
 };
