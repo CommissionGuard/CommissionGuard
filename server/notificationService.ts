@@ -384,7 +384,7 @@ export class NotificationService {
 
   // Process client response using AI to understand context and intent
   private async processClientResponse(messageBody: string, clientAgent: any) {
-      if (!openai) {
+       if (!openai) {
       return {
         category: "general",
         intent: "unknown",
