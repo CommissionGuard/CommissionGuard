@@ -8,8 +8,9 @@ import connectPg from "connect-pg-simple";
 import pkg from "pg";
 const { Pool } = pkg;
 import { storage } from "./storage";
-// Check if we're in a Replit environment
+
 const isReplitEnvironment = !!process.env.REPLIT_DOMAINS;
+
 const getOidcConfig = memoize(
   async () => {
     if (!isReplitEnvironment || !process.env.REPL_ID) {
@@ -27,6 +28,7 @@ const getOidcConfig = memoize(
     }
   }
 );
+
 export function getSession() {
   if (!isReplitEnvironment) {
     return session({
@@ -40,10 +42,13 @@ export function getSession() {
       },
     });
   }
+
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
   });
+
   const pgSession = connectPg(session);
+
   return session({
     store: new pgSession({
       pool: pool,
@@ -60,6 +65,7 @@ export function getSession() {
     },
   });
 }
+
 function updateUserSession(
   user: any,
   updatedFields?: Partial<{
@@ -73,6 +79,7 @@ function updateUserSession(
   }
   return user;
 }
+
 async function upsertUser(
   claims: client.IdTokenClaims | client.UserinfoResponse
 ): Promise<void> {
@@ -84,6 +91,7 @@ async function upsertUser(
     profileImageUrl: claims["profile_image_url"],
   });
 }
+
 export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
   
@@ -92,8 +100,10 @@ export async function setupAuth(app: Express) {
       app.use(getSession());
       app.use(passport.initialize());
       app.use(passport.session());
+
       const config = await getOidcConfig();
       if (!config) return;
+
       const verify: VerifyFunction = async (
         issuer,
         profile,
@@ -112,6 +122,7 @@ export async function setupAuth(app: Express) {
           verified(error as Error);
         }
       };
+
       passport.use(
         new Strategy(
           {
@@ -127,9 +138,11 @@ export async function setupAuth(app: Express) {
           verify
         )
       );
+
       passport.serializeUser((user: any, done) => {
         done(null, user.sub || user.id);
       });
+
       passport.deserializeUser(async (id: string, done) => {
         try {
           const user = await storage.getUser(id);
@@ -138,7 +151,9 @@ export async function setupAuth(app: Express) {
           done(error);
         }
       });
+
       app.get("/api/auth/login", passport.authenticate("openidconnect"));
+
       app.get(
         "/api/auth/callback",
         passport.authenticate("openidconnect", {
@@ -146,6 +161,7 @@ export async function setupAuth(app: Express) {
           failureRedirect: "/login",
         })
       );
+
       app.post("/api/auth/logout", (req, res) => {
         req.logout(() => {
           res.redirect(
@@ -163,6 +179,7 @@ export async function setupAuth(app: Express) {
     app.use(getSession());
   }
 }
+
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   if (!isReplitEnvironment) {
     req.user = {
@@ -174,11 +191,13 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     };
     return next();
   }
+
   if (req.isAuthenticated && req.isAuthenticated()) {
     return next();
   }
   res.status(401).json({ error: "Authentication required" });
 };
+
 export const isAuthenticatedOrDemo: RequestHandler = async (req, res, next) => {
   if (!isReplitEnvironment) {
     req.user = {
@@ -190,6 +209,7 @@ export const isAuthenticatedOrDemo: RequestHandler = async (req, res, next) => {
     };
     return next();
   }
+
   if (req.isAuthenticated && req.isAuthenticated()) {
     return next();
   }
