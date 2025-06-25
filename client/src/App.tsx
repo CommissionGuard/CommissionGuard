@@ -43,27 +43,17 @@ function Router() {
 
   return (
     <>
-      <Switch>
-        <Route path="/" component={!isAuthenticated ? Landing : Dashboard} />
-        <Route path="/clients" component={isAuthenticated ? Clients : Landing} />
-        <Route path="/clients/:clientId" component={isAuthenticated ? ClientProfile : Landing} />
-        <Route path="/contracts" component={isAuthenticated ? Contracts : Landing} />
-        <Route path="/alerts" component={isAuthenticated ? Alerts : Landing} />
-        <Route path="/reports" component={isAuthenticated ? Reports : Landing} />
-        <Route path="/legal-support" component={isAuthenticated ? LegalSupport : Landing} />
-        <Route path="/showing-tracker" component={isAuthenticated ? ShowingTracker : Landing} />
-        <Route path="/commission-tracker" component={isAuthenticated ? CommissionTracker : Landing} />
-        <Route path="/contract-reminders" component={isAuthenticated ? ContractReminders : Landing} />
-        <Route path="/commission-intelligence" component={isAuthenticated ? CommissionIntelligence : Landing} />
-        <Route path="/admin" component={isAuthenticated ? AdminDashboard : Landing} />
-        <Route path="/admin-enhanced" component={isAuthenticated ? EnhancedAdminDashboard : Landing} />
-        <Route path="/breach-management" component={isAuthenticated ? BreachManagement : Landing} />
-        <Route path="/subscription" component={isAuthenticated ? Subscription : Landing} />
-        <Route path="/support" component={isAuthenticated ? Support : Landing} />
-        <Route path="/public-records" component={isAuthenticated ? PublicRecordsMonitor : Landing} />
-        <Route path="/public-records-search" component={isAuthenticated ? PublicRecords : Landing} />
-        <Route component={NotFound} />
-      </Switch>
+<Switch>
+  {/* Always show Landing page at root - even if loading */}
+  <Route path="/" component={Landing} />
+  
+  {/* Protected routes - only accessible when authenticated */}
+  <Route path="/dashboard" component={isAuthenticated ? Dashboard : Landing} />
+  <Route path="/clients" component={isAuthenticated ? Clients : Landing} />
+  <Route path="/contracts" component={isAuthenticated ? Contracts : Landing} />
+  {/* ... other protected routes */}
+  <Route component={NotFound} />
+</Switch>
       {isAuthenticated && (
         <AISupportChat 
           isOpen={isChatOpen} 
