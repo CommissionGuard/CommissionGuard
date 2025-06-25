@@ -5,7 +5,8 @@ import * as client from "openid-client";
 import session from "express-session";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
-import { Pool } from "pg";
+import pkg from "pg";
+const { Pool } = pkg;
 import { storage } from "./storage";
 
 // Check if we're in a Replit environment
@@ -13,14 +14,19 @@ const isReplitEnvironment = !!process.env.REPLIT_DOMAINS;
 
 const getOidcConfig = memoize(
   async () => {
-    if (!isReplitEnvironment) {
+    if (!isReplitEnvironment || !process.env.REPL_ID) {
       return null;
     }
-    return await client.discovery(
-      new URL("https://auth.replit.com"),
-      process.env.REPL_ID!,
-      process.env.REPL_ID!,
-    );
+    try {
+      return await client.discovery(
+        new URL("https://auth.replit.com"),
+        process.env.REPL_ID!,
+        process.env.REPL_ID!,
+      );
+    } catch (error) {
+      console.warn("Failed to discover Replit OIDC config:", error.message);
+      return null;
+    }
   }
 );
 
@@ -88,11 +94,13 @@ export async function setupAuth(app: Express) {
   
   // Only set up session and passport if we're in Replit environment
   if (isReplitEnvironment) {
-    app.use(getSession());
-    app.use(passport.initialize());
-    app.use(passport.session());
+    try {
+      app.use(getSession());
+      app.use(passport.initialize());
+      app.use(passport.session());
 
-    const config = await getOidcConfig();
+      const config = await getOidcConfig();
+      if (!config) return;
 
     const verify: VerifyFunction = async (
       tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
@@ -145,6 +153,10 @@ export async function setupAuth(app: Express) {
         );
       });
     });
+    } catch (error) {
+      console.warn("Replit auth setup failed, using demo mode:", error.message);
+      // Fall through to demo mode setup
+    }
   } else {
     // Production environment - set up simple demo routes
     app.get("/api/login", (req, res) => {
