@@ -81,10 +81,24 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+ import { Express } from "express";
+import express from "express";
+import path from "path";
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+export function registerVite(app: Express) {
+  const __dirname = path.dirname(new URL(import.meta.url).pathname);
+  
+  // Serve static files from dist directory (Render compatibility)
+  app.use(express.static(path.join(__dirname, "../dist")));
+  
+  // SPA fallback - serve index.html for all non-API routes
+  app.get("*", (req, res) => {
+    // Skip API routes
+    if (req.path.startsWith("/api/")) {
+      return res.status(404).json({ error: "API endpoint not found" });
+    }
+    
+    // Serve index.html for all other routes (client-side routing)
+    res.sendFile(path.join(__dirname, "../dist", "index.html"));
   });
 }
