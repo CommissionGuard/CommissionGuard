@@ -1,8 +1,8 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import { registerRoutes } from "./routes";
-import { setupVite, log } from "./vite";
+import { setupVite, serveStatic, log } from "./vite";
 import { setupAuth } from "./replitAuth";
 
 const app = express();
@@ -10,6 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Capture API logs
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -38,9 +39,12 @@ app.use((req, res, next) => {
   next();
 });
 
+// For __dirname compatibility in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 (async () => {
   await setupAuth(app);
-  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -53,14 +57,13 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    // ✅ Static serve + wildcard fallback to index.html
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const clientDistPath = path.join(__dirname, "../client_dist"); // adjust if your Vite build is somewhere else
+    // ✅ Serve static frontend
+    const staticPath = path.join(__dirname, "../client_dist");
+    app.use(express.static(staticPath));
 
-    app.use(express.static(clientDistPath));
-
+    // ✅ Fallback to index.html for React Router
     app.get("*", (req, res) => {
-      res.sendFile(path.join(clientDistPath, "index.html"));
+      res.sendFile(path.join(staticPath, "index.html"));
     });
   }
 
