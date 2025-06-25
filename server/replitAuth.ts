@@ -1,3 +1,5 @@
+
+```typescript
 import express, { type Express, type RequestHandler } from "express";
 import passport from "passport";
 import { Strategy, type VerifyFunction } from "passport-openidconnect";
@@ -69,24 +71,40 @@ export function getSession() {
 }
 
 function updateUserSession(
-  user: Express.User,
-  tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers
+  user: any,
+  updatedFields?: Partial<{
+    fullName: string;
+    displayName: string;
+    profileImageUrl: string;
+  }>
 ) {
-  user.id = tokens.claims().sub;
-  user.accessToken = tokens.access_token;
-  user.refreshToken = tokens.refresh_token;
+  if (updatedFields) {
+    Object.assign(user, updatedFields);
+  }
+  return user;
 }
 
 async function upsertUser(
-  claims: client.IdTokenClaims | client.UserinfoResponse
-): Promise<void> {
-  await storage.upsertUser({
-    id: claims.sub,
-    email: claims.email!,
-    firstName: claims.given_name || "",
-    lastName: claims.family_name || "",
-    profileImageUrl: claims["profile_image_url"],
-  });
+  agentId: string,
+  fullName: string,
+  displayName: string,
+  email: string,
+  profileImageUrl: string
+) {
+  return updateUserSession(
+    await storage.upsertUser({
+      id: agentId,
+      email,
+      fullName,
+      displayName,
+      profileImageUrl,
+    }),
+    {
+      fullName,
+      displayName,
+      profileImageUrl: claims["profile_image_url"],
+    }
+  );
 }
 
 export async function setupAuth(app: Express) {
@@ -102,103 +120,135 @@ export async function setupAuth(app: Express) {
       const config = await getOidcConfig();
       if (!config) return;
 
-    const verify: VerifyFunction = async (
-      tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-      verified: passport.AuthenticateCallback
-    ) => {
-      const user = {};
-      updateUserSession(user, tokens);
-      await upsertUser(tokens.claims());
-      verified(null, user);
-    };
+      const verify: VerifyFunction = async (
+        issuer,
+        profile,
+        context,
+        idToken,
+        accessToken,
+        refreshToken,
+        verified
+      ) => {
+        const claims = context.userinfo || idToken.payload || {};
+        try {
+          const user = await upsertUser(
+            claims.sub!,
+            claims.name!,
+            claims.name!,
+            claims.email!,
+            claims["profile_image_url"]!
+          );
+          verified(null, user);
+        } catch (error) {
+          console.error("Authentication error:", error);
+          verified(error as Error);
+        }
+      };
 
-    for (const domain of process.env
-      .REPLIT_DOMAINS!.split(",")) {
-      const strategy = new Strategy(
-        {
-          name: `replitauth:${domain}`,
-          config,
-          scope: "openid email profile offline_access",
-          callbackURL: `https://${domain}/api/callback`,
-        },
-        verify,
+      passport.use(
+        new Strategy(
+          {
+            issuer: config.issuer.href,
+            authorizationURL: config.authorization_endpoint!,
+            tokenURL: config.token_endpoint!,
+            userInfoURL: config.userinfo_endpoint!,
+            clientID: process.env.REPL_ID!,
+            clientSecret: process.env.REPL_ID!,
+            callbackURL: "/api/auth/callback",
+            scope: "openid profile email",
+          },
+          verify
+        )
       );
-      passport.use(strategy);
-    }
 
-    passport.serializeUser((user: Express.User, cb) => cb(null, user));
-    passport.deserializeUser((user: Express.User, cb) => cb(null, user));
-
-    app.get("/api/login", (req, res, next) => {
-      passport.authenticate(`replitauth:${req.hostname}`, {
-        prompt: "login consent",
-        scope: ["openid", "email", "profile", "offline_access"],
-      })(req, res, next);
-    });
-
-    app.get("/api/callback", (req, res, next) => {
-      passport.authenticate(`replitauth:${req.hostname}`, {
-        successReturnToOrRedirect: "/",
-        failureRedirect: "/api/login",
-      })(req, res, next);
-    });
-
-    app.get("/api/logout", (req, res) => {
-      req.logout(() => {
-        res.redirect(
-          client.buildEndSessionUrl(config, {
-            client_id: process.env.REPL_ID!,
-            post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-          }).href
-        );
+      passport.serializeUser((user: any, done) => {
+        done(null, user.id);
       });
-    });
+
+      passport.deserializeUser(async (id: string, done) => {
+        try {
+          const user = await storage.getUser(id);
+          done(null, user);
+        } catch (error) {
+          done(error);
+        }
+      });
+
+      app.get("/api/auth/login", passport.authenticate("openidconnect"));
+
+      app.get(
+        "/api/auth/callback",
+        passport.authenticate("openidconnect", {
+          successRedirect: "/",
+          failureRedirect: "/login",
+        })
+      );
+
+      app.post("/api/auth/logout", (req, res) => {
+        req.logout(() => {
+          res.redirect(
+            client.buildEndSessionUrl(config, {
+              client_id: process.env.REPL_ID!,
+              post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+            }).href
+          );
+        });
+      });
     } catch (error) {
       console.warn("Replit auth setup failed, using demo mode:", error.message);
       // Fall through to demo mode setup
     }
   } else {
-    // Production environment - set up simple demo routes
-    app.get("/api/login", (req, res) => {
-      res.redirect("/");
-    });
-
-    app.get("/api/callback", (req, res) => {
-      res.redirect("/");
-    });
-
-    app.get("/api/logout", (req, res) => {
-      res.redirect("/");
-    });
+    // Demo mode for production environments
+    app.use(getSession());
   }
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  // In production or non-Replit environments, use demo mode
-  if (!isReplitEnvironment || !req.user) {
-    (req as any).user = {
-      id: "43911252",
-      email: "demo@commissionguard.com", 
-      firstName: "Demo",
-      lastName: "User",
-      role: "agent",
-      claims: { sub: "43911252" }
+  if (!isReplitEnvironment) {
+    // Demo mode - create mock user
+    req.user = {
+      id: "demo-user",
+      email: "demo@example.com",
+      fullName: "Demo User",
+      displayName: "Demo User",
+      profileImageUrl: ""
     };
+    return next();
   }
-  return next();
+
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ error: "Authentication required" });
 };
 
 export const isAuthenticatedOrDemo: RequestHandler = async (req, res, next) => {
-  // Use demo mode for local development
-  if (!req.user) {
-    (req as any).user = {
-      id: "43911252",
-      email: "demo@commissionguard.com", 
-      firstName: "Demo",
-      lastName: "User",
-      role: "agent",
-      claims: { sub: "43911252" }
+  if (!isReplitEnvironment) {
+    // Demo mode - create mock user
+    req.user = {
+      id: "demo-user", 
+      email: "demo@example.com",
+      fullName: "Demo User",
+      displayName: "Demo User",
+      profileImageUrl: ""
     };
+    return next();
   }
-  return next();
+
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ error: "Authentication required" });
 };
+```
+
+### 2. server/index.ts
+Update the port configuration section (around line 62-68):
+
+```typescript
+const port = process.env.PORT || 5000;
+server.listen(port, "0.0.0.0", () => {
+  console.log(`Express server listening on port ${port}`);
+});
+```
