@@ -60,25 +60,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-// Auth routes
-app.get('/api/auth/user', isAuthenticatedOrDemo, async (req: any, res) => {
+// Auth routes - require actual authentication
+app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
   try {
-    // In production/non-Replit environments, return demo user
+    // In production/non-Replit environments, check for demo login session
     if (!process.env.REPLIT_DOMAINS || !process.env.REPL_ID) {
-      const demoUser = await storage.getUser("demo-user-001");
-      if (!demoUser) {
-        // Create demo user if it doesn't exist
-        const newDemoUser = await storage.upsertUser({
-          id: "demo-user-001",
-          email: "demo@commissionguard.com",
-          firstName: "Demo",
-          lastName: "User",
-          profileImageUrl: null,
-        });
-        return res.json(newDemoUser);
+      // Check if user has explicitly logged in via session
+      if (req.session?.user) {
+        return res.json(req.session.user);
       }
-      return res.json(demoUser);
+      // Return 401 if no session - user needs to login first
+      return res.status(401).json({ message: "Please login to access your account" });
     }
+
+    // In Replit environment, use real authentication
+    const userId = req.user?.claims?.sub;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    const user = await storage.getUser(userId);
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Failed to fetch user" });
+  }
+});
 
     // In Replit environment, use real authentication
     const userId = req.user?.claims?.sub;
