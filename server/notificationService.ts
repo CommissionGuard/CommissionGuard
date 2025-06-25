@@ -384,7 +384,7 @@ export class NotificationService {
 
   // Process client response using AI to understand context and intent
   private async processClientResponse(messageBody: string, clientAgent: any) {
-    if (!process.env.OPENAI_API_KEY) {
+      if (!openai) {
       return {
         category: "general",
         intent: "unknown",
@@ -394,7 +394,6 @@ export class NotificationService {
         summary: messageBody
       };
     }
-
     try {
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
