@@ -9,7 +9,6 @@ interface ChatMessage {
 export class AISupportService {
   async generateSupportResponse(message: string, conversationHistory: ChatMessage[] = []): Promise<string> {
     if (!openai) {
-      // Provide helpful fallback responses based on common keywords
       const lowerMessage = message.toLowerCase();
       
       if (lowerMessage.includes('contract') || lowerMessage.includes('agreement')) {
@@ -67,7 +66,7 @@ Guidelines:
 Maintain a helpful, professional tone while being concise and practical in your responses.`;
       const messages = [
         { role: "system" as const, content: systemPrompt },
-        ...conversationHistory.slice(-8), // Keep last 8 messages for context
+        ...conversationHistory.slice(-8),
         { role: "user" as const, content: message }
       ];
       const completion = await openai.chat.completions.create({
@@ -83,7 +82,6 @@ Maintain a helpful, professional tone while being concise and practical in your 
     } catch (error) {
       console.error('Error generating AI support response:', error);
       
-      // Provide helpful fallback responses based on common keywords
       const lowerMessage = message.toLowerCase();
       
       if (lowerMessage.includes('contract') || lowerMessage.includes('agreement')) {
@@ -115,7 +113,6 @@ Maintain a helpful, professional tone while being concise and practical in your 
   }
   async generateQuickSuggestions(userQuery: string): Promise<string[]> {
     if (!openai) {
-      // Provide contextual fallback suggestions based on user query
       const lowerQuery = userQuery.toLowerCase();
       
       if (lowerQuery.includes('contract')) {
@@ -181,7 +178,6 @@ Maintain a helpful, professional tone while being concise and practical in your 
     } catch (error) {
       console.error('Error generating suggestions:', error);
       
-      // Provide contextual fallback suggestions based on user query
       const lowerQuery = userQuery.toLowerCase();
       
       if (lowerQuery.includes('contract')) {
@@ -263,7 +259,6 @@ Maintain a helpful, professional tone while being concise and practical in your 
           console.error('Error parsing intent analysis:', parseError);
         }
       }
-      // Fallback response
       return {
         category: "general",
         urgency: "medium",
@@ -279,8 +274,4 @@ Maintain a helpful, professional tone while being concise and practical in your 
     }
   }
 }
-export const aiSupportService = new AISupportService();
-  }
-}
-
 export const aiSupportService = new AISupportService();
