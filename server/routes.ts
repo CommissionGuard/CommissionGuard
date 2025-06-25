@@ -1,3 +1,4 @@
+import { setupAuth, isAuthenticated, isAuthenticatedOrDemo } from "./replitAuth";
 import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -59,7 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
- // Auth routes
+// Auth routes
 app.get('/api/auth/user', isAuthenticatedOrDemo, async (req: any, res) => {
   try {
     // In production/non-Replit environments, return demo user
@@ -78,6 +79,20 @@ app.get('/api/auth/user', isAuthenticatedOrDemo, async (req: any, res) => {
       }
       return res.json(demoUser);
     }
+
+    // In Replit environment, use real authentication
+    const userId = req.user?.claims?.sub;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    const user = await storage.getUser(userId);
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Failed to fetch user" });
+  }
+});
 
     // In Replit environment, use real authentication
     const userId = req.user?.claims?.sub;
