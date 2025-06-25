@@ -44,8 +44,10 @@ app.use((req, res, next) => {
   } else {
     serveStatic(app);
   }
-  const port = process.env.PORT || 5000;
-  server.listen(port, "0.0.0.0", () => {
-    log(`serving on port ${port}`);
-  });
-})();
+// Ensure this line exists (should already be correct):
+const PORT = process.env.PORT || 5000;
+
+// And this at the end:
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`[express] serving on port ${PORT}`);
+});
