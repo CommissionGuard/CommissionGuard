@@ -320,6 +320,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Commission Protection API
+  app.get('/api/commission-protection', isAuthenticated, async (req: any, res) => {
+    try {
+      const demoProtection = [
+        {
+          id: 1,
+          clientName: "Sarah Johnson",
+          propertyAddress: "123 Oak Street, Westbury, NY 11590",
+          contractValue: 850000,
+          commissionRate: 3.0,
+          protectedAmount: 25500,
+          status: "active",
+          contractStart: "2025-01-15",
+          contractEnd: "2025-07-15",
+          riskLevel: "low"
+        },
+        {
+          id: 2,
+          clientName: "Mike Rodriguez",
+          propertyAddress: "456 Pine Avenue, Garden City, NY 11530",
+          contractValue: 1250000,
+          commissionRate: 2.5,
+          protectedAmount: 31250,
+          status: "monitoring",
+          contractStart: "2025-02-01",
+          contractEnd: "2025-08-01",
+          riskLevel: "medium"
+        }
+      ];
+      res.json(demoProtection);
+    } catch (error) {
+      console.error("Error fetching commission protection:", error);
+      res.status(500).json({ message: "Failed to fetch commission protection" });
+    }
+  });
+
+  // Public Records API
+  app.get('/api/public-records', isAuthenticated, async (req: any, res) => {
+    try {
+      const demoRecords = [
+        {
+          id: 1,
+          type: "property_sale",
+          propertyAddress: "789 Maple Drive, Hempstead, NY 11550",
+          saleDate: "2025-06-20",
+          salePrice: 975000,
+          buyer: "Unknown Buyer",
+          seller: "Previous Owner",
+          status: "potential_breach",
+          matchedClient: "Sarah Johnson",
+          riskScore: 85
+        },
+        {
+          id: 2,
+          type: "listing_activity",
+          propertyAddress: "321 Cedar Lane, Uniondale, NY 11553",
+          listingDate: "2025-06-18",
+          listPrice: 1150000,
+          status: "monitoring",
+          matchedClient: "Mike Rodriguez",
+          riskScore: 45
+        }
+      ];
+      res.json(demoRecords);
+    } catch (error) {
+      console.error("Error fetching public records:", error);
+      res.status(500).json({ message: "Failed to fetch public records" });
+    }
+  });
+
+  // Reports API
+  app.get('/api/reports', isAuthenticated, async (req: any, res) => {
+    try {
+      const demoReports = {
+        commissionSummary: {
+          totalProtected: 125000,
+          activeContracts: 5,
+          completedDeals: 12,
+          averageCommission: 18500
+        },
+        monthlyStats: [
+          { month: "Jan", protected: 45000, earned: 38000 },
+          { month: "Feb", protected: 52000, earned: 41000 },
+          { month: "Mar", protected: 38000, earned: 35000 },
+          { month: "Apr", protected: 48000, earned: 42000 },
+          { month: "May", protected: 55000, earned: 48000 },
+          { month: "Jun", protected: 62000, earned: 51000 }
+        ],
+        riskAnalysis: {
+          lowRisk: 3,
+          mediumRisk: 2,
+          highRisk: 0
+        }
+      };
+      res.json(demoReports);
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+      res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
+
+  // Commission Intelligence API
+  app.get('/api/commission-intelligence', isAuthenticated, async (req: any, res) => {
+    try {
+      const demoIntelligence = {
+        contractAnalysis: {
+          totalContracts: 5,
+          riskScore: 72,
+          expiringWithin30Days: 2,
+          strengthScore: 85
+        },
+        clientRiskAssessment: {
+          highRiskClients: 1,
+          totalClients: 12,
+          averageEngagement: 78,
+          riskTrends: "stable"
+        },
+        marketIntelligence: {
+          competitionLevel: "moderate",
+          averageCommission: 2.8,
+          marketActivity: "high",
+          riskFactors: ["seasonal_changes", "interest_rates"]
+        },
+        protectionStrategy: {
+          recommendedActions: [
+            "Update contract terms for Sarah Johnson",
+            "Increase client engagement for high-risk clients",
+            "Monitor upcoming contract expirations"
+          ],
+          urgentItems: 2,
+          completionScore: 68
+        }
+      };
+      res.json(demoIntelligence);
+    } catch (error) {
+      console.error("Error fetching commission intelligence:", error);
+      res.status(500).json({ message: "Failed to fetch commission intelligence" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
