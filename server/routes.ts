@@ -115,6 +115,20 @@ app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
   }
 });
 
+    // In Replit environment, use real authentication
+    const userId = req.user?.claims?.sub;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    const user = await storage.getUser(userId);
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Failed to fetch user" });
+  }
+});
+
  // Admin middleware for role checking
 const isAdmin = async (req: any, res: any, next: any) => {
   try {
