@@ -211,12 +211,18 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  // In non-Replit environments, check for session-based login
+  // In non-Replit environments, allow demo access for production showcase
   if (!isReplitEnvironment) {
-    if (req.session?.user) {
-      return next();
-    }
-    return res.status(401).json({ message: "Please login to access this resource" });
+    // Always allow access in production for demo purposes
+    (req as any).user = {
+      id: "demo-user-001",
+      email: "demo@commissionguard.com", 
+      firstName: "Demo",
+      lastName: "User",
+      role: "agent",
+      claims: { sub: "demo-user-001" }
+    };
+    return next();
   }
 
   const user = req.user as any;
