@@ -1,11 +1,5 @@
 import OpenAI from "openai";
-
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY environment variable must be set");
-}
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 export class AIService {
   // Contract analysis for risk detection
   async analyzeContract(contractText: string): Promise<{
@@ -16,6 +10,16 @@ export class AIService {
     commissionTerms?: string;
     potentialIssues: string[];
   }> {
+    if (!openai) {
+      return {
+        riskLevel: "medium",
+        riskFactors: ["Unable to analyze - OpenAI API not configured"],
+        recommendations: ["Please configure OpenAI API key for contract analysis"],
+        commissionTerms: "Unable to analyze commission terms",
+        potentialIssues: ["API configuration required for detailed analysis"]
+      };
+    }
+    
     try {
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -40,14 +44,12 @@ export class AIService {
         ],
         response_format: { type: "json_object" },
       });
-
       return JSON.parse(response.choices[0].message.content || "{}");
     } catch (error) {
       console.error("Contract analysis error:", error);
       throw new Error("Failed to analyze contract");
     }
   }
-
   // Generate commission protection recommendations
   async generateCommissionRecommendations(contractData: {
     clientName: string;
@@ -62,6 +64,14 @@ export class AIService {
     protectionStrategies: string[];
     riskMitigation: string[];
   }> {
+    if (!openai) {
+      return {
+        priority: "medium",
+        actionItems: ["OpenAI API configuration required for detailed recommendations"],
+        protectionStrategies: ["Configure AI services for personalized strategies"],
+        riskMitigation: ["Set up API access for risk analysis"]
+      };
+    }
     try {
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -90,14 +100,12 @@ export class AIService {
         ],
         response_format: { type: "json_object" },
       });
-
       return JSON.parse(response.choices[0].message.content || "{}");
     } catch (error) {
       console.error("Recommendation generation error:", error);
       throw new Error("Failed to generate recommendations");
     }
   }
-
   // Intelligent alert prioritization
   async prioritizeAlerts(alerts: Array<{
     id: number;
@@ -112,6 +120,14 @@ export class AIService {
     reasoning: string;
     suggestedActions: string[];
   }>> {
+    if (!openai) {
+      return alerts.map(alert => ({
+        id: alert.id,
+        aiPriority: 5,
+        reasoning: "AI prioritization requires OpenAI API configuration",
+        suggestedActions: ["Configure AI services for intelligent alert prioritization"]
+      }));
+    }
     try {
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -134,7 +150,6 @@ export class AIService {
         ],
         response_format: { type: "json_object" },
       });
-
       const result = JSON.parse(response.choices[0].message.content || "{}");
       return result.alerts || [];
     } catch (error) {
@@ -142,7 +157,6 @@ export class AIService {
       throw new Error("Failed to prioritize alerts");
     }
   }
-
   // Market trend analysis and predictions
   async analyzeMarketTrends(propertyData: {
     location: string;
@@ -160,6 +174,19 @@ export class AIService {
     marketInsights: string[];
     investmentRecommendations: string[];
   }> {
+    if (!openai) {
+      return {
+        trendDirection: "stable",
+        confidenceLevel: 0.5,
+        predictions: {
+          nextMonth: 0,
+          nextQuarter: 0,
+          nextYear: 0
+        },
+        marketInsights: ["AI market analysis requires OpenAI API configuration"],
+        investmentRecommendations: ["Configure AI services for market analysis"]
+      };
+    }
     try {
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -186,14 +213,12 @@ export class AIService {
         ],
         response_format: { type: "json_object" },
       });
-
       return JSON.parse(response.choices[0].message.content || "{}");
     } catch (error) {
       console.error("Market analysis error:", error);
       throw new Error("Failed to analyze market trends");
     }
   }
-
   // Legal document analysis
   async analyzeLegalDocument(documentText: string, documentType: string): Promise<{
     compliance: "compliant" | "non-compliant" | "needs-review";
@@ -202,6 +227,15 @@ export class AIService {
     legalRisks: string[];
     requiredActions: string[];
   }> {
+    if (!openai) {
+      return {
+        compliance: "needs-review",
+        issues: ["AI legal analysis requires OpenAI API configuration"],
+        suggestions: ["Configure AI services for document analysis"],
+        legalRisks: ["Unable to assess legal risks without AI configuration"],
+        requiredActions: ["Set up OpenAI API for legal document analysis"]
+      };
+    }
     try {
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -224,7 +258,6 @@ export class AIService {
         ],
         response_format: { type: "json_object" },
       });
-
       return JSON.parse(response.choices[0].message.content || "{}");
     } catch (error) {
       console.error("Legal document analysis error:", error);
@@ -232,5 +265,4 @@ export class AIService {
     }
   }
 }
-
 export const aiService = new AIService();
