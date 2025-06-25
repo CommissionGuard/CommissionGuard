@@ -58,6 +58,6 @@ app.use((req, res, next) => {
 
   // Use PORT from environment (for production) or default to 5000 (for development)
   const port = process.env.PORT || 5000;
-server.listen(port, "0.0.0.0", () => {
-  console.log(`Express server listening on port ${port}`);
-});
+  server.listen(port, "0.0.0.0", () => {
+    log(`serving on port ${port}`);
+  });
