@@ -93,21 +93,30 @@ app.get('/api/auth/user', isAuthenticatedOrDemo, async (req: any, res) => {
   }
 });
 
-  // Admin middleware for role checking
-  const isAdmin = async (req: any, res: any, next: any) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      if (!user || user.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      
-      next();
-    } catch (error) {
-      res.status(500).json({ message: "Authorization check failed" });
+ // Admin middleware for role checking
+const isAdmin = async (req: any, res: any, next: any) => {
+  try {
+    // In production/non-Replit environments, allow admin access for demo user
+    if (!process.env.REPLIT_DOMAINS || !process.env.REPL_ID) {
+      return next(); // Allow all access in demo mode
     }
-  };
+
+    const userId = req.user?.claims?.sub;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    const user = await storage.getUser(userId);
+    
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    
+    next();
+  } catch (error) {
+    res.status(500).json({ message: "Authorization check failed" });
+  }
+};
 
   // Admin routes
   app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {
