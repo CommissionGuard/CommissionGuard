@@ -161,7 +161,44 @@ export async function setupAuth(app: Express) {
           lastName: "User",
           profileImageUrl: null,
         });
+      }} else {
+  // Production authentication routes - require explicit login
+  app.get("/api/login", async (req, res) => {
+    try {
+      // Create demo user in database if doesn't exist
+      let user = await storage.getUser("demo-user-001");
+      if (!user) {
+        user = await storage.upsertUser({
+          id: "demo-user-001",
+          email: "demo@commissionguard.com",
+          firstName: "Demo",
+          lastName: "User",
+          profileImageUrl: null,
+        });
       }
+      
+      // Set session to mark user as logged in
+      if (req.session) {
+        (req.session as any).user = user;
+      }
+      
+      res.redirect("/dashboard");
+    } catch (error) {
+      console.error("Login error:", error);
+      res.redirect("/?error=login_failed");
+    }
+  });
+
+  app.get("/api/logout", (req, res) => {
+    if (req.session) {
+      req.session.destroy(() => {
+        res.redirect("/");
+      });
+    } else {
+      res.redirect("/");
+    }
+  });
+}
       
       // Set session to mark user as logged in
       if (req.session) {
