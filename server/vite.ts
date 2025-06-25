@@ -65,21 +65,32 @@ export async function setupVite(app: Express, server: Server) {
 
 export function serveStatic(app: Express) {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  const distPath = path.resolve(__dirname, "..", "dist");
+  
+  // In production on Render, the build process creates:
+  // - dist/index.js (server bundle) 
+  // - dist/index.html, dist/assets/* (frontend assets)
+  // The server bundle runs from /opt/render/project/src/dist/index.js
+  // So we need to serve static files from the same dist directory
+  const distPath = path.resolve(__dirname);
 
-  if (!fs.existsSync(distPath)) {
+  console.log(`[express] Looking for static files in: ${distPath}`);
+  console.log(`[express] Files in dist:`, fs.readdirSync(distPath));
+
+  if (!fs.existsSync(path.join(distPath, "index.html"))) {
     throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      `Could not find index.html in ${distPath}. Available files: ${fs.readdirSync(distPath).join(", ")}`
     );
   }
 
+  // Serve static files from the current directory (where the server bundle is)
   app.use(express.static(distPath));
 
+  // SPA fallback for all non-API routes
   app.use("*", (req, res) => {
     if (req.path.startsWith("/api/")) {
       return res.status(404).json({ error: "API endpoint not found" });
     }
     
-    res.sendFile(path.resolve(distPath, "index.html"));
+    res.sendFile(path.join(distPath, "index.html"));
   });
 }
