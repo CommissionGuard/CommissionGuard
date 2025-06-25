@@ -44,8 +44,9 @@ function Router() {
   return (
     <>
 <Switch>
-  {/* Always show Landing page at root - even if loading */}
   <Route path="/" component={Landing} />
+  <Route path="/dashboard" component={isAuthenticated ? Dashboard : Landing} />
+  {/* rest of routes stay the same */}
   
   {/* Protected routes - only accessible when authenticated */}
   <Route path="/dashboard" component={isAuthenticated ? Dashboard : Landing} />
