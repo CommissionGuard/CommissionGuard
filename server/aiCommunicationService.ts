@@ -9,7 +9,6 @@ import type {
   CampaignStep,
   ClientCommunication
 } from "@shared/schema";
-
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 export class AiCommunicationService {
@@ -20,6 +19,17 @@ export class AiCommunicationService {
     targetAudience: string;
     description?: string;
   }): Promise<{ campaign: any; steps: any[] }> {
+    if (!openai) {
+      return {
+        campaign: {
+          id: Date.now(),
+          name: "Sample Campaign",
+          description: "AI service not configured - using sample data",
+          status: "draft"
+        },
+        steps: []
+      };
+    }
     try {
       // Generate campaign content using AI
       const campaignContent = await this.generateCampaignContent(
@@ -27,7 +37,6 @@ export class AiCommunicationService {
         campaignData.targetAudience,
         campaignData.description
       );
-
       // Create the campaign
       const campaign = await storage.createDripCampaign({
         agentId: campaignData.agentId,
@@ -38,7 +47,6 @@ export class AiCommunicationService {
         status: "draft",
         totalSteps: campaignContent.steps.length,
       });
-
       // Create campaign steps
       const steps = [];
       for (let i = 0; i < campaignContent.steps.length; i++) {
@@ -55,14 +63,12 @@ export class AiCommunicationService {
         });
         steps.push(step);
       }
-
       return { campaign, steps };
     } catch (error) {
       console.error("Error creating drip campaign:", error);
       throw new Error("Failed to create drip campaign");
     }
   }
-
   async generateCampaignContent(
     campaignType: string,
     targetAudience: string,
@@ -78,6 +84,19 @@ export class AiCommunicationService {
       content: string;
     }>;
   }> {
+    if (!openai) {
+      return {
+        name: "Sample Campaign",
+        description: "AI content generation requires OpenAI API configuration",
+        steps: [{
+          title: "Sample Step",
+          messageType: "email",
+          delayDays: 0,
+          subject: "Welcome",
+          content: "AI service not configured"
+        }]
+      };
+    }
     const prompt = `Create a real estate drip campaign for ${targetAudience} with campaign type: ${campaignType}.
     ${description ? `Additional context: ${description}` : ''}
     
@@ -102,7 +121,6 @@ export class AiCommunicationService {
         }
       ]
     }`;
-
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -115,16 +133,20 @@ export class AiCommunicationService {
       response_format: { type: "json_object" },
       temperature: 0.7,
     });
-
     return JSON.parse(response.choices[0].message.content || "{}");
   }
-
   async generatePersonalizedMessage(
     messageType: string,
     clientData: any,
     agentData: any,
     context?: string
   ): Promise<{ subject?: string; content: string }> {
+    if (!openai) {
+      return {
+        subject: "Follow Up",
+        content: "AI message generation requires OpenAI API configuration"
+      };
+    }
     const prompt = `Generate a personalized ${messageType} for a real estate client.
     
     Client: ${clientData.fullName} (${clientData.email})
@@ -143,7 +165,6 @@ export class AiCommunicationService {
       "subject": "Email subject (if email)",
       "content": "Full message content"
     }`;
-
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -156,10 +177,8 @@ export class AiCommunicationService {
       response_format: { type: "json_object" },
       temperature: 0.8,
     });
-
     return JSON.parse(response.choices[0].message.content || "{}");
   }
-
   async analyzeInquiry(inquiryText: string, clientData?: any): Promise<{
     sentiment: string;
     intent: string;
@@ -167,6 +186,15 @@ export class AiCommunicationService {
     suggestedResponse: string;
     keyTopics: string[];
   }> {
+    if (!openai) {
+      return {
+        sentiment: "neutral",
+        intent: "information_seeking",
+        urgency: "normal",
+        suggestedResponse: "Thank you for your inquiry. We will respond shortly.",
+        keyTopics: ["general"]
+      };
+    }
     const prompt = `Analyze this client inquiry and provide guidance for response:
     
     Inquiry: "${inquiryText}"
@@ -187,7 +215,6 @@ export class AiCommunicationService {
       "suggestedResponse": "Suggested response message",
       "keyTopics": ["topic1", "topic2"]
     }`;
-
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -200,10 +227,8 @@ export class AiCommunicationService {
       response_format: { type: "json_object" },
       temperature: 0.3,
     });
-
     return JSON.parse(response.choices[0].message.content || "{}");
   }
-
   async generateFollowUpSuggestions(
     clientData: any,
     communicationHistory: any[],
@@ -216,6 +241,16 @@ export class AiCommunicationService {
       priority: string;
     }>;
   }> {
+    if (!openai) {
+      return {
+        suggestions: [{
+          type: "email",
+          timing: "3 days",
+          content: "AI suggestion service requires OpenAI API configuration",
+          priority: "medium"
+        }]
+      };
+    }
     const prompt = `Suggest follow-up communications for this real estate client:
     
     Client: ${clientData.fullName}
@@ -240,7 +275,6 @@ export class AiCommunicationService {
         }
       ]
     }`;
-
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -253,10 +287,8 @@ export class AiCommunicationService {
       response_format: { type: "json_object" },
       temperature: 0.6,
     });
-
     return JSON.parse(response.choices[0].message.content || "{}");
   }
-
   async createAiConversation(
     agentId: string,
     conversationType: string,
@@ -278,14 +310,12 @@ export class AiCommunicationService {
           }
         ],
       });
-
       return conversation;
     } catch (error) {
       console.error("Error creating AI conversation:", error);
       throw new Error("Failed to create AI conversation");
     }
   }
-
   async continueAiConversation(
     conversationId: number,
     userMessage: string
@@ -295,54 +325,49 @@ export class AiCommunicationService {
       if (!conversation) {
         throw new Error("Conversation not found");
       }
-
       const messages = conversation.messages as any[];
       messages.push({
         role: "user",
         content: userMessage,
         timestamp: new Date().toISOString()
       });
-
       // Generate AI response based on conversation type and context
       const aiResponse = await this.generateAiResponse(
         conversation.conversationType,
         messages,
         conversation.context
       );
-
       messages.push({
         role: "assistant",
         content: aiResponse,
         timestamp: new Date().toISOString()
       });
-
       const updatedConversation = await storage.updateAiConversation(conversationId, {
         messages,
         lastMessageAt: new Date(),
       });
-
       return { response: aiResponse, updatedConversation };
     } catch (error) {
       console.error("Error continuing AI conversation:", error);
       throw new Error("Failed to continue conversation");
     }
   }
-
   private async generateAiResponse(
     conversationType: string,
     messages: any[],
     context: any
   ): Promise<string> {
+    if (!openai) {
+      return "AI conversation service requires OpenAI API configuration. Please contact support for assistance.";
+    }
     const systemPrompts = {
       campaign_creation: "You are a real estate marketing expert helping create effective drip campaigns. Provide strategic advice on campaign structure, timing, and content.",
       message_drafting: "You are a professional real estate communication consultant. Help draft effective, personalized messages that build relationships and drive action.",
       inquiry_response: "You are a real estate client service expert. Help analyze and respond to client inquiries with professionalism and effectiveness.",
       market_analysis: "You are a real estate market analyst. Provide insights on market trends, property values, and investment opportunities."
     };
-
     const systemPrompt = systemPrompts[conversationType as keyof typeof systemPrompts] || 
       "You are a helpful real estate assistant providing professional guidance.";
-
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -354,9 +379,7 @@ export class AiCommunicationService {
       ],
       temperature: 0.7,
     });
-
     return response.choices[0].message.content || "";
   }
 }
-
 export const aiCommunicationService = new AiCommunicationService();
