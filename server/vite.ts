@@ -65,32 +65,28 @@ export async function setupVite(app: Express, server: Server) {
 
 export function serveStatic(app: Express) {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  
-  // In production on Render, the build process creates:
-  // - dist/index.js (server bundle) 
-  // - dist/index.html, dist/assets/* (frontend assets)
-  // The server bundle runs from /opt/render/project/src/dist/index.js
-  // So we need to serve static files from the same dist directory
-  const distPath = path.resolve(__dirname);
+  const clientDistPath = path.resolve(__dirname, "..", "client_dist");
 
-  console.log(`[express] Looking for static files in: ${distPath}`);
-  console.log(`[express] Files in dist:`, fs.readdirSync(distPath));
+  console.log(`[express] Looking for frontend files in: ${clientDistPath}`);
 
-  if (!fs.existsSync(path.join(distPath, "index.html"))) {
-    throw new Error(
-      `Could not find index.html in ${distPath}. Available files: ${fs.readdirSync(distPath).join(", ")}`
-    );
+  if (!fs.existsSync(clientDistPath)) {
+    throw new Error(`Frontend build directory not found: ${clientDistPath}`);
   }
 
-  // Serve static files from the current directory (where the server bundle is)
-  app.use(express.static(distPath));
+  if (!fs.existsSync(path.join(clientDistPath, "index.html"))) {
+    const available = fs.readdirSync(clientDistPath);
+    throw new Error(`index.html not found in ${clientDistPath}. Available: ${available.join(", ")}`);
+  }
 
-  // SPA fallback for all non-API routes
+  // Serve static frontend files
+  app.use(express.static(clientDistPath));
+
+  // SPA fallback for client-side routing
   app.use("*", (req, res) => {
     if (req.path.startsWith("/api/")) {
       return res.status(404).json({ error: "API endpoint not found" });
     }
     
-    res.sendFile(path.join(distPath, "index.html"));
+    res.sendFile(path.join(clientDistPath, "index.html"));
   });
 }
