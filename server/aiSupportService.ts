@@ -1,11 +1,14 @@
 import OpenAI from 'openai';
+
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 }) : null;
+
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
+
 export class AISupportService {
   async generateSupportResponse(message: string, conversationHistory: ChatMessage[] = []): Promise<string> {
     if (!openai) {
@@ -37,8 +40,10 @@ export class AISupportService {
       
       return "I'm currently experiencing technical difficulties with my AI responses due to API limitations. However, I can still help you navigate Commission Guard! The platform includes Contracts, Clients, Showing Tracker, Commission Protection, Alerts, and Public Records monitoring. For immediate assistance, please use the Support menu or contact our support team directly.";
     }
+
     try {
       const systemPrompt = `You are an expert AI assistant for Commission Guard, a real estate commission protection platform. You help real estate agents and brokers with:
+
 1. Commission protection strategies and best practices
 2. Contract analysis and representation agreement guidance
 3. Platform features and how to use them effectively
@@ -46,6 +51,7 @@ export class AISupportService {
 5. Breach prevention and detection methods
 6. Public records monitoring guidance
 7. Client management and relationship protection
+
 Key Platform Features to Reference:
 - Contract Management: Upload and analyze representation agreements
 - Client Tracking: Manage client relationships and contact history
@@ -55,6 +61,7 @@ Key Platform Features to Reference:
 - Public Records Monitoring: Track unauthorized transactions
 - AI Contract Analysis: Risk assessment and legal review
 - Property Research: Market analysis and valuation tools
+
 Guidelines:
 - Provide practical, actionable advice for real estate professionals
 - Reference specific Commission Guard features when relevant
@@ -63,12 +70,15 @@ Guidelines:
 - Be supportive and understanding of the challenges agents face
 - Use clear, professional language appropriate for business users
 - Focus on commission protection and breach prevention strategies
+
 Maintain a helpful, professional tone while being concise and practical in your responses.`;
+
       const messages = [
         { role: "system" as const, content: systemPrompt },
         ...conversationHistory.slice(-8),
         { role: "user" as const, content: message }
       ];
+
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: messages,
@@ -77,8 +87,10 @@ Maintain a helpful, professional tone while being concise and practical in your 
         presence_penalty: 0.1,
         frequency_penalty: 0.1
       });
+
       return completion.choices[0]?.message?.content || 
         "I apologize, but I'm having trouble generating a response right now. Please try rephrasing your question or contact our support team for immediate assistance.";
+
     } catch (error) {
       console.error('Error generating AI support response:', error);
       
@@ -111,6 +123,7 @@ Maintain a helpful, professional tone while being concise and practical in your 
       return "I'm currently experiencing technical difficulties with my AI responses due to API limitations. However, I can still help you navigate Commission Guard! The platform includes Contracts, Clients, Showing Tracker, Commission Protection, Alerts, and Public Records monitoring. For immediate assistance, please use the Support menu or contact our support team directly.";
     }
   }
+
   async generateQuickSuggestions(userQuery: string): Promise<string[]> {
     if (!openai) {
       const lowerQuery = userQuery.toLowerCase();
@@ -153,6 +166,7 @@ Maintain a helpful, professional tone while being concise and practical in your 
         "How do I set up automated monitoring?"
       ];
     }
+
     try {
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -169,12 +183,15 @@ Maintain a helpful, professional tone while being concise and practical in your 
         max_tokens: 200,
         temperature: 0.8
       });
+
       const suggestions = completion.choices[0]?.message?.content
         ?.split('\n')
         .filter(line => line.trim().length > 0)
         .map(line => line.replace(/^\d+\.\s*/, '').trim())
         .slice(0, 3) || [];
+
       return suggestions;
+
     } catch (error) {
       console.error('Error generating suggestions:', error);
       
@@ -219,6 +236,7 @@ Maintain a helpful, professional tone while being concise and practical in your 
       ];
     }
   }
+
   async analyzeUserIntent(message: string): Promise<{
     category: string;
     urgency: 'low' | 'medium' | 'high';
@@ -231,6 +249,7 @@ Maintain a helpful, professional tone while being concise and practical in your 
         suggestedActions: ["Review your contracts", "Check platform alerts", "Contact support if needed"]
       };
     }
+
     try {
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -241,6 +260,7 @@ Maintain a helpful, professional tone while being concise and practical in your 
             - category: one of "contract", "platform", "legal", "technical", "commission_protection", "general"
             - urgency: low/medium/high based on time sensitivity
             - suggestedActions: array of 1-3 specific next steps they could take
+
             Focus on Commission Guard platform features and real estate commission protection needs.`
           },
           {
@@ -251,6 +271,7 @@ Maintain a helpful, professional tone while being concise and practical in your 
         max_tokens: 150,
         temperature: 0.3
       });
+
       const response = completion.choices[0]?.message?.content;
       if (response) {
         try {
@@ -259,11 +280,13 @@ Maintain a helpful, professional tone while being concise and practical in your 
           console.error('Error parsing intent analysis:', parseError);
         }
       }
+
       return {
         category: "general",
         urgency: "medium",
         suggestedActions: ["Review your contracts", "Check platform alerts", "Contact support if needed"]
       };
+
     } catch (error) {
       console.error('Error analyzing user intent:', error);
       return {
@@ -274,4 +297,5 @@ Maintain a helpful, professional tone while being concise and practical in your 
     }
   }
 }
+
 export const aiSupportService = new AISupportService();
